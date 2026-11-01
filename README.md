@@ -242,11 +242,19 @@ list of groups changes as groups are published and offline it saves
 nothing. The jars of a Nix build get a fixed timestamp, so a rebuild gives
 the same bytes.
 
-## Real-world projects
+## Examples
 
-| Project | Commit | What it showed |
-| --- | --- | --- |
-| [google/gson](https://github.com/google/gson) | gson-parent-2.15.0 (`fcd41690`) | A reactor of eight modules locks in under three minutes, and builds and tests offline in the Nix sandbox from a lockfile kept outside its source (the `real-world-gson` checks). Its protobuf module runs a native protoc, which made the lock fetch each system's build of files named by an os-maven-plugin classifier. Its moditect plugin writes temporary jars, which made the lock run keep Java's temporary directory in its own. In the everyday loop, a new dependency in `extras` failed the offline build with the extension's message, a relock took just over two minutes, and after a prefetch both Maven and jdtls resolved it offline. |
+[Gson](https://github.com/google/gson), Google's JSON library, is an
+example of maven-purifier at work. CI locks Gson at its release
+gson-parent-2.15.0 on both Linux systems, and the relock must reproduce the
+lockfile in `tests/real-world/gson/` byte for byte. The `real-world-gson`
+flake checks then build Gson and run its tests in the Nix sandbox from that
+lockfile, which lies outside Gson's source.
+
+Gson's build is a reactor of eight modules. Its protobuf module runs a
+native protoc, so the lockfile holds the protoc of each Linux system. Its
+moditect plugin writes temporary jars, so a lock run gives Java a temporary
+directory of its own. A lock of Gson takes between two and three minutes.
 
 ## Credits
 

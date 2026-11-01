@@ -48,6 +48,13 @@ jobs:
           cp -r tests/fixtures/external "$RUNNER_TEMP/external"
           (cd "$RUNNER_TEMP/external/src" && HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force --lockfile ../maven-purifier.lock.json)
           diff -u tests/fixtures/external/maven-purifier.lock.json "$RUNNER_TEMP/external/maven-purifier.lock.json"
+      - name: Relock Gson, which must reproduce its committed lockfile byte for byte
+        run: |
+          git clone --quiet https://github.com/google/gson "$RUNNER_TEMP/gson"
+          git -C "$RUNNER_TEMP/gson" checkout --quiet fcd416909db2bea96eb916bcfb2d0a83cb9b86c3
+          cp tests/real-world/gson/maven-purifier.lock.json "$RUNNER_TEMP/gson.lock.json"
+          (cd "$RUNNER_TEMP/gson" && HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force --lockfile ../gson.lock.json)
+          diff -u tests/real-world/gson/maven-purifier.lock.json "$RUNNER_TEMP/gson.lock.json"
 
   conformance-update:
     runs-on: ubuntu-latest
