@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 #
-# Runs the flake checks on x86_64-linux and aarch64-linux, and the tests
-# that need the network or a Nix installation, which the Nix sandbox has
-# neither of: the lock run, the interactive mode, and builds of locks
-# someone edited.
+# Runs the flake checks on x86_64-linux and aarch64-linux, and the two
+# conformance checks of the purifier contract that need the network or a
+# Nix installation, which the Nix sandbox has neither of: a relock of a
+# fixture, and the offline loop after a real `maven-purifier prefetch`.
 name: check
 
 on:
@@ -27,38 +27,89 @@ jobs:
       - name: Run the flake checks
         run: nix flake check --print-build-logs
 
-  negative:
-    runs-on: ubuntu-latest
+  conformance-relock:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
-      - name: Build locks someone edited
-        run: tests/negative-builds.sh
+      - name: Build the command
+        run: nix build --out-link "$RUNNER_TEMP/cli" '.#cli'
+      - name: Relock copies of fixtures, which must reproduce their lockfiles byte for byte
+        run: |
+          # An empty home, so that no settings of the runner take part.
+          mkdir "$RUNNER_TEMP/home"
+          cp -r tests/fixtures/wrapper "$RUNNER_TEMP/wrapper"
+          (cd "$RUNNER_TEMP/wrapper" && HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force)
+          diff -u tests/fixtures/wrapper/maven-purifier.lock.json "$RUNNER_TEMP/wrapper/maven-purifier.lock.json"
+          cp -r tests/fixtures/external "$RUNNER_TEMP/external"
+          (cd "$RUNNER_TEMP/external/src" && HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force --lockfile ../maven-purifier.lock.json)
+          diff -u tests/fixtures/external/maven-purifier.lock.json "$RUNNER_TEMP/external/maven-purifier.lock.json"
 
-  lock-and-interactive:
+  conformance-update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
       - name: Build the command
         run: nix build --out-link "$RUNNER_TEMP/cli" '.#cli'
-      - name: Lock a copy of the wrapper fixture again
-        run: |
-          cp -r tests/fixtures/wrapper "$RUNNER_TEMP/wrapper"
-          cd "$RUNNER_TEMP/wrapper"
-          # An empty home, so that no settings of the runner take part.
-          mkdir "$RUNNER_TEMP/home"
-          HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force
-          # The relock must reproduce the committed lockfile byte for byte.
-          diff -u "$GITHUB_WORKSPACE/tests/fixtures/wrapper/maven-purifier.lock.json" maven-purifier.lock.json
-      - name: Run Maven offline from the lock of the multi fixture
+      - name: Update a copy of the multi fixture to a newer commons-lang3
         run: |
           cp -r tests/fixtures/multi "$RUNNER_TEMP/multi"
           cd "$RUNNER_TEMP/multi"
-          "$RUNNER_TEMP/cli/bin/maven-purifier" mvn -B -ntp clean install
-      - name: Tell a stale lock in the interactive mode
+          sed -i 's|<version>3.17.0</version>|<version>3.18.0</version>|' pom.xml
+          mkdir "$RUNNER_TEMP/home"
+          HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" update
+          grep -q 'commons-lang3-3.18.0.jar' maven-purifier.lock.json
+          # The updated lockfile passes the stale check: readLock reports
+          # no problem for it.
+          problems=$(nix eval --impure --json --expr "
+            ((builtins.getFlake \"path:$GITHUB_WORKSPACE\").lib.maven-purifier.readLock {
+              src = /. + \"$RUNNER_TEMP/multi\";
+            }).problems")
+          test "$problems" = "[]"
+
+  conformance-offline:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+      - name: Build the command, jdtls and Python
+        run: |
+          nix build --out-link "$RUNNER_TEMP/cli" '.#cli'
+          nix build --out-link "$RUNNER_TEMP/jdtls" 'nixpkgs#jdt-language-server'
+          nix build --out-link "$RUNNER_TEMP/python" 'nixpkgs#python3'
+      - name: Prefetch a copy of the multi fixture
+        run: |
+          cp -r tests/fixtures/multi "$RUNNER_TEMP/multi"
+          cd "$RUNNER_TEMP/multi"
+          "$RUNNER_TEMP/cli/bin/maven-purifier" prefetch
+      - name: Build, test and open the editor with the network cut off
+        run: |
+          cd "$RUNNER_TEMP/multi"
+          # A network namespace without interfaces: nothing reaches the
+          # network, and the steps run as the runner's own user.
+          offline() {
+            sudo unshare --net -- sudo -u "$USER" env HOME="$HOME" PATH="$PATH" \
+              JAVA_HOME="$PWD/.maven-purifier/jdk" "$@"
+          }
+          offline .maven-purifier/bin/mvn -B -ntp clean install
+          offline "$RUNNER_TEMP/python/bin/python3" "$GITHUB_WORKSPACE/tests/ide/jdtls_check.py" \
+            "$RUNNER_TEMP/jdtls/bin/jdtls" . .maven-purifier/settings.xml \
+            core/src/main/java/example/multi/core/Greeting.java
+      - name: Name `maven-purifier lock` for a stale lock
         run: |
           cd "$RUNNER_TEMP/multi"
           sed -i 's|<version>1.0.0</version>|<version>1.0.1</version>|' core/pom.xml
-          "$RUNNER_TEMP/cli/bin/maven-purifier" mvn -B -ntp -q validate 2>&1 | tee "$RUNNER_TEMP/stale.log" || true
-          grep -F 'the build definition changed' "$RUNNER_TEMP/stale.log"
+          if "$RUNNER_TEMP/cli/bin/maven-purifier" prefetch 2> "$RUNNER_TEMP/stale.log"; then
+            echo "prefetch accepted a stale lock" >&2
+            exit 1
+          fi
+          grep -F 'run `maven-purifier lock`' "$RUNNER_TEMP/stale.log"

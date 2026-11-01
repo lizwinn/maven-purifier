@@ -47,12 +47,19 @@ class Mirrors(unittest.TestCase):
         path = "org/example/a/1/a-1.jar"
         for host in (REPO1, CENTRAL, GOOGLE):
             entry = mp.file_entry(path, host + path, "sha256-x")
-            self.assertEqual(entry["url"], REPO1 + path)
-            self.assertEqual(entry["mirrors"], [CENTRAL + path, GOOGLE + path])
+            self.assertEqual(entry, {"path": path, "url": REPO1 + path, "hash": "sha256-x"})
 
-    def test_other_repositories_have_no_mirrors(self):
+    def test_other_repositories_keep_their_url(self):
         entry = mp.file_entry("a/b.jar", "https://example.org/a/b.jar", "sha256-x")
-        self.assertEqual(entry, {"path": "a/b.jar", "url": "https://example.org/a/b.jar", "mirrors": [], "hash": "sha256-x"})
+        self.assertEqual(entry, {"path": "a/b.jar", "url": "https://example.org/a/b.jar", "hash": "sha256-x"})
+
+    def test_fetch_url_takes_the_central_mirror(self):
+        path = "org/example/a/1/a-1.jar"
+        with mock.patch.dict(os.environ, {"MAVEN_PURIFIER_CENTRAL_MIRROR": GOOGLE}, clear=True):
+            self.assertEqual(mp.fetch_url(CENTRAL + path), GOOGLE + path)
+            self.assertEqual(mp.fetch_url("https://example.org/x"), "https://example.org/x")
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(mp.fetch_url(CENTRAL + path), CENTRAL + path)
 
     def test_lock_run_mirror_of_central(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -172,10 +179,10 @@ class Settings(TemporaryTree):
             self.assertFalse(mp.proxy_with_credentials())
 
 
-class IdeSettings(TemporaryTree):
+class OfflineSettings(TemporaryTree):
     def test_offline_on_the_locked_repository(self):
         lock = {"settings": '<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"><mirrors/></settings>\n'}
-        mp.ide_settings(lock, self.root / "repository", self.root / "ide.xml")
+        mp.offline_settings(lock, self.root / "repository", self.root / "ide.xml")
         settings = ET.parse(self.root / "ide.xml").getroot()
         ns = "{http://maven.apache.org/SETTINGS/1.2.0}"
         self.assertEqual(settings.findtext(f"{ns}localRepository"), str(self.root / "repository"))
@@ -183,7 +190,7 @@ class IdeSettings(TemporaryTree):
         self.assertIsNotNone(settings.find(f"{ns}mirrors"))
 
     def test_without_recorded_settings(self):
-        mp.ide_settings({"settings": None}, self.root / "repository", self.root / "ide.xml")
+        mp.offline_settings({"settings": None}, self.root / "repository", self.root / "ide.xml")
         settings = ET.parse(self.root / "ide.xml").getroot()
         self.assertEqual(settings.findtext("offline"), "true")
 
@@ -302,19 +309,137 @@ class DistributionTarget(TemporaryTree):
 
 
 class ReadLock(TemporaryTree):
+    def lock(self, data):
+        return self.write("maven-purifier.lock.json", json.dumps(data))
+
+    def test_valid_lock(self):
+        data = {"version": mp.FORMAT_VERSION, "downloads": [], "note": "é ✓"}
+        data["lockHash"] = mp.lock_hash(data)
+        self.assertEqual(mp.read_lock(self.lock(data)), data)
+
     def test_malformed_lock(self):
-        self.write("maven-purifier.lock.json", "{ not json")
         with self.assertRaises(SystemExit):
-            mp.read_lock(self.root)
+            mp.read_lock(self.write("maven-purifier.lock.json", "{ not json"))
+
+    def test_not_an_object(self):
+        with self.assertRaises(SystemExit):
+            mp.read_lock(self.lock([1]))
 
     def test_wrong_version(self):
-        self.write("maven-purifier.lock.json", json.dumps({"version": 999}))
+        data = {"version": 999}
+        data["lockHash"] = mp.lock_hash(data)
         with self.assertRaises(SystemExit):
-            mp.read_lock(self.root)
+            mp.read_lock(self.lock(data))
+
+    def test_tampered_lock(self):
+        data = {"version": mp.FORMAT_VERSION, "downloads": [{"path": "a", "url": "u", "hash": "h"}]}
+        data["lockHash"] = mp.lock_hash(data)
+        data["downloads"][0]["hash"] = "other"
+        with self.assertRaises(SystemExit):
+            mp.read_lock(self.lock(data))
 
     def test_missing_lock(self):
         with self.assertRaises(SystemExit):
-            mp.read_lock(self.root)
+            mp.read_lock(self.root / "maven-purifier.lock.json")
+
+
+class LockHash(unittest.TestCase):
+    def test_canonical_json(self):
+        # The text that Nix's builtins.toJSON writes for the same value.
+        value = {"b": [1, None, True, "tab\there", "é ✓"], "a": {"z": "", "y": []}}
+        self.assertEqual(mp.canonical_json(value), '{"a":{"y":[],"z":""},"b":[1,null,true,"tab\\there","é ✓"]}')
+
+    def test_ignores_its_own_field(self):
+        data = {"version": 2, "goals": ["install"]}
+        self.assertEqual(mp.lock_hash(data), mp.lock_hash(dict(data, lockHash="anything")))
+
+
+class PrefetchLines(TemporaryTree):
+    def test_written_after_the_build_lines(self):
+        self.write(".mvn/maven.config", "-Pfast\n-T4")
+        mp.write_maven_config(self.root, ["--settings=/s.xml"])
+        mp.write_maven_config(self.root, ["--settings=/t.xml"])
+        text = (self.root / ".mvn/maven.config").read_text()
+        self.assertEqual(text, "-Pfast\n-T4\n" + mp.PREFETCH_MARKER + "\n--settings=/t.xml\n")
+        self.assertEqual(mp.without_prefetch_lines(text), "-Pfast\n-T4\n")
+        self.assertEqual(mp.build_config_lines(text), ["-Pfast", "-T4"])
+
+    def test_left_out_of_the_definition_hash(self):
+        self.write("pom.xml", "<project/>")
+        self.write(".mvn/maven.config", "-Pfast\n")
+        before = mp.definition_hash(self.root, ["install"])
+        mp.write_maven_config(self.root, ["--settings=/s.xml"])
+        self.assertEqual(mp.definition_hash(self.root, ["install"]), before)
+
+    def test_left_out_of_a_lock_run_copy(self):
+        self.write("pom.xml", "<project/>")
+        mp.write_maven_config(self.root, ["--settings=/s.xml"])
+        mp.copy_build(self.root, self.root.parent / (self.root.name + "-copy"))
+        copied = (self.root.parent / (self.root.name + "-copy") / ".mvn/maven.config").read_text()
+        self.assertNotIn("--settings", copied)
+
+
+class PlatformCounterparts(unittest.TestCase):
+    def test_native_binaries(self):
+        path = "com/google/protobuf/protoc/4.35.1/protoc-4.35.1-linux-x86_64.exe"
+        self.assertEqual(
+            mp.platform_counterparts(path, "x86_64-linux"),
+            {"aarch64-linux": "com/google/protobuf/protoc/4.35.1/protoc-4.35.1-linux-aarch_64.exe"},
+        )
+        jar = "io/netty/netty-transport-native-epoll/4.1.0/netty-transport-native-epoll-4.1.0-linux-aarch_64.jar"
+        self.assertEqual(
+            mp.platform_counterparts(jar, "aarch64-linux"),
+            {"x86_64-linux": jar.replace("linux-aarch_64", "linux-x86_64")},
+        )
+
+    def test_other_files(self):
+        self.assertEqual(mp.platform_counterparts("a/b/1/b-1.jar", "x86_64-linux"), {})
+        self.assertEqual(mp.platform_counterparts("a/b/1/b-1-linux-aarch_64.jar", "x86_64-linux"), {})
+
+
+class SeedMetadata(TemporaryTree):
+    PREVIOUS = {
+        "downloads": [
+            {"path": "org/slf4j/slf4j-api/maven-metadata-central.xml", "contents": "<metadata>slf4j</metadata>"},
+            {"path": "example/snaplib/1.0-SNAPSHOT/maven-metadata-snaps.xml", "contents": "<metadata>snap</metadata>"},
+            {"path": "org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar", "url": "u", "hash": "h"},
+        ]
+    }
+
+    def test_seeds_every_metadata_file(self):
+        seeded = mp.seed_metadata(self.root, self.PREVIOUS, None)
+        self.assertEqual(
+            seeded,
+            {"org/slf4j/slf4j-api/maven-metadata-central.xml", "example/snaplib/1.0-SNAPSHOT/maven-metadata-snaps.xml"},
+        )
+        self.assertEqual((self.root / "org/slf4j/slf4j-api/maven-metadata-central.xml").read_text(), "<metadata>slf4j</metadata>")
+        status = (self.root / "org/slf4j/slf4j-api/resolver-status.properties").read_text()
+        self.assertRegex(status, r"^maven-metadata-central\.xml\.lastUpdated=\d+\n$")
+        self.assertFalse((self.root / "org/slf4j/slf4j-api/2.0.16").exists())
+
+    def test_update_seeds_none(self):
+        self.assertEqual(mp.seed_metadata(self.root, self.PREVIOUS, "all"), set())
+        self.assertEqual(mp.seed_metadata(self.root, None, None), set())
+
+    def test_update_of_named_packages(self):
+        seeded = mp.seed_metadata(self.root, self.PREVIOUS, ["org.slf4j:slf4j-api"])
+        self.assertEqual(seeded, {"example/snaplib/1.0-SNAPSHOT/maven-metadata-snaps.xml"})
+
+    def test_package_names(self):
+        self.assertEqual(mp.package_prefix("org.slf4j:slf4j-api"), "org/slf4j/slf4j-api/")
+        for bad in ("slf4j-api", "org.slf4j:", ":a", "a:b:c"):
+            with self.assertRaises(SystemExit):
+                mp.package_prefix(bad)
+
+
+class Options(unittest.TestCase):
+    def test_lockfile_and_values(self):
+        o = mp.Options(["--lockfile", "x.json", "--force", "--settings", "s.xml", "clean", "-Pa"], flags=("--force",), values=("--settings",))
+        self.assertEqual(o.lockfile, Path("x.json").resolve())
+        self.assertEqual(o.flags, {"--force"})
+        self.assertEqual(o.values, {"--settings": "s.xml"})
+        self.assertEqual(o.rest, ["clean", "-Pa"])
+        self.assertEqual(mp.Options([]).lock_path(Path("/b")), Path("/b/maven-purifier.lock.json"))
 
 
 if __name__ == "__main__":

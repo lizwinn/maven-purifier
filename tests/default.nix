@@ -1,29 +1,25 @@
 # SPDX-License-Identifier: MIT
 #
 # The flake's checks. Every one builds in the sandbox; the only network
-# access is the fixed-output fetches of locked artifacts.
+# access is the fixed-output fetches of locked downloads. The conformance-*
+# checks are those of the purifier contract; conformance-relock needs the
+# network and runs as a CI job of that name.
 {
   pkgs,
-  # The flake's default package overlay, which adds buildMavenProject.
-  overlay,
+  # lib.maven-purifier.buildMavenProject of this flake.
+  buildMavenProject,
   cli,
   extension,
 }:
 let
   inherit (pkgs) lib;
 
-  # Every fixture builds the way a consumer's package does: through
-  # buildMavenProject of a package set the overlay applies to.
-  withOverlay = pkgs.extend overlay;
-  inherit (withOverlay) buildMavenProject;
+  build = args: buildMavenProject ({ inherit pkgs; } // args);
 
   # A reactor of a parent POM and two modules. core depends on
   # commons-lang3 and installs a sources jar beside its jar; app depends on
-  # core, and its JUnit 5 test runs in the build.
-  multi = buildMavenProject {
-    src = ./fixtures/multi;
-    doCheck = true;
-  };
+  # core, and its JUnit 5 test runs in `tests`.
+  multi = build { src = ./fixtures/multi; };
 
   # The lock names the artifacts of each package, so a consumer reaches
   # them without building first. app runs from the jars of the packages
@@ -47,59 +43,58 @@ let
         touch $out
       '';
 
-  # The deploy script deploys the artifacts Nix built, with the
-  # maven-deploy-plugin of the lock, to a file: repository.
-  multiDeploy = pkgs.runCommand "maven-purifier-test-multi-deploy" { } ''
+  # The publish script deploys the files of the release to a file:
+  # repository, with the maven-deploy-plugin of the lock.
+  multiPublish = pkgs.runCommand "maven-purifier-test-multi-publish" { } ''
     export HOME=$TMPDIR/home
     mkdir -p $HOME
-    ${multi.deploy}/bin/maven-purifier-deploy --repository-id local --url file://$TMPDIR/deployed
-    deployed=$TMPDIR/deployed/example/multi
-    cmp ${multi.packages.core.artifacts."core-sources.jar"} $deployed/core/1.0.0/core-1.0.0-sources.jar
-    cmp ${multi.packages.core.artifacts."core.jar"} $deployed/core/1.0.0/core-1.0.0.jar
-    cmp ${multi.packages.app.artifacts."app.jar"} $deployed/app/1.0.0/app-1.0.0.jar
+    ${multi.release.publish}/bin/maven-purifier-publish --repository-id local --url file://$TMPDIR/published
+    published=$TMPDIR/published/example/multi
+    cmp ${multi.packages.core.artifacts."core-sources.jar"} $published/core/1.0.0/core-1.0.0-sources.jar
+    cmp ${multi.packages.core.artifacts."core.jar"} $published/core/1.0.0/core-1.0.0.jar
+    cmp ${multi.packages.app.artifacts."app.jar"} $published/app/1.0.0/app-1.0.0.jar
     cmp ${
       multi.packages.multi-parent.artifacts."multi-parent.pom"
-    } $deployed/multi-parent/1.0.0/multi-parent-1.0.0.pom
-    test -f $deployed/core/maven-metadata.xml
+    } $published/multi-parent/1.0.0/multi-parent-1.0.0.pom
+    test -f $published/core/maven-metadata.xml
     touch $out
   '';
 
   # A build with every kind of dependency source; see the comment in its
   # pom.xml. Its lock took the SNAPSHOT from tests/snapshot-repository on
   # localhost:18080, so the check fetches those files from the committed
-  # repository instead, by their locked hashes. Its test checks that a
-  # class of every source is on the classpath, and that the core
-  # extension's property reached a resource.
+  # repository instead, by their locked hashes, through `fetchers`.
   snapshotUrl = "http://localhost:18080/";
-  fetchFromSnapshotRepository =
+  fromSnapshotRepository =
     {
       name,
-      urls,
+      url ? null,
+      urls ? [ url ],
       hash,
-    }:
+      ...
+    }@args:
     let
-      url = builtins.head urls;
+      first = builtins.head urls;
     in
-    if lib.hasPrefix snapshotUrl url then
+    if lib.hasPrefix snapshotUrl first then
       pkgs.runCommand name
         {
           outputHash = hash;
           outputHashMode = "flat";
         }
         ''
-          cp ${./snapshot-repository}/${lib.removePrefix snapshotUrl url} $out
+          cp ${./snapshot-repository}/${lib.removePrefix snapshotUrl first} $out
         ''
     else
-      pkgs.fetchurl { inherit name urls hash; };
-  sources = buildMavenProject {
+      pkgs.fetchurl args;
+  sources = build {
     src = ./fixtures/sources;
-    fetchurl = fetchFromSnapshotRepository;
-    doCheck = true;
+    fetchers.fetchurl = fromSnapshotRepository;
   };
 
   # A build whose Maven wrapper names Maven 3.9.11 as a zip: the lock run
   # and the sandboxed build both use that distribution.
-  wrapper = buildMavenProject { src = ./fixtures/wrapper; };
+  wrapper = build { src = ./fixtures/wrapper; };
   wrapperVersion =
     assert wrapper.maven.version == "3.9.11";
     pkgs.runCommand "maven-purifier-test-wrapper-version" { JAVA_HOME = wrapper.jdk.home; } ''
@@ -108,85 +103,194 @@ let
       touch $out
     '';
 
-  # Each of these locks fails to read: the reader names the field at fault
-  # and the command to run, rather than failing deep inside a build.
-  validLock = {
-    version = 1;
-    maven = {
-      version = "3.10.0";
-      distribution = "dist.tar.gz";
+  # Locks edited in Nix, each with a lockHash that matches it, so that the
+  # check meant for it is the one that fails.
+  multiLock = builtins.fromJSON (builtins.readFile ./fixtures/multi/maven-purifier.lock.json);
+  rehash =
+    l:
+    l
+    // {
+      lockHash = "sha256:${
+        builtins.hashString "sha256" (builtins.toJSON (removeAttrs l [ "lockHash" ]))
+      }";
     };
-    javaVersion = "21";
-    goals = [ "install" ];
-    settings = null;
-    definitionHash = "sha256:0";
-    projects = [
-      {
-        groupId = "g";
-        artifactId = "a";
-        version = "1";
-        artifacts = [
-          {
-            key = "a.jar";
-            path = "g/a/1/a-1.jar";
-          }
-        ];
-      }
-    ];
-    artifacts = [
-      {
-        path = "dist.tar.gz";
-        url = "https://example.org/dist.tar.gz";
-        mirrors = [ ];
-        hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-      }
-    ];
-  };
-  readsAs =
-    lock:
-    (builtins.tryEval
-      (import ../nix/lib/lock.nix {
-        lockFile = builtins.toFile "maven-purifier.lock.json" (builtins.toJSON lock);
-      }).projectsByArtifactId
-    ).success;
-  invalidLocks = {
-    wrong-version = validLock // {
-      version = 999;
-    };
-    no-artifacts = removeAttrs validLock [ "artifacts" ];
-    no-projects = removeAttrs validLock [ "projects" ];
-    no-maven = removeAttrs validLock [ "maven" ];
-    entry-without-hash = validLock // {
-      artifacts = [ (removeAttrs (builtins.head validLock.artifacts) [ "hash" ]) ];
-    };
-    entry-without-mirrors = validLock // {
-      artifacts = [ (removeAttrs (builtins.head validLock.artifacts) [ "mirrors" ]) ];
-    };
-    entry-without-url = validLock // {
-      artifacts = [ (removeAttrs (builtins.head validLock.artifacts) [ "url" ]) ];
-    };
-    missing-distribution = validLock // {
-      maven = validLock.maven // {
-        distribution = "elsewhere.tar.gz";
-      };
-    };
-    project-without-artifact-id = validLock // {
-      projects = [ (removeAttrs (builtins.head validLock.projects) [ "artifactId" ]) ];
-    };
-  };
-  negativeLocks =
-    assert readsAs validLock;
-    assert lib.all (name: !readsAs invalidLocks.${name}) (builtins.attrNames invalidLocks);
-    pkgs.runCommand "maven-purifier-test-negative-locks" { } "touch $out";
+  lockFileOf = l: builtins.toFile "maven-purifier.lock.json" (builtins.toJSON l);
+  isLang3 = d: lib.hasSuffix "commons-lang3-3.17.0.jar" d.path;
+  evaluates = value: (builtins.tryEval (builtins.seq value true)).success;
 
-  # A build whose pom.xml differs from the one its lock was made from fails
-  # at evaluation time, before anything is fetched or built.
-  negativeStale =
-    assert !(builtins.tryEval (buildMavenProject { src = ./negative/stale; }).build.drvPath).success;
-    pkgs.runCommand "maven-purifier-test-negative-stale" { } "touch $out";
+  # A lockfile older than the build definition fails at evaluation; the
+  # build is the wrapper fixture's lock with another pom.xml.
+  conformanceStale =
+    assert
+      !evaluates
+        (build {
+          src = ./negative/stale;
+          lockFile = ./fixtures/wrapper/maven-purifier.lock.json;
+        }).release.drvPath;
+    pkgs.runCommand "maven-purifier-conformance-stale" { } "touch $out";
+
+  # A lockfile with a hash changed after locking no longer matches its
+  # lockHash, and fails at evaluation.
+  conformanceTampered =
+    let
+      tampered = multiLock // {
+        downloads = map (
+          d: if isLang3 d then d // { hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; } else d
+        ) multiLock.downloads;
+      };
+    in
+    assert
+      !evaluates
+        (build {
+          src = ./fixtures/multi;
+          lockFile = lockFileOf tampered;
+        }).release.drvPath;
+    pkgs.runCommand "maven-purifier-conformance-tampered" { } "touch $out";
+
+  # A valid lockfile without an entry the build needs: Maven fails offline,
+  # and the build names the command to run. The check runs the release
+  # build and requires that failure.
+  conformanceMissing =
+    let
+      missing = build {
+        src = ./fixtures/multi;
+        lockFile = lockFileOf (
+          rehash (multiLock // { downloads = builtins.filter (d: !isLang3 d) multiLock.downloads; })
+        );
+      };
+    in
+    missing.release.overrideAttrs (old: {
+      name = "maven-purifier-conformance-missing";
+      buildPhase = ''
+        if ( set -e; ${old.buildPhase} ) > $TMPDIR/build.log 2>&1; then
+          echo "the build without commons-lang3 in its lock succeeded" >&2
+          exit 1
+        fi
+        grep -F 'run `maven-purifier lock --force`' $TMPDIR/build.log
+      '';
+      installPhase = "touch $out";
+    });
+
+  # Lockfiles that are not valid fail at evaluation, naming the field and
+  # the command. Each has a lockHash that matches it.
+  invalidLocks = {
+    wrong-version = rehash (multiLock // { version = 999; });
+    no-downloads = rehash (removeAttrs multiLock [ "downloads" ]);
+    no-projects = rehash (removeAttrs multiLock [ "projects" ]);
+    no-maven = rehash (removeAttrs multiLock [ "maven" ]);
+    no-java = rehash (removeAttrs multiLock [ "javaMajor" ]);
+    entry-without-hash = rehash (
+      multiLock
+      // {
+        downloads = map (d: if isLang3 d then removeAttrs d [ "hash" ] else d) multiLock.downloads;
+      }
+    );
+    entry-without-url = rehash (
+      multiLock
+      // {
+        downloads = map (d: if isLang3 d then removeAttrs d [ "url" ] else d) multiLock.downloads;
+      }
+    );
+    no-distribution = rehash (
+      multiLock
+      // {
+        maven = multiLock.maven // {
+          version = "0.0.0";
+        };
+      }
+    );
+    project-without-artifact-id = rehash (
+      multiLock // { projects = map (p: removeAttrs p [ "artifactId" ]) multiLock.projects; }
+    );
+    not-an-object = [ 1 ];
+  };
+  # readLock returns each problem rather than failing, and the builder
+  # fails with them.
+  problemsOf =
+    l:
+    (import ../nix/lib/lock.nix {
+      src = ./fixtures/multi;
+      lockFile = lockFileOf l;
+    }).problems;
+  conformanceMalformed =
+    assert problemsOf multiLock == [ ];
+    assert lib.all (
+      name:
+      let
+        problems = problemsOf invalidLocks.${name};
+      in
+      problems != [ ] && lib.all (lib.hasInfix "maven-purifier lock") problems
+    ) (builtins.attrNames invalidLocks);
+    assert
+      !evaluates
+        (build {
+          src = ./fixtures/multi;
+          lockFile = lockFileOf invalidLocks.entry-without-hash;
+        }).release.drvPath;
+    pkgs.runCommand "maven-purifier-conformance-malformed" { } "touch $out";
+
+  # The release, built a second time, gives the same bytes: the jars get a
+  # fixed timestamp.
+  conformanceRebuild =
+    let
+      again = multi.release.overrideAttrs { MAVEN_PURIFIER_REBUILD = "1"; };
+    in
+    pkgs.runCommand "maven-purifier-conformance-rebuild" { } ''
+      diff -r ${multi.release} ${again}
+      touch $out
+    '';
+
+  # After `maven-purifier prefetch`, the everyday loop works with no
+  # network, which the sandbox has none of: plain `mvn` builds and tests
+  # the multi fixture through the lines that prefetch wrote into
+  # .mvn/maven.config. The prefetch is the one this build made, which
+  # `--prefetched` hands to the command in place of building it.
+  conformanceOffline =
+    pkgs.runCommand "maven-purifier-conformance-offline"
+      {
+        nativeBuildInputs = [ pkgs.coreutils ];
+      }
+      ''
+        export HOME=$TMPDIR/home
+        mkdir -p $HOME
+        cp -r ${./fixtures/multi} $TMPDIR/multi
+        chmod -R u+w $TMPDIR/multi
+        cd $TMPDIR/multi
+        ${cli}/bin/maven-purifier prefetch --prefetched ${multi.prefetch}
+        grep -qx -- '-Dmaven-purifier.prefetched=true' .mvn/maven.config
+        export JAVA_HOME=$PWD/.maven-purifier/jdk
+        .maven-purifier/bin/mvn -B -ntp clean install 2>&1 | tee $TMPDIR/mvn.log
+        grep -q 'Tests run: 1, Failures: 0' $TMPDIR/mvn.log
+        test -f app/target/app-1.0.0.jar
+        touch $out
+      '';
+
+  # A build whose source holds no lockfile, built from one kept outside it.
+  external = build {
+    src = ./fixtures/external/src;
+    lockFile = ./fixtures/external/maven-purifier.lock.json;
+  };
+  conformanceExternal =
+    assert !builtins.pathExists ./fixtures/external/src/maven-purifier.lock.json;
+    external.packages.external;
+
+  # A real project: Gson at its release gson-parent-2.15.0, a reactor of a
+  # library, its extras, a protobuf module that runs a protoc of each
+  # system, and tests of JPMS and code shrinking. Its source comes from
+  # GitHub unchanged, and its lockfile lies here, outside it.
+  gson = build {
+    src = pkgs.fetchFromGitHub {
+      owner = "google";
+      repo = "gson";
+      rev = "fcd416909db2bea96eb916bcfb2d0a83cb9b86c3";
+      hash = "sha256-Z6Ciixpi415JzF96ZACH9YR2Aq15uS/oPz1TxhQGRUQ=";
+    };
+    lockFile = ./real-world/gson/maven-purifier.lock.json;
+  };
 
   # The unit tests of the lock tool: settings, tracking files, mirrors,
-  # paths, the definition hash, declared downloads and the deploy target.
+  # paths, the lockfile and definition hashes, declared downloads and the
+  # deploy target.
   unitCli =
     pkgs.runCommand "maven-purifier-test-unit-cli"
       {
@@ -198,8 +302,8 @@ let
         touch $out
       '';
 
-  # The unit tests of the recording extension: the remote path of an
-  # artifact or metadata file, and the URL it joins with its repository.
+  # The unit tests of the extension: the remote path of an artifact or
+  # metadata file, and the URL it joins with its repository.
   unitExtension =
     pkgs.runCommand "maven-purifier-test-unit-extension"
       {
@@ -216,32 +320,29 @@ let
       '';
 
   # The extension jar holds the class Maven loads and the index that names
-  # it, and the command's Python parses.
+  # it, and the command answers --help.
   packaging =
     pkgs.runCommand "maven-purifier-test-packaging"
       {
-        nativeBuildInputs = [
-          pkgs.jdk_headless
-          pkgs.python3
-        ];
+        nativeBuildInputs = [ pkgs.jdk_headless ];
       }
       ''
         jar=${extension}/share/java/maven-purifier-extension.jar
         jar tf $jar | grep -qx 'io/github/nixpurifiers/maven/RecordingEventSpy.class'
-        unzip_index=$(jar xf $jar META-INF/sisu/javax.inject.Named && cat META-INF/sisu/javax.inject.Named)
-        test "$unzip_index" = io.github.nixpurifiers.maven.RecordingEventSpy
-        python3 -c 'import py_compile, sys; py_compile.compile(sys.argv[1], cfile="cli.pyc", doraise=True)' \
-          ${cli}/libexec/maven-purifier/maven_purifier.py
-        ${cli}/bin/maven-purifier --help | grep -q 'maven-purifier lock'
+        index=$(jar xf $jar META-INF/sisu/javax.inject.Named && cat META-INF/sisu/javax.inject.Named)
+        test "$index" = io.github.nixpurifiers.maven.RecordingEventSpy
+        ${cli}/bin/maven-purifier --help | grep -q 'maven-purifier prefetch'
         touch $out
       '';
 in
 {
   multi-app = multi.packages.app;
   multi-core = multi.packages.core;
+  multi-tests = multi.tests;
   multi-runs = multiRuns;
-  multi-deploy = multiDeploy;
+  multi-publish = multiPublish;
   sources = sources.packages.sources;
+  sources-tests = sources.tests;
   # The download that .mvn/maven-purifier.json declares is in the local
   # repository, at the path it declares.
   sources-declared = pkgs.runCommand "maven-purifier-test-sources-declared" { } ''
@@ -249,8 +350,16 @@ in
     touch $out
   '';
   wrapper-version = wrapperVersion;
-  negative-locks = negativeLocks;
-  negative-stale = negativeStale;
+  real-world-gson = gson.packages.gson;
+  real-world-gson-proto = gson.packages.proto;
+  real-world-gson-tests = gson.tests;
+  conformance-stale = conformanceStale;
+  conformance-tampered = conformanceTampered;
+  conformance-missing = conformanceMissing;
+  conformance-malformed = conformanceMalformed;
+  conformance-rebuild = conformanceRebuild;
+  conformance-offline = conformanceOffline;
+  conformance-external = conformanceExternal;
   unit-cli = unitCli;
   unit-extension = unitExtension;
   inherit packaging;

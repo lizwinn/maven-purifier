@@ -3,3 +3,5 @@ target/
 /result*
 .idea/
 __pycache__/
+.claude/
+.mcp.json

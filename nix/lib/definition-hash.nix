@@ -7,10 +7,17 @@
 # every regular file under .mvn/ at the build root; the walk skips the
 # directories that never belong to a build definition and symbolic links.
 #
+# `maven-purifier prefetch` appends lines of its own to .mvn/maven.config,
+# from the line in `marker` on. They point Maven at the prefetched files of
+# this machine and take no part in the build definition, so the hash of
+# .mvn/maven.config covers only the lines before them.
+#
 # `src` must be a path, since the walk reads the directory at evaluation
 # time.
 { src, goals }:
 let
+  marker = import ./maven-config-marker.nix;
+
   skipped = [
     "target"
     ".git"
@@ -47,10 +54,37 @@ let
       ) (builtins.attrNames entries)
     );
 
+  # The SHA-256 of a definition file. For .mvn/maven.config, the build's own
+  # lines joined by newlines: those before the lines of `maven-purifier
+  # prefetch`, less trailing empty ones (build_config_lines in
+  # cli/maven_purifier.py).
+  fileHash =
+    rel:
+    let
+      path = src + "/${rel}";
+      lines = builtins.filter builtins.isString (builtins.split "\n" (builtins.readFile path));
+      before =
+        list:
+        if list == [ ] || builtins.head list == marker then
+          [ ]
+        else
+          [ (builtins.head list) ] ++ before (builtins.tail list);
+      dropTrailingEmpty =
+        list: if list != [ ] && lib.last list == "" then dropTrailingEmpty (lib.init list) else list;
+      lib = {
+        last = list: builtins.elemAt list (builtins.length list - 1);
+        init = list: builtins.genList (builtins.elemAt list) (builtins.length list - 1);
+      };
+    in
+    if rel == ".mvn/maven.config" then
+      builtins.hashString "sha256" (builtins.concatStringsSep "\n" (dropTrailingEmpty (before lines)))
+    else
+      builtins.hashFile "sha256" path;
+
   files = builtins.sort builtins.lessThan (walk src "" false);
   lines = [
     "goals ${builtins.concatStringsSep " " goals}"
   ]
-  ++ map (rel: "${rel} ${builtins.hashFile "sha256" (src + "/${rel}")}") files;
+  ++ map (rel: "${rel} ${fileHash rel}") files;
 in
 "sha256:${builtins.hashString "sha256" (builtins.concatStringsSep "\n" lines + "\n")}"

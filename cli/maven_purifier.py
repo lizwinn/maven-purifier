@@ -1,36 +1,41 @@
 # SPDX-License-Identifier: MIT
-"""maven-purifier: lock a Maven build's downloads, build from them, deploy what Nix built.
+"""maven-purifier: lock a Maven build's downloads, work offline from them, publish what Nix built.
 
-  maven-purifier lock [--force] [--settings FILE] [GOAL...]
+  maven-purifier lock [--lockfile FILE] [--force] [--settings FILE] [GOAL...]
       Runs the build once with an empty local repository and records every
-      file Maven downloads in maven-purifier.lock.json at the build root.
-      The default goals are `clean install`. The lock holds what these
-      goals need, so lock the goals you run; Maven options such as -P
-      belong among them. The lock run uses FILE, or ~/.m2/settings.xml,
-      and the lock records those settings without servers and proxies. The
-      lock is renewed only when the build definition, the goals or the
-      settings changed, unless --force is given.
+      file Maven downloads in the lockfile, maven-purifier.lock.json at the
+      build root unless --lockfile names another. The default goals are
+      `clean install`. The lock holds what these goals need, so lock the
+      goals you run; Maven options such as -P belong among them. A second
+      pass adds what development needs beyond them: the plugins of the
+      build, the source jars of its dependencies, and the default plugins
+      of the Maven inside the editor. The lock run uses the settings FILE,
+      or ~/.m2/settings.xml, and the lockfile records them without servers
+      and proxies. The lock is renewed only when the build definition, the
+      goals or the settings changed, unless --force is given. A relock
+      keeps what version ranges and SNAPSHOTs resolved to in the previous
+      lock.
 
-  maven-purifier mvn [ARG...]
-      Runs Maven offline from the locked downloads, which Nix fetches into
-      .maven-purifier/ at the build root.
+  maven-purifier update [--lockfile FILE] [--settings FILE] [GROUP:ARTIFACT...]
+      Locks again with the goals of the lockfile, resolving the version
+      ranges and SNAPSHOTs of the named packages, or of every package,
+      afresh.
 
-  maven-purifier ide-settings
-      Fetches the locked downloads like `mvn` and prints the path of
-      .maven-purifier/ide-settings.xml: settings for an editor's embedded
-      Maven that resolve offline from the same files.
+  maven-purifier prefetch [--lockfile FILE]
+      Fetches everything the lockfile lists into the Nix store, behind a
+      garbage-collector root in .maven-purifier/ at the build root, and
+      points Maven at it: it writes lines of its own at the end of
+      .mvn/maven.config, so that `mvn`, `./mvnw` and an editor that reads
+      that file resolve offline from the locked files. The locked Maven is
+      .maven-purifier/bin/mvn, and the locked JDK .maven-purifier/jdk.
 
-  maven-purifier deploy [--repository-id ID --url URL] [ARG...]
-      Builds the artifacts with Nix and deploys them with the locked Maven
-      and ~/.m2/settings.xml (for credentials). The default target is the
-      root pom.xml's distributionManagement.
+  maven-purifier publish [--lockfile FILE] [--repository-id ID --url URL] [ARG...]
+      Builds the release with Nix and deploys it with the locked Maven and
+      ~/.m2/settings.xml, which holds the credentials. The default target is
+      the root pom.xml's distributionManagement.
 
-The package that installs this script sets the environment variables
-MAVEN_PURIFIER_EXTENSION (the recording extension jar),
-MAVEN_PURIFIER_NIX_LIB (the Nix library directory),
-MAVEN_PURIFIER_NIXPKGS (the nixpkgs that `deploy` builds with),
-MAVEN_PURIFIER_DEFAULT_MAVEN (the default Maven version) and
-MAVEN_PURIFIER_DEFAULT_JAVA_HOME (the JDK used when JAVA_HOME is unset).
+The package that installs this script sets the environment variables that
+pkgs/cli/default.nix describes.
 """
 
 import base64
@@ -45,15 +50,26 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.parse
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+from typing import NoReturn
 
 LOCK_NAME = "maven-purifier.lock.json"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 STATE_DIR = ".maven-purifier"
 CENTRAL = "https://repo.maven.apache.org/maven2/"
+
+# The line of .mvn/maven.config from which on `prefetch` writes lines of
+# its own (nix/lib/maven-config-marker.nix). It defines a property that
+# nothing reads, since maven.config has no comments.
+PREFETCH_MARKER = "-Dmaven-purifier.prefetched=true"
+
+# The maven-dependency-plugin of the development pass of a lock run, at a
+# fixed version, so that a relock does not move with its releases.
+DEPENDENCY_PLUGIN = "org.apache.maven.plugins:maven-dependency-plugin:3.8.1"
 
 # Files Maven Resolver writes into a local repository for its own
 # bookkeeping. They are not downloads, and an offline build does not need
@@ -74,8 +90,16 @@ MAVEN_FLAGS = ["-Daether.remoteRepositoryFilter.prefixes=false"]
 # Directories that never belong to the build definition or the build input.
 SKIPPED_DIRS = {"target", ".git", STATE_DIR, ".idea", "node_modules"}
 
+# Maven Central serves the same files under each of these URLs. The lock
+# records the first as a file's URL and the others as its mirrors.
+CENTRAL_HOSTS = (
+    "https://repo1.maven.org/maven2/",
+    "https://repo.maven.apache.org/maven2/",
+    "https://maven-central.storage-download.googleapis.com/maven2/",
+)
 
-def fail(message):
+
+def fail(message) -> NoReturn:
     print(f"maven-purifier: {message}", file=sys.stderr)
     sys.exit(1)
 
@@ -97,6 +121,33 @@ def sri(path):
         for block in iter(lambda: f.read(1 << 20), b""):
             digest.update(block)
     return "sha256-" + base64.b64encode(digest.digest()).decode()
+
+
+def canonical_json(value):
+    """JSON as Nix's builtins.toJSON writes it: keys sorted, no spaces, text unescaped."""
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def lock_hash(lock_data):
+    """The lockHash of a lockfile: the SHA-256 of its canonical JSON without the field."""
+    without = {k: v for k, v in lock_data.items() if k != "lockHash"}
+    return "sha256:" + hashlib.sha256(canonical_json(without).encode()).hexdigest()
+
+
+def build_config_lines(text):
+    """The build's own lines of .mvn/maven.config: those before the lines of `prefetch`, less trailing empty ones."""
+    lines = text.split("\n")
+    if PREFETCH_MARKER in lines:
+        lines = lines[: lines.index(PREFETCH_MARKER)]
+    while lines and lines[-1] == "":
+        lines.pop()
+    return lines
+
+
+def without_prefetch_lines(text):
+    """The text of .mvn/maven.config with only the build's own lines, each ending in a newline."""
+    lines = build_config_lines(text)
+    return "".join(line + "\n" for line in lines)
 
 
 def definition_files(root):
@@ -125,13 +176,18 @@ def definition_hash(root, goals):
 
     It is the SHA-256, in hex, of the text "goals <goals joined by spaces>"
     followed by a line "<relative path> <SHA-256 of the file in hex>" for
-    each definition file. Nix computes the same text from the build root
-    (nix/lib/definition-hash.nix), so a sandboxed build can tell a stale
-    lock at evaluation time.
+    each definition file. For .mvn/maven.config the hash covers the build's
+    own lines (build_config_lines) joined by newlines, so the lines that
+    `prefetch` writes take no part. Nix computes the same text from the
+    build root (nix/lib/definition-hash.nix), so a sandboxed build can tell
+    a stale lock at evaluation time.
     """
     lines = ["goals " + " ".join(goals)]
     for rel in definition_files(root):
-        lines.append(f"{rel} {hashlib.sha256((root / rel).read_bytes()).hexdigest()}")
+        content = (root / rel).read_bytes()
+        if rel == ".mvn/maven.config":
+            content = "\n".join(build_config_lines(content.decode())).encode()
+        lines.append(f"{rel} {hashlib.sha256(content).hexdigest()}")
     return "sha256:" + hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()
 
 
@@ -143,17 +199,11 @@ def distribution_url(root):
             key, sep, value = line.partition("=")
             if sep and key.strip() == "distributionUrl":
                 return value.strip().replace("\\:", ":")
-    version = os.environ["MAVEN_PURIFIER_DEFAULT_MAVEN"]
+    return maven_url(os.environ["MAVEN_PURIFIER_DEFAULT_MAVEN"])
+
+
+def maven_url(version):
     return f"{CENTRAL}org/apache/maven/apache-maven/{version}/apache-maven-{version}-bin.tar.gz"
-
-
-# Maven Central serves the same files under each of these URLs. The lock
-# records the first as a file's URL and the others as its mirrors.
-CENTRAL_HOSTS = (
-    "https://repo1.maven.org/maven2/",
-    "https://repo.maven.apache.org/maven2/",
-    "https://maven-central.storage-download.googleapis.com/maven2/",
-)
 
 
 def central_path(url):
@@ -165,22 +215,61 @@ def central_path(url):
 
 
 def file_entry(path, url, hash_):
-    """A file entry of the lock; a file of Maven Central gets its canonical URL and mirrors."""
+    """A file entry of the lock, with the canonical URL of a file of Maven Central.
+
+    The lock holds no mirrors: Nix derives them from the URL (lock.nix), as
+    the other hosts of Maven Central.
+    """
     rest = central_path(url)
-    if rest is None:
-        return {"path": path, "url": url, "mirrors": [], "hash": hash_}
-    return {
-        "path": path,
-        "url": CENTRAL_HOSTS[0] + rest,
-        "mirrors": [host + rest for host in CENTRAL_HOSTS[1:]],
-        "hash": hash_,
-    }
+    return {"path": path, "url": url if rest is None else CENTRAL_HOSTS[0] + rest, "hash": hash_}
 
 
 def central_mirror():
     """The URL the lock run downloads Maven Central's files from, when MAVEN_PURIFIER_CENTRAL_MIRROR names one."""
     mirror = os.environ.get("MAVEN_PURIFIER_CENTRAL_MIRROR")
     return (mirror.rstrip("/") + "/") if mirror else None
+
+
+def fetch_url(url):
+    """The URL the lock run fetches url from: the Central mirror for a file of Central, when one is set."""
+    rest = central_path(url)
+    if central_mirror() and rest is not None:
+        return central_mirror() + rest
+    return url
+
+
+# The classifiers that os-maven-plugin gives each Nix system of the
+# nix-purifiers. Builds that need a native binary, such as protoc or
+# netty's transports, name it by such a classifier.
+PLATFORM_CLASSIFIERS = {"x86_64-linux": "linux-x86_64", "aarch64-linux": "linux-aarch_64"}
+
+
+def native_system():
+    machine = os.uname().machine
+    system = {"x86_64": "x86_64-linux", "aarch64": "aarch64-linux", "arm64": "aarch64-linux"}.get(machine)
+    if system is None:
+        fail(f"maven-purifier runs on x86_64-linux and aarch64-linux, and this machine is {machine}")
+    return system
+
+
+def platform_counterparts(path, native):
+    """The paths of the other systems' builds of a file named by the native platform classifier, by system.
+
+    A file such as protoc-4.35.1-linux-x86_64.exe has the counterpart
+    protoc-4.35.1-linux-aarch_64.exe for aarch64-linux. A file with no
+    platform classifier has none.
+    """
+    directory, _, name = path.rpartition("/")
+    native_classifier = PLATFORM_CLASSIFIERS[native]
+    match = re.fullmatch(rf"(.*-){re.escape(native_classifier)}(\..*)?", name)
+    if match is None:
+        return {}
+    stem, suffix = match.group(1), match.group(2) or ""
+    return {
+        system: f"{directory}/{stem}{classifier}{suffix}"
+        for system, classifier in PLATFORM_CLASSIFIERS.items()
+        if system != native
+    }
 
 
 def download_path(url):
@@ -192,13 +281,17 @@ def download_path(url):
     return f"downloads/{parsed.netloc}{parsed.path}"
 
 
-def prefetch(url):
-    out = subprocess.run(
-        ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256", url],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+def prefetch_file(url):
+    """Adds url to the Nix store and returns its SRI hash and store path."""
+    try:
+        out = subprocess.run(
+            ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256", fetch_url(url)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        fail(f"could not download {fetch_url(url)}: {e.stderr.strip()}")
     result = json.loads(out.stdout)
     return result["hash"], result["storePath"]
 
@@ -227,32 +320,6 @@ def java_home():
     return home
 
 
-def locked_java_home(lock_data):
-    """The JDK of the Java major version the lock was made with, from nixpkgs.
-
-    The sandboxed build runs on nixpkgs' headless JDK of that major, so the
-    interactive mode and the deploy step run on it too, whatever JAVA_HOME
-    names.
-    """
-    major = lock_data["javaVersion"].split(".")[0]
-    try:
-        jdk = subprocess.run(
-            [
-                "nix-build",
-                os.environ["MAVEN_PURIFIER_NIXPKGS"],
-                "-A",
-                f"javaPackages.compiler.openjdk{major}.headless",
-                "--no-out-link",
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            text=True,
-        ).stdout.strip()
-    except subprocess.CalledProcessError:
-        fail(f"nixpkgs has no headless JDK {major}, the Java major version the lock was made with")
-    return f"{jdk}/lib/openjdk"
-
-
 def java_version(home):
     out = subprocess.run(
         [f"{home}/bin/java", "-XshowSettings:properties", "-version"],
@@ -277,6 +344,14 @@ def proxy_with_credentials():
 
 def local_name(tag):
     return tag.rsplit("}", 1)[-1]
+
+
+def qualifier(element):
+    """A function that names a child of element in the namespace of element."""
+    namespace = element.tag[1:].split("}")[0] if element.tag.startswith("{") else ""
+    if namespace:
+        ET.register_namespace("", namespace)
+    return lambda name: f"{{{namespace}}}{name}" if namespace else name
 
 
 def env_proxies(qualify):
@@ -315,8 +390,8 @@ def read_settings(source):
     The lock run uses the given settings file, or the user's
     ~/.m2/settings.xml. The lock records them without <servers> and
     <proxies>, which hold credentials, and without <localRepository> and
-    <offline>, which each run sets itself. The sandboxed build and the
-    interactive mode use the recorded settings, so their repository and
+    <offline>, which each run sets itself. The sandboxed build and a
+    prefetched Maven use the recorded settings, so their repository and
     mirror ids are the ids of the lock run, which the names of metadata files
     in the local repository depend on.
     """
@@ -331,9 +406,7 @@ def read_settings(source):
         fail(f"cannot read the settings file {source}: {e}")
     if local_name(settings.tag) != "settings":
         fail(f"{source} is not a Maven settings file")
-    namespace = settings.tag[1:].split("}")[0] if settings.tag.startswith("{") else ""
-    if namespace:
-        ET.register_namespace("", namespace)
+    qualifier(settings)
     for child in list(settings):
         if local_name(child.tag) in ("localRepository", "offline"):
             settings.remove(child)
@@ -347,10 +420,7 @@ def read_settings(source):
 def write_run_settings(settings, path):
     """Writes the lock run's settings, adding the environment's proxy when they name none."""
     settings = copy.deepcopy(settings)
-    namespace = settings.tag[1:].split("}")[0] if settings.tag.startswith("{") else ""
-
-    def qualify(name):
-        return f"{{{namespace}}}{name}" if namespace else name
+    qualify = qualifier(settings)
 
     if not any(local_name(c.tag) == "proxies" for c in settings):
         proxies = env_proxies(qualify)
@@ -374,26 +444,10 @@ def write_run_settings(settings, path):
     path.write_text(ET.tostring(settings, encoding="unicode") + "\n")
 
 
-def recorded_settings(lock_data, path):
-    """Writes the settings a lock recorded, or empty settings."""
-    path.write_text(lock_data.get("settings") or "<settings/>\n")
-
-
-def ide_settings(lock_data, repo, path):
-    """Writes settings for an editor's embedded Maven: the recorded settings, offline, on the locked repository.
-
-    An editor that imports the build with these as its user settings (the
-    `java.configuration.maven.userSettings` of jdtls, the user settings file
-    of IntelliJ IDEA) resolves from the same files as `maven-purifier mvn`.
-    """
+def offline_settings(lock_data, repo, path):
+    """Writes the settings of a prefetched Maven: the recorded settings, offline, on the locked repository."""
     settings = ET.fromstring(lock_data.get("settings") or "<settings/>")
-    namespace = settings.tag[1:].split("}")[0] if settings.tag.startswith("{") else ""
-    if namespace:
-        ET.register_namespace("", namespace)
-
-    def qualify(name):
-        return f"{{{namespace}}}{name}" if namespace else name
-
+    qualify = qualifier(settings)
     for child in list(settings):
         if local_name(child.tag) in ("localRepository", "offline"):
             settings.remove(child)
@@ -407,10 +461,15 @@ def ide_settings(lock_data, repo, path):
 
 
 def copy_build(root, dest):
+    """Copies the build root for a lock run, without build outputs and without the lines of `prefetch`."""
+
     def ignore(_dir, names):
         return [n for n in names if n in SKIPPED_DIRS or n.startswith("result")]
 
     shutil.copytree(root, dest, symlinks=True, ignore=ignore)
+    config = dest / ".mvn" / "maven.config"
+    if config.is_file() and not config.is_symlink() and PREFETCH_MARKER in config.read_text().split("\n"):
+        config.write_text(without_prefetch_lines(config.read_text()))
 
 
 def read_record(path):
@@ -465,45 +524,174 @@ def tracked_repository(path):
     return None
 
 
+class Options:
+    """The options of a command: --lockfile, the flags it names, and the rest in order."""
+
+    def __init__(self, args, flags=(), values=()):
+        self.lockfile = None
+        self.flags = set()
+        self.values = {}
+        self.rest = []
+        it = iter(args)
+        for arg in it:
+            if arg == "--lockfile":
+                self.lockfile = Path(next(it, "")).resolve()
+            elif arg in flags:
+                self.flags.add(arg)
+            elif arg in values:
+                value = next(it, None)
+                if value is None:
+                    fail(f"{arg} needs a value")
+                self.values[arg] = value
+            else:
+                self.rest.append(arg)
+
+    def lock_path(self, root):
+        return self.lockfile or root / LOCK_NAME
+
+
+def read_lock(lock_path):
+    """The lockfile, checked: it is JSON, of this format version, and matches its lockHash."""
+    fix = "run `maven-purifier lock --force` to write it again"
+    if not lock_path.is_file():
+        fail(f"there is no lockfile at {lock_path}; run `maven-purifier lock` first")
+    try:
+        lock_data = json.loads(lock_path.read_text())
+    except json.JSONDecodeError as e:
+        fail(f"{lock_path} is not valid JSON ({e}); {fix}")
+    if not isinstance(lock_data, dict):
+        fail(f"{lock_path} is not a lockfile that maven-purifier wrote; {fix}")
+    if lock_data.get("version") != FORMAT_VERSION:
+        fail(f"{lock_path} has lock format version {lock_data.get('version')}, and this maven-purifier reads version {FORMAT_VERSION}; {fix}")
+    if lock_data.get("lockHash") != lock_hash(lock_data):
+        fail(f"{lock_path} does not match its lockHash, so it was changed after `maven-purifier lock` wrote it; {fix}")
+    return lock_data
+
+
+def check_fresh(root, lock_path, lock_data):
+    if lock_data.get("definitionHash") != definition_hash(root, lock_data.get("goals", [])):
+        fail(
+            f"the build definition (a pom.xml, .mvn/ or the goals) changed since {lock_path} was made; "
+            "run `maven-purifier lock` to lock it again"
+        )
+
+
+def run_maven(mvn, project, env, settings, repo, goals):
+    command = [
+        str(mvn),
+        "-B",
+        "-ntp",
+        "-s",
+        str(settings),
+        f"-Dmaven.repo.local={repo}",
+        f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}",
+        *MAVEN_FLAGS,
+        *goals,
+    ]
+    return subprocess.run(command, cwd=project, env=env, check=False).returncode
+
+
+def previous_lock(lock_path):
+    """The previous lockfile, when it is one this maven-purifier reads and matches its lockHash, or None."""
+    try:
+        data = json.loads(lock_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if isinstance(data, dict) and data.get("version") == FORMAT_VERSION and data.get("lockHash") == lock_hash(data):
+        return data
+    return None
+
+
+def package_prefix(package):
+    """The local repository directory of a package named groupId:artifactId."""
+    group, sep, artifact = package.partition(":")
+    if not sep or not group or not artifact or ":" in artifact:
+        fail(f"name a package as groupId:artifactId, such as org.slf4j:slf4j-api, not {package!r}")
+    return f"{group.replace('.', '/')}/{artifact}/"
+
+
+def seed_metadata(repo, previous, refresh):
+    """Lays the metadata files of the previous lock into the empty local repository of a lock run.
+
+    Each is marked as checked now in resolver-status.properties, so that
+    Maven Resolver reads it rather than fetching the repository's current
+    one, and version ranges and SNAPSHOTs resolve as the previous lock run
+    resolved them. `refresh` is None to seed every file, "all" to seed none,
+    or a list of groupId:artifactId whose files are left out. Returns the
+    paths it seeded.
+    """
+    if previous is None or refresh == "all":
+        return set()
+    prefixes = [package_prefix(p) for p in (refresh or [])]
+    now = int(time.time() * 1000)
+    seeded = set()
+    for entry in previous["downloads"]:
+        if "contents" not in entry or any(entry["path"].startswith(p) for p in prefixes):
+            continue
+        target = repo / entry["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(entry["contents"])
+        with open(target.parent / "resolver-status.properties", "a") as status:
+            status.write(f"{target.name}.lastUpdated={now}\n")
+        seeded.add(entry["path"])
+    return seeded
+
+
 def lock(args):
-    force = False
-    settings_source = None
-    goals = []
-    rest = iter(args)
-    for arg in rest:
-        if arg == "--force":
-            force = True
-        elif arg == "--settings":
-            settings_source = Path(next(rest, "")).resolve()
-        else:
-            goals.append(arg)
-    goals = goals or ["clean", "install"]
+    options = Options(args, flags=("--force",), values=("--settings",))
     root = build_root()
-    lock_path = root / LOCK_NAME
+    run_lock(
+        root,
+        options.lock_path(root),
+        options.rest or ["clean", "install"],
+        options.values.get("--settings"),
+        force="--force" in options.flags,
+        refresh=None,
+    )
+
+
+def update(args):
+    options = Options(args, values=("--settings",))
+    root = build_root()
+    lock_path = options.lock_path(root)
+    previous = read_lock(lock_path)
+    run_lock(
+        root,
+        lock_path,
+        previous["goals"],
+        options.values.get("--settings"),
+        force=True,
+        refresh=options.rest or "all",
+    )
+
+
+def run_lock(root, lock_path, goals, settings_file, force, refresh):
+    """The lock run. `refresh` says which metadata of the previous lock to resolve afresh (seed_metadata)."""
     def_hash = definition_hash(root, goals)
+    settings_source = Path(settings_file).resolve() if settings_file else None
     settings, settings_record = read_settings(settings_source)
+    previous = previous_lock(lock_path)
     if not force and lock_path.is_file():
         try:
             old = json.loads(lock_path.read_text())
         except json.JSONDecodeError:
             old = {}
         if (
-            old.get("version") == FORMAT_VERSION
+            isinstance(old, dict)
+            and old.get("version") == FORMAT_VERSION
+            and old.get("lockHash") == lock_hash(old)
             and old.get("definitionHash") == def_hash
             and old.get("settings") == settings_record
         ):
-            info(f"{LOCK_NAME} is up to date; pass --force to lock again")
+            info(f"{lock_path} is up to date; pass --force to lock again")
             return
 
     home = java_home()
     with tempfile.TemporaryDirectory(prefix="maven-purifier-lock-") as tmp:
         tmp = Path(tmp)
         url = distribution_url(root)
-        fetch_url = url
-        if central_mirror() and central_path(url) is not None:
-            fetch_url = central_mirror() + central_path(url)
-        info(f"fetching {fetch_url}")
-        dist_hash, dist_store = prefetch(fetch_url)
+        info(f"fetching {fetch_url(url)}")
+        dist_hash, dist_store = prefetch_file(url)
         dist_path = download_path(url)
         mvn = unpack_maven(Path(dist_store), tmp / "maven")
         maven_version = mvn.parent.parent.name.removeprefix("apache-maven-")
@@ -514,77 +702,90 @@ def lock(args):
         repo.mkdir()
         declared = []
         for d in declared_downloads(root):
-            fetch_url = d["url"]
-            if central_mirror() and central_path(fetch_url) is not None:
-                fetch_url = central_mirror() + central_path(fetch_url)
-            info(f"fetching {fetch_url}")
-            declared_hash, declared_store = prefetch(fetch_url)
+            info(f"fetching {fetch_url(d['url'])}")
+            declared_hash, declared_store = prefetch_file(d["url"])
             target = repo / d["path"]
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(declared_store, target)
             declared.append(file_entry(Path(d["path"]).as_posix(), d["url"], declared_hash))
         declared_paths = {d["path"] for d in declared}
+        seeded = seed_metadata(repo, previous, refresh)
         (tmp / "home").mkdir()
         write_run_settings(settings, tmp / "settings.xml")
         record = tmp / "record.jsonl"
 
         env = dict(os.environ)
-        env.update(
-            {
-                "JAVA_HOME": home,
-                "HOME": str(tmp / "home"),
-                "MAVEN_PURIFIER_RECORD": str(record),
-            }
-        )
+        env.update({"JAVA_HOME": home, "HOME": str(tmp / "home"), "MAVEN_PURIFIER_RECORD": str(record)})
+        # Plugins that write temporary files write them into the lock run's
+        # own directory.
+        (tmp / "java-tmp").mkdir()
+        maven_opts = [env.get("MAVEN_OPTS", ""), f"-Duser.home={tmp / 'home'}", f"-Djava.io.tmpdir={tmp / 'java-tmp'}"]
         if proxy_with_credentials():
             # Java disables Basic authentication to a proxy by default, for
             # HTTPS tunnels and plain requests alike. Maven 3.9's Apache
             # HttpClient transport also fails with 407 on concurrent
             # downloads through a proxy that asks for credentials, so the
             # lock run downloads one file at a time.
-            env["MAVEN_OPTS"] = " ".join(
-                filter(
-                    None,
-                    [
-                        env.get("MAVEN_OPTS", ""),
-                        "-Djdk.http.auth.tunneling.disabledSchemes=",
-                        "-Djdk.http.auth.proxying.disabledSchemes=",
-                        "-Dmaven.artifact.threads=1",
-                    ],
-                )
-            )
-        command = [
-            str(mvn),
-            "-B",
-            "-ntp",
-            "-s",
-            str(tmp / "settings.xml"),
-            f"-Dmaven.repo.local={repo}",
-            f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}",
-            f"-Duser.home={tmp / 'home'}",
-            *MAVEN_FLAGS,
-            *goals,
-        ]
+            maven_opts += [
+                "-Djdk.http.auth.tunneling.disabledSchemes=",
+                "-Djdk.http.auth.proxying.disabledSchemes=",
+                "-Dmaven.artifact.threads=1",
+            ]
+        env["MAVEN_OPTS"] = " ".join(filter(None, maven_opts))
+
         info(f"running Maven {maven_version} on a copy of the build: {' '.join(goals)}")
-        if subprocess.run(command, cwd=project, env=env, check=False).returncode != 0:
-            fail("the lock run failed; the lockfile is unchanged")
+        if run_maven(mvn, project, env, tmp / "settings.xml", repo, goals) != 0:
+            fail(f"the lock run failed; {lock_path} is unchanged")
+        build_events = len(read_record(record)) if record.exists() else 0
+
+        # The development pass: the plugins of the build and the source jars
+        # of its dependencies, with the locked Maven, and the default plugins
+        # of the Maven inside the editor, with that Maven. What it adds is
+        # marked as development: `prefetch` fetches it, and a sandboxed build
+        # leaves it out. A failure here costs the lock nothing the build
+        # needs, so it is reported and passed over.
+        development = [f"{DEPENDENCY_PLUGIN}:resolve-plugins", f"{DEPENDENCY_PLUGIN}:sources"]
+        info("adding the build's plugins and its dependencies' source jars for development")
+        if run_maven(mvn, project, env, tmp / "settings.xml", repo, development) != 0:
+            info("the development pass with the locked Maven failed; the lock leaves out what it would have added")
+        editor_maven = os.environ.get("MAVEN_PURIFIER_EDITOR_MAVEN")
+        editor_dist = None
+        if editor_maven and editor_maven != maven_version:
+            info(f"adding the default plugins of Maven {editor_maven}, which the editor runs")
+            editor_hash, editor_store = prefetch_file(maven_url(editor_maven))
+            editor_dist = file_entry(download_path(maven_url(editor_maven)), maven_url(editor_maven), editor_hash)
+            editor_mvn = unpack_maven(Path(editor_store), tmp / "editor-maven")
+            if run_maven(editor_mvn, project, env, tmp / "settings.xml", repo, [f"{DEPENDENCY_PLUGIN}:resolve-plugins"]) != 0:
+                info(f"the development pass with Maven {editor_maven} failed; the editor may miss plugins offline")
 
         events = read_record(record) if record.exists() else []
         downloads = {}
+        development_paths = set()
         repository_urls = {}
-        for e in events:
+        for index, e in enumerate(events):
             if e["event"] != "download":
                 continue
             rel = Path(e["file"]).relative_to(repo).as_posix()
-            downloads.setdefault(rel, e["url"])
-            repository_urls.setdefault(e["repository"], e["repositoryUrl"])
+            found = [rel]
             # Maven Resolver stores a timestamped SNAPSHOT under its base
             # version, which the event names, and also under the name it has
             # in the remote repository. Both copies are the same file.
             remote_name = e["url"].rsplit("/", 1)[-1]
             sibling = Path(rel).parent / remote_name
             if remote_name != Path(rel).name and (repo / sibling).is_file():
-                downloads.setdefault(sibling.as_posix(), e["url"])
+                found.append(sibling.as_posix())
+            for path in found:
+                if path not in downloads:
+                    downloads[path] = e["url"]
+                    if index >= build_events:
+                        development_paths.add(path)
+            repository_urls.setdefault(e["repository"], e["repositoryUrl"])
+
+        # A seeded metadata file stays in the lock while the build reads it.
+        read_metadata = {Path(e["file"]).relative_to(repo).as_posix() for e in events if e["event"] == "resolved"}
+        for path in sorted(seeded):
+            if path in read_metadata and path not in downloads and (repo / path).is_file():
+                downloads[path] = None
 
         installs = [e for e in events if e["event"] == "install"]
         installed = {Path(e["file"]).relative_to(repo).as_posix() for e in installs}
@@ -602,7 +803,7 @@ def lock(args):
             rel = path.relative_to(repo).as_posix()
             if path.name in BOOKKEEPING or path.name.endswith(".lastUpdated"):
                 continue
-            if rel in downloads or rel in installed or rel in declared_paths:
+            if rel in downloads or rel in installed or rel in declared_paths or rel in seeded:
                 continue
             if path.name.startswith("maven-metadata") and Path(rel).parent.as_posix() in module_dirs:
                 continue
@@ -624,34 +825,67 @@ def lock(args):
             listing = "\n  ".join(unrecorded)
             fail(
                 "these files reached the local repository without a recorded download, "
-                f"so a sandboxed build could not have them:\n  {listing}"
+                f"so a sandboxed build could not have them:\n  {listing}\n"
+                "Declare each one that a plugin downloads itself in .mvn/maven-purifier.json"
             )
 
         # A metadata file lists the versions a repository holds, and its URL
         # serves new contents whenever a version is published, so a fetch
         # pinned by hash would break. The lock holds the contents the
         # resolver read. Every other download is immutable.
-        artifacts = [file_entry(dist_path, url, dist_hash), *declared]
+        entries: list[dict] = [file_entry(dist_path, url, dist_hash), *declared]
+        if editor_dist is not None and editor_dist["path"] != dist_path:
+            entries.append(dict(editor_dist, development=True))
         for rel, src in sorted(downloads.items()):
             if rel in declared_paths:
                 continue
             if Path(rel).name.startswith("maven-metadata"):
-                artifacts.append({"path": rel, "contents": (repo / rel).read_text()})
+                entry = {"path": rel, "contents": (repo / rel).read_text()}
             else:
-                artifacts.append(file_entry(rel, src, sri(repo / rel)))
-        artifacts.sort(key=lambda a: str(a["path"]))
+                entry = file_entry(rel, src, sri(repo / rel))
+            if rel in development_paths:
+                entry["development"] = True
+            entries.append(entry)
+        # A native binary that the build downloaded by the platform
+        # classifier of this system is needed on this system only, and each
+        # other system needs its own build of it, which the lock run could
+        # not download by running the build. The lock fetches those by the
+        # same name with the other classifier, and marks every such entry
+        # with the systems that need it.
+        native = native_system()
+        for entry in list(entries):
+            counterparts = platform_counterparts(entry["path"], native) if "url" in entry else {}
+            if not counterparts:
+                continue
+            found = {}
+            for system, path in counterparts.items():
+                url = entry["url"][: -len(entry["path"].rpartition("/")[2])] + path.rpartition("/")[2]
+                try:
+                    out = subprocess.run(
+                        ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256", fetch_url(url)],
+                        check=True,
+                        capture_output=True,
+                        text=True,
+                    )
+                except subprocess.CalledProcessError:
+                    info(f"{entry['path']} has no build for {system} at {url}; a build there will miss it")
+                    continue
+                found[system] = file_entry(path, url, json.loads(out.stdout)["hash"])
+            if found:
+                entry["systems"] = [native]
+                for system, other in found.items():
+                    other["systems"] = [system]
+                    if entry.get("development"):
+                        other["development"] = True
+                    entries.append(other)
+        entries.sort(key=lambda d: str(d["path"]))
 
         projects = {}
         for e in installs:
             key = (e["groupId"], e["artifactId"])
             p = projects.setdefault(
                 key,
-                {
-                    "groupId": e["groupId"],
-                    "artifactId": e["artifactId"],
-                    "version": e["version"],
-                    "artifacts": {},
-                },
+                {"groupId": e["groupId"], "artifactId": e["artifactId"], "version": e["version"], "artifacts": {}},
             )
             p["artifacts"][artifact_key(e)] = {
                 "key": artifact_key(e),
@@ -668,8 +902,8 @@ def lock(args):
 
         result = {
             "version": FORMAT_VERSION,
-            "maven": {"version": maven_version, "distribution": dist_path},
-            "javaVersion": java_version(home),
+            "maven": {"version": maven_version},
+            "javaMajor": java_version(home).split(".")[0],
             "goals": goals,
             "settings": settings_record,
             "definitionHash": def_hash,
@@ -677,113 +911,110 @@ def lock(args):
                 dict(p, artifacts=sorted(p["artifacts"].values(), key=lambda a: a["key"]))
                 for _, p in sorted(projects.items())
             ],
-            "artifacts": artifacts,
+            "downloads": entries,
         }
-        lock_path.write_text(json.dumps(result, indent=2) + "\n")
+        result["lockHash"] = lock_hash(result)
+        lock_path.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
         modules = ", ".join(sorted(a for _, a in projects))
-        info(f"wrote {LOCK_NAME} with {len(artifacts)} downloads; the build installs {modules}")
+        dev = sum(1 for d in entries if d.get("development"))
+        info(f"wrote {lock_path} with {len(entries)} downloads, {dev} of them for development; the build installs {modules}")
 
 
-def realize(root, lock_data):
-    """Fetches the locked downloads through Nix into a writable tree under .maven-purifier/."""
+def nix_expression(attribute):
+    """A Nix expression for an attribute of this flake's buildMavenProject, for the build root and lockfile in the environment."""
+    return f"""
+      let
+        flake = builtins.getFlake ("path:" + builtins.getEnv "MAVEN_PURIFIER_FLAKE");
+        pkgs = import flake.inputs.nixpkgs {{ system = builtins.currentSystem; }};
+      in
+      (flake.lib.maven-purifier.buildMavenProject {{
+        inherit pkgs;
+        src = /. + builtins.getEnv "MAVEN_PURIFIER_ROOT";
+        lockFile = /. + builtins.getEnv "MAVEN_PURIFIER_LOCKFILE";
+      }}).{attribute}
+    """
+
+
+def nix_build(root, lock_path, attribute, out_link):
+    env = dict(os.environ, MAVEN_PURIFIER_ROOT=str(root), MAVEN_PURIFIER_LOCKFILE=str(lock_path))
+    try:
+        return subprocess.run(
+            ["nix", "build", "--impure", "--out-link", str(out_link), "--print-out-paths", "--expr", nix_expression(attribute)],
+            env=env,
+            check=True,
+            stdout=subprocess.PIPE,
+            text=True,
+        ).stdout.strip()
+    except subprocess.CalledProcessError:
+        fail(f"Nix could not build what {lock_path} lists")
+
+
+def write_maven_config(root, lines):
+    """Replaces the lines of `prefetch` at the end of .mvn/maven.config with lines, keeping the build's own."""
+    config = root / ".mvn" / "maven.config"
+    own = without_prefetch_lines(config.read_text()) if config.is_file() else ""
+    config.parent.mkdir(exist_ok=True)
+    config.write_text(own + "\n".join([PREFETCH_MARKER, *lines]) + "\n")
+
+
+def prefetch(args):
+    options = Options(args, values=("--prefetched",))
+    if options.rest:
+        fail(f"`maven-purifier prefetch` takes no argument {options.rest[0]!r}")
+    root = build_root()
+    lock_path = options.lock_path(root)
+    lock_data = read_lock(lock_path)
+    check_fresh(root, lock_path, lock_data)
     state = root / STATE_DIR
     state.mkdir(exist_ok=True)
-    entry = Path(os.environ["MAVEN_PURIFIER_NIX_LIB"]) / "realize-entry.nix"
-    args = [str(entry), "--arg", "lockFile", str(root / LOCK_NAME)]
-    try:
-        subprocess.run(["nix-build", *args, "-A", "fetches", "--no-out-link"], check=True, stdout=subprocess.DEVNULL)
-        # The manifest is a store file, not a derivation. Evaluating it in
-        # read/write mode writes it to the store and gives its path, and
-        # the GC root keeps it and every artifact it names alive.
-        manifest_path = json.loads(
-            subprocess.run(
-                ["nix-instantiate", "--eval", "--read-write-mode", "--json", *args, "-A", "manifest"],
-                check=True,
-                stdout=subprocess.PIPE,
-                text=True,
-            ).stdout
-        )
-        subprocess.run(
-            ["nix-store", "--add-root", str(state / "gcroot"), "--realise", manifest_path],
-            check=True,
-            stdout=subprocess.DEVNULL,
-        )
-    except subprocess.CalledProcessError:
-        fail(f"Nix could not fetch the downloads that {LOCK_NAME} names")
 
+    # `--prefetched` names a prefetch that is built already, as the check of
+    # the offline loop passes one built in the sandbox.
+    if "--prefetched" in options.values:
+        prefetched = Path(options.values["--prefetched"]).resolve()
+    else:
+        info(f"fetching what {lock_path.name} lists into the Nix store")
+        prefetched = Path(nix_build(root, lock_path, "prefetch", state / "prefetch"))
+
+    # Maven writes tracking files next to what it reads and installs into
+    # the local repository, and Maven 3.10 treats a file as absent when its
+    # real path differs from its path in the repository, so the repository
+    # is a writable copy of the one in the store.
     repo = state / "repository"
-    stamp = state / "manifest"
-    if not (stamp.exists() and stamp.read_text() == manifest_path):
+    stamp = state / "repository.source"
+    source = str((prefetched / "repository").resolve())
+    if not (stamp.exists() and stamp.read_text() == source and repo.is_dir()):
         if repo.exists():
             shutil.rmtree(repo)
-        manifest = json.loads(Path(manifest_path).read_text())
-        for rel, source in manifest.items():
-            dest = repo / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source, dest)
-        stamp.write_text(manifest_path)
+        shutil.copytree(source, repo, symlinks=False, copy_function=shutil.copyfile)
+        # copytree copies the read-only mode of each directory in the store,
+        # which leaves no room for Maven's lock and tracking files.
+        for directory, _, _ in os.walk(repo):
+            os.chmod(directory, 0o755)
+        stamp.write_text(source)
 
-    version = lock_data["maven"]["version"]
-    maven_home = state / f"maven-{version}"
-    if not maven_home.exists():
-        archive = repo / lock_data["maven"]["distribution"]
-        mvn = unpack_maven(archive.resolve(), maven_home)
-    else:
-        mvn = next(maven_home.glob("*/bin/mvn"))
-    return repo, mvn
+    offline_settings(lock_data, repo, state / "settings.xml")
+    bin_dir = state / "bin"
+    bin_dir.mkdir(exist_ok=True)
+    for name, target in (("bin/mvn", prefetched / "maven" / "bin" / "mvn"), ("jdk", prefetched / "jdk")):
+        link = state / name
+        if link.is_symlink() or link.exists():
+            link.unlink()
+        link.symlink_to(target)
 
-
-def run_mvn(args):
-    root = build_root()
-    lock_data = read_lock(root)
-    repo, mvn = realize(root, lock_data)
-    env = dict(os.environ)
-    env["JAVA_HOME"] = locked_java_home(lock_data)
-    if lock_data.get("definitionHash") != definition_hash(root, lock_data["goals"]):
-        info(f"the build definition changed since {LOCK_NAME} was made; Maven resolves online until `maven-purifier lock` renews it")
-        os.execve(str(mvn), [str(mvn), *args], env)
-    settings = root / STATE_DIR / "settings.xml"
-    recorded_settings(lock_data, settings)
-    ide_settings(lock_data, repo, root / STATE_DIR / "ide-settings.xml")
-    result = subprocess.run(
-        [str(mvn), "-o", "-s", str(settings), f"-Dmaven.repo.local={repo}", *MAVEN_FLAGS, *args],
-        env=env,
-        check=False,
+    write_maven_config(
+        root,
+        [
+            f"--settings={state / 'settings.xml'}",
+            f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}",
+            f"-Dmaven-purifier.maven={lock_data['maven']['version']}",
+            *MAVEN_FLAGS,
+        ],
     )
-    if result.returncode != 0:
-        goals = " ".join(lock_data["goals"])
-        info(
-            f"Maven ran offline from the downloads locked for `{goals}`. If it reported a "
-            "plugin or dependency that has not been downloaded, lock the goals you run: "
-            "`maven-purifier lock --force <goal>...`"
-        )
-    sys.exit(result.returncode)
-
-
-def write_ide_settings(args):
-    if args:
-        fail("`maven-purifier ide-settings` takes no arguments")
-    root = build_root()
-    lock_data = read_lock(root)
-    repo, _ = realize(root, lock_data)
-    path = root / STATE_DIR / "ide-settings.xml"
-    ide_settings(lock_data, repo, path)
-    print(path)
-
-
-def read_lock(root):
-    lock_path = root / LOCK_NAME
-    if not lock_path.is_file():
-        fail(f"{root} has no {LOCK_NAME}; run `maven-purifier lock` first")
-    try:
-        lock_data = json.loads(lock_path.read_text())
-    except json.JSONDecodeError as e:
-        fail(f"{lock_path} is not valid JSON ({e}); run `maven-purifier lock --force` to write it again")
-    if not isinstance(lock_data, dict):
-        fail(f"{lock_path} is not a lock that maven-purifier wrote; run `maven-purifier lock --force`")
-    if lock_data.get("version") != FORMAT_VERSION:
-        fail(f"{LOCK_NAME} has lock format version {lock_data.get('version')}; run `maven-purifier lock --force`")
-    return lock_data
+    info(
+        f"Maven resolves offline from {repo} now. The locked Maven {lock_data['maven']['version']} is "
+        f"{state / 'bin' / 'mvn'}, and the JDK of Java {lock_data['javaMajor']} is {state / 'jdk'}."
+    )
 
 
 def distribution_target(root, lock_data):
@@ -803,60 +1034,26 @@ def distribution_target(root, lock_data):
             fields = {local_name(c.tag): (c.text or "").strip() for c in repository}
             if fields.get("id") and fields.get("url"):
                 return fields["id"], fields["url"]
-    fail(
-        f"the root pom.xml declares no <distributionManagement><{wanted}>; "
-        "pass --repository-id and --url"
-    )
+    fail(f"the root pom.xml declares no <distributionManagement><{wanted}>; pass --repository-id and --url")
 
 
-def deploy(args):
-    repository_id = None
-    url = None
-    maven_args = []
-    rest = iter(args)
-    for arg in rest:
-        if arg == "--repository-id":
-            repository_id = next(rest, None)
-        elif arg == "--url":
-            url = next(rest, None)
-        else:
-            maven_args.append(arg)
+def publish(args):
+    options = Options(args, values=("--repository-id", "--url"))
     root = build_root()
-    lock_data = read_lock(root)
+    lock_path = options.lock_path(root)
+    lock_data = read_lock(lock_path)
+    check_fresh(root, lock_path, lock_data)
+    repository_id = options.values.get("--repository-id")
+    url = options.values.get("--url")
     if url is None or repository_id is None:
         repository_id, url = distribution_target(root, lock_data)
     state = root / STATE_DIR
     state.mkdir(exist_ok=True)
-    entry = Path(os.environ["MAVEN_PURIFIER_NIX_LIB"]) / "deploy-entry.nix"
-    info("building the artifacts with Nix")
-    try:
-        script = subprocess.run(
-            [
-                "nix-build",
-                str(entry),
-                "--argstr",
-                "src",
-                str(root),
-                "--arg",
-                "nixpkgs",
-                os.environ["MAVEN_PURIFIER_NIXPKGS"],
-                "-o",
-                str(state / "deploy"),
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            text=True,
-        ).stdout.strip()
-    except subprocess.CalledProcessError:
-        fail("the Nix build of the artifacts failed")
-    deploy_bin = Path(script) / "bin" / "maven-purifier-deploy"
+    info("building the release with Nix")
+    script = Path(nix_build(root, lock_path, "release.publish", state / "publish")) / "bin" / "maven-purifier-publish"
     env = dict(os.environ)
-    env["JAVA_HOME"] = locked_java_home(lock_data)
-    os.execve(
-        str(deploy_bin),
-        [str(deploy_bin), "--repository-id", repository_id, "--url", url, *maven_args],
-        env,
-    )
+    env.pop("JAVA_HOME", None)
+    os.execve(str(script), [str(script), "--repository-id", repository_id, "--url", url, *options.rest], env)
 
 
 def main():
@@ -864,16 +1061,10 @@ def main():
         print(__doc__)
         return
     verb, args = sys.argv[1], sys.argv[2:]
-    if verb == "lock":
-        lock(args)
-    elif verb == "mvn":
-        run_mvn(args)
-    elif verb == "deploy":
-        deploy(args)
-    elif verb == "ide-settings":
-        write_ide_settings(args)
-    else:
-        fail(f"unknown command {verb!r}; the commands are `lock`, `mvn`, `ide-settings` and `deploy`")
+    commands = {"lock": lock, "update": update, "prefetch": prefetch, "publish": publish}
+    if verb not in commands:
+        fail(f"unknown command {verb!r}; the commands are `lock`, `update`, `prefetch` and `publish`")
+    commands[verb](args)
 
 
 if __name__ == "__main__":

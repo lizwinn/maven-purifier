@@ -7,9 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.apache.maven.eventspy.AbstractEventSpy;
+import org.apache.maven.execution.MavenExecutionResult;
 import org.eclipse.aether.RepositoryEvent;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.metadata.Metadata;
@@ -28,17 +33,26 @@ import org.eclipse.aether.repository.RemoteRepository;
  *   <li>{@code {"event":"download","repository":…,"repositoryUrl":…,"url":…,"file":…}} for each
  *       artifact or metadata file the resolver downloaded, with the id and URL of the repository it
  *       came from, its own URL, and the file it was stored at in the local repository;
+ *   <li>{@code {"event":"resolved","file":…}} for each metadata file the build read from the local
+ *       repository;
  *   <li>{@code {"event":"install","groupId":…,"artifactId":…,"version":…,"classifier":…,
  *       "extension":…,"file":…}} for each artifact the build installed into the local repository.
  * </ul>
  *
- * <p>Without the variable the spy does nothing.
+ * <p>After {@code maven-purifier prefetch}, Maven loads the spy for every build through the lines
+ * that the command writes into {@code .mvn/maven.config}, with the system property {@code
+ * maven-purifier.maven} naming the Maven version of the lock. The spy then guards the offline
+ * build: it warns when another Maven version runs, whose default plugin versions differ from the
+ * locked ones, and when the build fails after files could not be resolved offline, it names them
+ * and the commands that add them.
  */
 @Named("maven-purifier")
 @Singleton
 public class RecordingEventSpy extends AbstractEventSpy {
 
   private Writer out;
+  private String lockedMaven;
+  private final Set<String> unresolved = new LinkedHashSet<>();
 
   @Override
   public void init(Context context) throws IOException {
@@ -50,12 +64,34 @@ public class RecordingEventSpy extends AbstractEventSpy {
               StandardCharsets.UTF_8,
               StandardOpenOption.CREATE,
               StandardOpenOption.APPEND);
+      return;
+    }
+    lockedMaven = System.getProperty("maven-purifier.maven");
+    if (lockedMaven == null) {
+      return;
+    }
+    Map<String, Object> data = context.getData();
+    Object versions = data == null ? null : data.get("versionProperties");
+    String running = versions instanceof Properties ? ((Properties) versions).getProperty("version") : null;
+    if (running != null && !running.equals(lockedMaven)) {
+      System.err.println(
+          "maven-purifier: this is Maven "
+              + running
+              + ", and the lock was made with Maven "
+              + lockedMaven
+              + ". Their default plugin versions differ, so a plugin may be missing offline; run"
+              + " .maven-purifier/bin/mvn, or lock with this Maven's version in"
+              + " .mvn/wrapper/maven-wrapper.properties.");
     }
   }
 
   @Override
   public synchronized void onEvent(Object event) throws IOException {
-    if (out == null || !(event instanceof RepositoryEvent)) {
+    if (out == null) {
+      guard(event);
+      return;
+    }
+    if (!(event instanceof RepositoryEvent)) {
       return;
     }
     RepositoryEvent e = (RepositoryEvent) event;
@@ -73,6 +109,9 @@ public class RecordingEventSpy extends AbstractEventSpy {
           download(remote(e.getRepository()), metadataPath(e.getMetadata()), e);
         }
         break;
+      case METADATA_RESOLVED:
+        resolved(e);
+        break;
       case ARTIFACT_INSTALLED:
         install(e.getArtifact(), e);
         break;
@@ -86,6 +125,42 @@ public class RecordingEventSpy extends AbstractEventSpy {
     if (out != null) {
       out.close();
       out = null;
+    }
+  }
+
+  // Notes each artifact or metadata file that could not be resolved, and when
+  // the build has failed, names them and the commands that add them.
+  private void guard(Object event) {
+    if (lockedMaven == null) {
+      return;
+    }
+    if (event instanceof RepositoryEvent) {
+      RepositoryEvent e = (RepositoryEvent) event;
+      boolean failed = e.getException() != null;
+      if (failed && e.getType() == RepositoryEvent.EventType.ARTIFACT_RESOLVED && e.getArtifact() != null) {
+        unresolved.add(e.getArtifact().toString());
+      } else if (failed && e.getType() == RepositoryEvent.EventType.METADATA_RESOLVED && e.getMetadata() != null) {
+        unresolved.add(e.getMetadata().toString());
+      }
+    } else if (event instanceof MavenExecutionResult
+        && ((MavenExecutionResult) event).hasExceptions()
+        && !unresolved.isEmpty()) {
+      StringBuilder names = new StringBuilder();
+      int shown = 0;
+      for (String name : unresolved) {
+        if (shown++ == 5) {
+          names.append(", and ").append(unresolved.size() - 5).append(" more");
+          break;
+        }
+        names.append(shown == 1 ? "" : ", ").append(name);
+      }
+      System.err.println(
+          "maven-purifier: Maven could not resolve "
+              + names
+              + " offline, because the lock does not hold "
+              + (unresolved.size() == 1 ? "it" : "them")
+              + ". Run `maven-purifier lock --force` with the goals and -P options you build with,"
+              + " then `maven-purifier prefetch`.");
     }
   }
 
@@ -105,6 +180,13 @@ public class RecordingEventSpy extends AbstractEventSpy {
             + ",\"file\":"
             + json(e.getFile().getAbsolutePath())
             + "}\n");
+    out.flush();
+  }
+
+  // A metadata file the build read, whether it was downloaded now or lay in
+  // the local repository already, as the metadata of the previous lock does.
+  private void resolved(RepositoryEvent e) throws IOException {
+    out.write("{\"event\":\"resolved\",\"file\":" + json(e.getFile().getAbsolutePath()) + "}\n");
     out.flush();
   }
 

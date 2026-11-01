@@ -28,3 +28,5 @@ lock() {
 lock multi clean deploy
 lock wrapper
 lock sources --settings settings.xml clean install -Pextra
+# The external fixture keeps its lockfile outside its source.
+lock external/src --lockfile ../maven-purifier.lock.json

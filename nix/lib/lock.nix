@@ -1,14 +1,36 @@
 # SPDX-License-Identifier: MIT
 #
-# Reads a maven-purifier lock file, written by `maven-purifier lock`.
+# readLock: the lock in memory of the purifier contract, read from a
+# maven-purifier lockfile. The flake publishes it as
+# `lib.maven-purifier.readLock`:
 #
-# Beside `artifacts` (see read-lock.nix), where each `path` is the path of
-# the file in a Maven local repository, the lock holds:
+#   {
+#     purifier = "maven-purifier";
+#     entries  = [ <download entry> ];   # every locked download
+#     outputs  = { <artifactId> = <project>; };
+#     problems = [ <string> ];           # each naming the command that fixes it
+#     maven    = { ... };                # what buildMavenProject reads besides
+#   }
 #
-#   maven.version        the Maven version of the lock run
-#   maven.distribution   the path of its distribution archive in `artifacts`
-#   javaVersion          the version of the JDK that ran the lock run
-#   goals                the goals the lock run ran
+# A problem is a lockfile that is stale, tampered, malformed or of another
+# format version. The reader returns the problems rather than failing, and
+# the builder passes the result to the purifier library's checkLock, which
+# fails with them. A lockfile that is not JSON at all fails in Nix's own
+# JSON parser, which a reader cannot catch.
+#
+# The lockfile is JSON with these fields:
+#
+#   version              the lock format version (lock-version.nix)
+#   lockHash             "sha256:" and the SHA-256, in hex, of the lockfile
+#                        without this field, as builtins.toJSON writes it:
+#                        keys sorted, no spaces. A lockfile someone edited
+#                        by hand no longer matches it.
+#   maven.version        the Maven version of the lock run; its distribution
+#                        archive is the entry of `downloads` named
+#                        apache-maven-<version>-bin.tar.gz or .zip
+#   javaMajor            the Java major version of the JDK that ran the
+#                        lock run
+#   goals                the goals and options the lock run ran
 #   settings             the settings the lock run used, without servers and
 #                        proxies, as XML text; null when it used none
 #   definitionHash       a hash of the build definition (every pom.xml and
@@ -17,75 +39,207 @@
 #                        artifactId, version, and its artifacts, each with
 #                        `key` (<artifactId>[-<classifier>].<extension>),
 #                        classifier, extension and its local repository path
+#   downloads            the download entries of the purifier library, less
+#                        what Nix derives: file entries ({ path, url, hash })
+#                        for the files Maven downloaded, at their paths in
+#                        a Maven local repository, and inline entries for
+#                        the metadata files it read. The reader adds the
+#                        `mirrors` of every file entry: the other hosts of
+#                        Maven Central for a file of Central, and none for
+#                        any other. An entry with `development = true` is
+#                        one that only development needs (source jars,
+#                        plugins the build's goals do not run, the default
+#                        plugins of an editor's Maven); `maven-purifier
+#                        prefetch` fetches it and a sandboxed build leaves
+#                        it out.
 #
-# The reader checks the shape of the lock, so that a lock someone edited by
-# hand fails with the field at fault rather than deep inside a build.
-#
-# Needs no nixpkgs, like read-lock.nix.
-{ lockFile }:
+# Needs no nixpkgs.
+{
+  # The root of the Maven build.
+  src,
+  # The lockfile. It may lie outside `src`.
+  lockFile ? src + "/maven-purifier.lock.json",
+  # Compares the build definition with the one the lock was made from. The
+  # comparison reads `src` at evaluation time, so it applies only when `src`
+  # is a path.
+  checkDefinition ? true,
+}:
 let
-  lock = import ./read-lock.nix {
-    inherit lockFile;
-    purifier = "maven-purifier";
-    formatVersion = import ./lock-version.nix;
-  };
+  inherit (builtins)
+    isAttrs
+    isList
+    isString
+    filter
+    all
+    ;
 
+  relock = "Run `maven-purifier lock --force` to write it again.";
   invalid =
     problem:
-    throw "maven-purifier: ${toString lockFile} is not a lock that maven-purifier wrote: ${problem}. Run `maven-purifier lock --force` to write it again.";
+    "maven-purifier: ${toString lockFile} is not a lockfile that maven-purifier wrote: ${problem}. ${relock}";
 
-  isString = builtins.isString;
-  checkArtifact =
-    i: a:
-    if !(builtins.isAttrs a) then
-      invalid "artifacts[${toString i}] is not an object"
-    else if !(isString (a.path or null)) then
-      invalid "artifacts[${toString i}] has no `path`"
-    else if a ? contents then
-      isString a.contents || invalid "the `contents` of ${a.path} is not a string"
+  formatVersion = import ./lock-version.nix;
+
+  text = builtins.readFile lockFile;
+  raw = if builtins.substring 0 1 text == "{" then builtins.fromJSON text else null;
+
+  downloadProblem =
+    i: d:
+    let
+      where = "downloads[${toString i}]";
+    in
+    if !isAttrs d then
+      invalid "${where} is not an object"
+    else if !isString (d.path or null) then
+      invalid "${where} has no `path`"
+    else if d ? contents then
+      if isString d.contents then null else invalid "the `contents` of ${d.path} is not a string"
+    else if !isString (d.url or null) then
+      invalid "${d.path} has neither `url` nor `contents`"
+    else if !isString (d.hash or null) then
+      invalid "${d.path} has no `hash`"
     else
-      (isString (a.url or null) || invalid "${a.path} has neither `url` nor `contents`")
-      && (isString (a.hash or null) || invalid "${a.path} has no `hash`")
-      && (builtins.isList (a.mirrors or null) || invalid "${a.path} has no `mirrors` list");
+      null;
 
-  checkProject =
+  projectProblem =
     p:
-    (builtins.isAttrs p && isString (p.artifactId or null) || invalid "a project has no `artifactId`")
-    && (isString (p.groupId or null) || invalid "project ${p.artifactId} has no `groupId`")
-    && (isString (p.version or null) || invalid "project ${p.artifactId} has no `version`")
-    && (
-      builtins.isList (p.artifacts or null)
-      && builtins.all (a: isString (a.key or null) && isString (a.path or null)) p.artifacts
-      || invalid "project ${p.artifactId} has an artifact without `key` or `path`"
-    );
-
-  valid =
-    (builtins.isList (lock.artifacts or null) || invalid "it has no `artifacts` list")
-    && (builtins.isList (lock.projects or null) || invalid "it has no `projects` list")
-    && (builtins.isList (lock.goals or null) || invalid "it has no `goals` list")
-    && (isString (lock.javaVersion or null) || invalid "it has no `javaVersion`")
-    && (
-      isString (lock.maven.version or null) && isString (lock.maven.distribution or null)
-      || invalid "it has no `maven.version` and `maven.distribution`"
-    )
-    && builtins.all (x: x) (
-      builtins.genList (i: checkArtifact i (builtins.elemAt lock.artifacts i)) (
-        builtins.length lock.artifacts
+    if !(isAttrs p && isString (p.artifactId or null)) then
+      invalid "a project has no `artifactId`"
+    else if !isString (p.groupId or null) then
+      invalid "project ${p.artifactId} has no `groupId`"
+    else if !isString (p.version or null) then
+      invalid "project ${p.artifactId} has no `version`"
+    else if
+      !(
+        isList (p.artifacts or null)
+        && all (a: isString (a.key or null) && isString (a.path or null)) p.artifacts
       )
-    )
-    && builtins.all checkProject lock.projects
-    && (
-      builtins.any (a: a.path == lock.maven.distribution) lock.artifacts
-      || invalid "`artifacts` has no entry for the Maven distribution ${lock.maven.distribution}"
-    );
+    then
+      invalid "project ${p.artifactId} has an artifact without `key` or `path`"
+    else
+      null;
+
+  distributionName =
+    name:
+    name == "apache-maven-${raw.maven.version}-bin.tar.gz"
+    || name == "apache-maven-${raw.maven.version}-bin.zip";
+  distributions = filter (
+    d: !(d.development or false) && distributionName (baseNameOf d.path)
+  ) raw.downloads;
+
+  # The first problem that keeps the lockfile from being read at all.
+  shapeProblem =
+    if !isAttrs raw then
+      invalid "it is not a JSON object"
+    else if (raw.version or null) != formatVersion then
+      "maven-purifier: ${toString lockFile} has lock format version ${
+        builtins.toJSON (raw.version or null)
+      }, and this maven-purifier reads version ${toString formatVersion}. ${relock}"
+    else if
+      (raw.lockHash or null)
+      != "sha256:${builtins.hashString "sha256" (builtins.toJSON (removeAttrs raw [ "lockHash" ]))}"
+    then
+      "maven-purifier: ${toString lockFile} does not match its lockHash, so it was changed after `maven-purifier lock` wrote it. ${relock}"
+    else if !isList (raw.downloads or null) then
+      invalid "it has no `downloads` list"
+    else if !isList (raw.projects or null) then
+      invalid "it has no `projects` list"
+    else if !isList (raw.goals or null) then
+      invalid "it has no `goals` list"
+    else if !isString (raw.javaMajor or null) then
+      invalid "it has no `javaMajor`"
+    else if !isString (raw.definitionHash or null) then
+      invalid "it has no `definitionHash`"
+    else if !(isAttrs (raw.maven or null) && isString (raw.maven.version or null)) then
+      invalid "it has no `maven.version`"
+    else
+      let
+        problems =
+          filter (p: p != null) (
+            builtins.genList (i: downloadProblem i (builtins.elemAt raw.downloads i)) (
+              builtins.length raw.downloads
+            )
+          )
+          ++ filter (p: p != null) (map projectProblem raw.projects);
+      in
+      if problems != [ ] then
+        builtins.head problems
+      else if builtins.length distributions != 1 then
+        invalid "`downloads` has no single entry for the distribution of Maven ${raw.maven.version}"
+      else
+        null;
+
+  staleProblem =
+    if
+      checkDefinition
+      && builtins.isPath src
+      &&
+        raw.definitionHash != import ./definition-hash.nix {
+          inherit src;
+          inherit (raw) goals;
+        }
+    then
+      "maven-purifier: the build definition (a pom.xml, .mvn/ or the goals) changed since ${toString lockFile} was made. Run `maven-purifier lock` at the build root to lock it again."
+    else
+      null;
+
+  problems =
+    if shapeProblem != null then [ shapeProblem ] else filter (p: p != null) [ staleProblem ];
+  usable = shapeProblem == null;
+
+  # Maven Central serves the same files under each of these URLs (as
+  # CENTRAL_HOSTS in cli/maven_purifier.py); the lock records the first.
+  centralHosts = [
+    "https://repo1.maven.org/maven2/"
+    "https://repo.maven.apache.org/maven2/"
+    "https://maven-central.storage-download.googleapis.com/maven2/"
+  ];
+  canonical = builtins.head centralHosts;
+  withMirrors =
+    d:
+    if d ? contents then
+      d
+    else
+      d
+      // {
+        mirrors =
+          if builtins.substring 0 (builtins.stringLength canonical) d.url == canonical then
+            map (host: host + builtins.substring (builtins.stringLength canonical) (-1) d.url) (
+              builtins.tail centralHosts
+            )
+          else
+            [ ];
+      };
+
+  entries = if usable then map withMirrors raw.downloads else [ ];
 in
-assert valid;
-lock
-// {
-  projectsByArtifactId = builtins.listToAttrs (
-    map (p: {
-      name = p.artifactId;
-      value = p;
-    }) lock.projects
-  );
+{
+  purifier = "maven-purifier";
+  inherit entries problems;
+  outputs =
+    if usable then
+      builtins.listToAttrs (
+        map (p: {
+          name = p.artifactId;
+          value = p;
+        }) raw.projects
+      )
+    else
+      { };
+  maven =
+    if usable then
+      {
+        inherit (raw)
+          goals
+          javaMajor
+          projects
+          definitionHash
+          ;
+        inherit (raw.maven) version;
+        settings = raw.settings or null;
+        # The path of the Maven distribution archive in the local repository.
+        distribution = (builtins.head distributions).path;
+      }
+    else
+      { };
 }

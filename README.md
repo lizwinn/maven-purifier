@@ -2,45 +2,25 @@
 
 A command and a Nix library that make Nix the dependency and build backend
 of a Maven build. Maven still plans the build. maven-purifier records the
-files Maven downloads in a lockfile, and Nix builds the project from that
-lockfile in its sandbox, offline. You commit the lockfile; you do not
-commit generated Nix files.
+files Maven downloads in a lockfile, Nix builds the project from that
+lockfile in its sandbox, and after a prefetch Maven and the editor work with
+the network cut off. You commit the lockfile; you do not commit generated
+Nix files.
 
-maven-purifier is one of the [nix-purifiers](https://nix-purifiers.github.io).
-Its design follows [sbt-purifier](https://github.com/nix-purifiers/sbt-purifier)
-(formerly sbt-nix-backend): a lock run that records every download of the
-build tool, a Nix library that builds from the lockfile, an interactive
-mode on the locked downloads, and a publish step for what Nix built.
+maven-purifier is one of the [nix-purifiers](https://nix-purifiers.github.io),
+and meets their [contract](https://github.com/nix-purifiers/purifier/blob/main/CONTRACT.md).
 
-- **A lockfile.** `maven-purifier lock` writes `maven-purifier.lock.json`
-  at the build root. It names every file the build downloads, Maven's own
-  distribution and plugins included, and every artifact the build installs.
-- **Sandboxed builds.** `buildMavenProject`, which the flake's overlay
-  adds to a package set, turns a build and its lockfile into derivations.
-  `packages.<artifactId>` holds the artifacts of a module in Maven layout.
-- **Maven on the locked downloads.** `maven-purifier mvn` runs Maven
-  offline against a local repository that Nix fills from the lockfile.
-- **Deploying what Nix built.** `maven-purifier deploy` deploys the
-  artifacts of the Nix build with the locked Maven, so nothing that is
-  published was compiled outside the sandbox.
+## Quickstart
 
-## Use
-
-Lock the build from its root:
+Lock the build from its root, and commit the lockfile it writes,
+`maven-purifier.lock.json`:
 
 ```zsh
 nix run github:nix-purifiers/maven-purifier -- lock
 ```
 
-Commit `maven-purifier.lock.json`. The flake's `overlays.default` adds
-`buildMavenProject` to a package set, and a package written for
-`callPackage` takes it by name:
-
-```nix
-# package.nix
-{ buildMavenProject }:
-(buildMavenProject { src = ./.; }).packages.app
-```
+Build a module with Nix. The flake's library has the builder, which takes
+the package set it builds with as `pkgs`:
 
 ```nix
 {
@@ -50,208 +30,224 @@ Commit `maven-purifier.lock.json`. The flake's `overlays.default` adds
   outputs = { nixpkgs, maven-purifier, ... }:
     let
       system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          maven-purifier.overlays.default
-          (final: prev: { app = final.callPackage ./package.nix { }; })
-        ];
+      pkgs = nixpkgs.legacyPackages.${system};
+      project = maven-purifier.lib.maven-purifier.buildMavenProject {
+        inherit pkgs;
+        src = ./.;
       };
     in
     {
-      packages.${system}.app = pkgs.app;
+      packages.${system}.app = project.packages.app;
+      checks.${system}.tests = project.tests;
     };
 }
 ```
 
-`nix build '.#app'` builds module `app`. The builder returns:
+`nix build '.#app'` builds module `app`. The builder's result has:
 
 - `packages.<artifactId>`: the files the module installs, in Maven layout.
   `artifacts.<key>` names each file, where the key is
   `<artifactId>[-<classifier>].<extension>`, such as
-  `packages.core.artifacts."core-sources.jar"`. The lockfile lists them,
-  so Nix knows every output of the build at evaluation time, without
-  building first.
-- `build`: one build of the whole reactor, with every installed artifact.
-- `deploy`: a script, `bin/maven-purifier-deploy --repository-id ID --url
-  URL`, that deploys the files of every package with `deploy:deploy-file`.
-- `repository`: the local repository of every locked download.
-- `maven`: the Maven distribution the lock run used.
+  `packages.core.artifacts."core-sources.jar"`. The lockfile lists them, so
+  Nix knows every output at evaluation time, without building first.
+- `tests`: the build with its tests, whose output holds the test reports.
+- `release`: every artifact the build installs, built with the tests
+  skipped; `maven-purifier publish` deploys it.
+- `fetches`: the download entries the build fetches, for SBOM, license and
+  vulnerability tools.
 
-`nix/lib/build-maven-project.nix` documents the builder's arguments: `jdk`
-(the default is the headless JDK of the major version the lock was made
-with), `fetchurl` (for credentials or mirrors), `doCheck` (runs the tests),
-`mavenFlags` and `srcFilter`.
+The builder also takes `fetchers` (a company mirror or credentials go into
+`fetchers.fetchurl`), `lockFile` (a lockfile outside `src`), `jdk` (the
+default is nixpkgs' headless JDK of the Java major version the lock was made
+with), `mavenFlags`, `srcFilter` and `checkDefinition`;
+`nix/lib/build-maven-project.nix` documents them.
 
-To run Maven offline from the lock, for example while developing:
+To deploy what Nix built, with the target from the root POM's
+`distributionManagement` and the credentials from `~/.m2/settings.xml`:
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- mvn clean install
+nix run github:nix-purifiers/maven-purifier -- publish
 ```
 
-### Editors
+`--repository-id ID --url URL` names another target. Every command takes
+`--lockfile FILE` for a lockfile outside the build root.
+
+## Everyday loop
+
+After `maven-purifier prefetch` (see [Offline work](#offline-work)), you run
+Maven as usual: `mvn clean install`, `mvn test`, `mvn package`, `./mvnw
+verify`. Maven resolves from the locked files, offline.
+
+To add or upgrade a dependency or a plugin, edit the POM and lock again:
+
+```zsh
+nix run github:nix-purifiers/maven-purifier -- lock
+nix run github:nix-purifiers/maven-purifier -- prefetch
+```
+
+A relock keeps what version ranges and SNAPSHOTs resolved to in the
+previous lock: the lock run starts from the metadata files the lockfile
+recorded. To move them to what the repositories hold now, update instead,
+for every package or for the ones you name:
+
+```zsh
+nix run github:nix-purifiers/maven-purifier -- update
+nix run github:nix-purifiers/maven-purifier -- update org.slf4j:slf4j-api
+```
+
+`maven-purifier update` locks with the goals that the lockfile recorded.
+
+`maven-purifier lock` copies the build to a temporary directory and runs
+Maven there with an empty local repository and an empty home directory. The
+default goals are `clean install`; pass others as arguments, with any Maven
+options they need, such as `maven-purifier lock clean deploy -Prelease`.
+The lock holds what those goals need, so lock the goals you run. The lock
+run also runs the tests, so the lock holds what they need even when a Nix
+build skips them. It locks again only when a `pom.xml`, anything under
+`.mvn/`, the goals or the settings changed; `--force` locks regardless. A
+relock of an unchanged build writes the same lockfile, byte for byte.
+
+## Offline work
+
+```zsh
+nix run github:nix-purifiers/maven-purifier -- prefetch
+```
+
+`maven-purifier prefetch` fetches everything the lockfile lists into the
+Nix store and keeps it there with a garbage-collector root in
+`.maven-purifier/`. Besides what the build downloads, the lock holds what
+day-to-day development asks for: every plugin the build declares, the source
+jars of its dependencies, and the default plugins of the Maven inside the
+editor. The command copies the locked repository to
+`.maven-purifier/repository`, writes `.maven-purifier/settings.xml` with
+offline mode on, and adds lines of its own at the end of
+`.mvn/maven.config`, after the line `-Dmaven-purifier.prefetched=true`.
+Maven reads that file for every build, so `mvn`, `./mvnw` and an editor
+that reads it resolve from the locked files. The lines of `prefetch` take
+no part in the build definition, and a lock run or a Nix build leaves them
+out; delete them to resolve online again.
+
+The lines also load maven-purifier's extension, which warns when a Maven of
+another version runs: its default plugin versions differ from the locked
+ones. The locked Maven is `.maven-purifier/bin/mvn`, and nixpkgs' JDK of the
+locked Java major version is `.maven-purifier/jdk`. Put
+`.maven-purifier/bin` on `PATH`, or use a Maven wrapper that names the
+locked version.
+
+## Editor
 
 An editor that imports a Maven build, such as VS Code or Neovim through
-jdtls, or IntelliJ IDEA, runs a Maven of its own. `maven-purifier
-ide-settings` fetches the locked downloads and prints the path of
-`.maven-purifier/ide-settings.xml`, which holds the lock's settings with
-offline mode on and the locked repository as the local repository. Make
-it the editor's Maven user settings, `java.configuration.maven.userSettings`
-for jdtls or *User settings file* in IntelliJ IDEA, and the editor
-resolves from the same files as `maven-purifier mvn`, without the network.
+jdtls, or IntelliJ IDEA, runs a Maven of its own. After a prefetch, make
+`.maven-purifier/settings.xml` the editor's Maven user settings,
+`java.configuration.maven.userSettings` for jdtls or *User settings file*
+in IntelliJ IDEA, and the editor resolves from the locked files without the
+network: dependencies, their source jars, and the plugins of its own Maven.
 
-The Maven inside an editor has default plugin versions of its own, which
-differ from those of the Maven that made the lock. We recommend pinning the
-version of every plugin the build uses in `<pluginManagement>`, the
-lifecycle plugins such as maven-compiler-plugin and maven-resources-plugin
-included, as Maven's own guidance does. The editor's Maven then asks for
-the locked versions. Without the pins, the editor reports that it could not
-resolve a plugin in offline mode, such as maven-resources-plugin 3.4.0.
+The lock holds the default plugins of the Maven that jdtls embeds, which
+the lock run reads from the jdtls of maven-purifier's nixpkgs. CI imports a
+fixture with jdtls with the network cut off. An editor whose Maven has other
+default plugin versions finds them missing offline, unless the build pins
+the version of every plugin it uses in `<pluginManagement>`, as we
+recommend; then every Maven asks for the locked versions.
 
-### Errors
+## Errors and fixes
 
 Each common mistake fails with a message that says what went wrong and what
 to run.
 
 - When a pom.xml, `.mvn/` or the lock goals changed after locking, a Nix
-  build fails at evaluation, saying that the build definition changed
-  since the lock was made and to run `maven-purifier lock`.
-  `maven-purifier mvn` says the same, and resolves online until the lock
-  is renewed.
-- When the build needs a dependency or plugin that the lock does not hold,
-  Maven reports that it cannot reach the repository in offline mode.
-  maven-purifier adds that the lock does not hold everything the build
-  needs, and to run `maven-purifier lock --force` with the goals and `-P`
-  options of the build.
-- When someone edited the lockfile, a missing or misshaped field fails
-  with the name of the field and asks for `maven-purifier lock --force`. A
-  changed hash fails the fetch of that file with Nix's hash mismatch. A
-  lockfile that is not JSON fails `maven-purifier mvn` with the parse error
-  and the same command; for a Nix build, Nix's own JSON parser reports it.
+  build fails at evaluation, and `maven-purifier prefetch` and `publish`
+  fail, saying that the build definition changed and to run
+  `maven-purifier lock`.
+- When a build needs a dependency or plugin that the lock does not hold, a
+  Nix build fails with Maven's offline error and adds that the lock does
+  not hold everything the build needs, and to run `maven-purifier lock
+  --force` with the goals and `-P` options of the build. After a prefetch,
+  Maven itself names the files it could not resolve and the same command.
+- When someone edited the lockfile, it no longer matches its `lockHash`,
+  and a Nix build and every command fail, saying so and asking for
+  `maven-purifier lock --force`. A lockfile that is valid JSON but misses a
+  field names the field. A lockfile that is not JSON fails the commands
+  with the parse error and the same command; for a Nix build, Nix's own JSON
+  parser reports it.
+- When a lock run sees a file reach the local repository without a download
+  that Maven reported, it fails with the list of such files: a plugin
+  downloaded them itself. Declare them as below.
 
-### Deploying
+## Sources supported and refused
 
-To deploy, with the target from the root POM's `distributionManagement`
-and the credentials from `~/.m2/settings.xml`:
-
-```zsh
-nix run github:nix-purifiers/maven-purifier -- deploy
-```
-
-`--repository-id ID --url URL` names another target.
-
-## How the lock is made
-
-`maven-purifier lock` copies the build to a temporary directory and runs
-Maven there with an empty local repository and an empty home directory.
-The default goals are `clean install`; pass others as arguments, with any
-Maven options they need (`maven-purifier lock clean deploy -Prelease`).
-The lock holds what those goals need, so lock the goals you run. The lock
-run also runs the tests, so the lock holds what they need even when a Nix
-build skips them.
-
-Maven loads a small core extension of maven-purifier, which records every
-file Maven Resolver downloads, with its URL, and every artifact the build
-installs. After the run, every file in the local repository must be a
-recorded download, an artifact the build installed, or Maven Resolver's
-own bookkeeping, or the lock fails with the list of files that reached the
-repository some other way.
-
-Each source of dependencies reaches the lock this way:
+Each source of dependencies reaches the lock as follows.
 
 - **Repositories declared in POMs, plugins and their dependencies,
-  profiles, version ranges**: Maven Resolver downloads them during the
-  run, and the extension records them. Profiles count as they were active
-  in the lock run; `-P` options belong among the lock goals.
-- **Repositories, mirrors and profiles in `settings.xml`**: the lock run
-  uses `~/.m2/settings.xml`, or the file `--settings FILE` names. The lock
-  records the settings without `<servers>`, `<proxies>`, `<localRepository>`
-  and `<offline>`, and the sandboxed build and the interactive mode use the
-  recorded settings. Their repository and mirror ids are then those of the
-  lock run, which the names of metadata files in the local repository
-  depend on.
-- **Core extensions** (`.mvn/extensions.xml`): Maven resolves them before
-  it loads the recording extension. The lock takes each of their URLs
-  from Maven Resolver's tracking file, which names the repository a file
-  came from.
+  profiles and version ranges.** Maven Resolver downloads them during the
+  lock run, and the extension records each file with its URL. Profiles
+  count as they were active in the lock run; `-P` options belong among the
+  lock goals.
+- **Repositories, mirrors and profiles in `settings.xml`.** The lock run
+  uses `~/.m2/settings.xml`, or the file that `--settings FILE` names. The
+  lockfile records the settings without `<servers>`, `<proxies>`,
+  `<localRepository>` and `<offline>`, and a Nix build and a prefetched
+  Maven use the recorded settings, whose repository and mirror ids the names
+  of metadata files depend on.
+- **Core extensions** (`.mvn/extensions.xml`). Maven resolves them before it
+  loads the recording extension, so the lock takes each of their URLs from
+  Maven Resolver's tracking file, which names the repository a file came
+  from.
 - **Metadata files** (`maven-metadata.xml`), which version ranges,
-  SNAPSHOTs and plugin prefixes read: their URLs serve new contents
-  whenever a version is published, so the lock holds the contents the lock
-  run read, inline.
-- **SNAPSHOT dependencies**: the lock holds the timestamped files the lock
-  run resolved, under both names Maven Resolver stores them under.
-- **Files a plugin downloads itself**, outside Maven Resolver: Maven
-  reports nothing about them, so the build declares them in
-  `.mvn/maven-purifier.json`, each with its URL and its path in the local
-  repository, where plugins that do this cache their downloads:
+  SNAPSHOTs and plugin prefixes read. Their URLs serve new contents
+  whenever a version is published, so the lockfile holds the contents the
+  lock run read.
+- **SNAPSHOT dependencies.** The lockfile holds the timestamped files the
+  lock run resolved, under both names Maven Resolver stores them under.
+- **Files a plugin downloads itself**, outside Maven Resolver, such as the
+  Node.js of frontend-maven-plugin. Maven reports nothing about them, so the
+  build declares each with its URL and its path in the local repository, in
+  `.mvn/maven-purifier.json`, and the lock run fetches it:
 
   ```json
   { "downloads": [ { "url": "https://…/node-v22.0.0-linux-x64.tar.gz",
                      "path": "com/github/eirslett/node/22.0.0/node-22.0.0-linux-x64.tar.gz" } ] }
   ```
 
-  The lock run fetches each one into its local repository, and the lock
-  holds it like any other download.
-- **Maven itself**: the version the build's Maven wrapper names in
-  `.mvn/wrapper/maven-wrapper.properties`, or else the Maven of the
-  maven-purifier flake's nixpkgs. The distribution archive is locked like
-  any other download, so the sandboxed build runs the same Maven.
+- **Maven itself.** The version the build's Maven wrapper names in
+  `.mvn/wrapper/maven-wrapper.properties`, or else the Maven of
+  maven-purifier's nixpkgs. Its distribution archive is locked like any
+  other download, so the sandboxed build runs the same Maven.
+- **Repositories that need credentials.** The lock run authenticates with
+  the `<servers>` of the settings, which the lockfile leaves out. A Nix
+  build fetches their files through `fetchers.fetchurl`, such as nixpkgs'
+  `fetchurl` with `netrcPhase`, or through Nix's own `netrc-file` setting.
 
-A file of Maven Central lists both of its hosts, `repo.maven.apache.org`
-and `repo1.maven.org`, so a Nix fetch falls back from one to the other.
+A file of Maven Central is recorded under repo1.maven.org, whichever of
+Central's hosts served it, and Nix fetches it from repo.maven.apache.org or
+Google's copy of Central when repo1 fails. `MAVEN_PURIFIER_CENTRAL_MIRROR`
+makes a lock run download through another copy of Central without changing
+the lockfile. The lock run copies the proxy from `https_proxy` and
+`http_proxy` into its settings when they name none.
 
-`maven-purifier lock` locks again only when the build definition changed:
-a `pom.xml`, anything under `.mvn/`, the goals, or the settings. `--force`
-locks regardless.
+maven-purifier refuses no source kind.
 
-The lock run copies the proxy from `https_proxy` and `http_proxy` into its
-settings when the settings name none. When the proxy URL carries
-credentials, the lock run allows Basic authentication to the proxy, which
-Java disables by default, and downloads one file at a time, since Maven
-3.9's HttpClient transport fails with 407 on concurrent downloads through
-such a proxy.
+Decisions recorded here: the sandboxed build runs the locked goals with
+`deploy` replaced by `install`, since Maven refuses to deploy offline, and
+`release.publish` deploys exactly the files the Nix build made. The local
+repository holds copies rather than links into the store, since Maven 3.10
+treats a file as absent when its real path differs from its path in the
+repository. Every run turns Maven Resolver 2's prefix filter off, since its
+list of groups changes as groups are published and offline it saves
+nothing. The jars of a Nix build get a fixed timestamp, so a rebuild gives
+the same bytes.
 
-## Decisions
+## Real-world projects
 
-- **The sandboxed build runs the locked goals with `deploy` replaced by
-  `install`.** Maven refuses to deploy offline, and deploying is the job
-  of the `deploy` script, which deploys exactly the files the Nix build
-  made.
-- **The local repository holds real files.** Maven 3.10 treats a file as
-  absent when its real path differs from its path in the repository, so
-  the build and the interactive mode copy the locked files rather than
-  linking into the Nix store.
-- **The prefix filter of Maven Resolver 2 is off in every run.** It reads
-  a list of the groups each repository holds, which changes as groups are
-  published, and offline it saves nothing.
-- **A file of Maven Central is recorded under repo1.maven.org**, whichever
-  of Central's hosts served it, with repo.maven.apache.org and Google's
-  copy of Central as mirrors. `MAVEN_PURIFIER_CENTRAL_MIRROR` makes a lock
-  run download through another copy of Central, which spares Central's
-  rate limit, without changing the lock.
-- **The interactive mode and the deploy step run on nixpkgs' JDK of the
-  locked Java major version**, as the sandboxed build does, whatever
-  `JAVA_HOME` names.
-- **A stale lock fails a Nix build** at evaluation time, since the lock
-  also names the build's outputs. `checkDefinition = false` turns the
-  comparison off, and it applies only when `src` is a path.
+| Project | Commit | What it showed |
+| --- | --- | --- |
+| [google/gson](https://github.com/google/gson) | gson-parent-2.15.0 (`fcd41690`) | A reactor of eight modules locks in under three minutes, and builds and tests offline in the Nix sandbox from a lockfile kept outside its source (the `real-world-gson` checks). Its protobuf module runs a native protoc, which made the lock fetch each system's build of files named by an os-maven-plugin classifier. Its moditect plugin writes temporary jars, which made the lock run keep Java's temporary directory in its own. |
 
-## Limits
+## Credits
 
-- **Credentials for the Nix fetch.** The lock run authenticates with the
-  `<servers>` of the settings, which the lock does not record. A Nix
-  build fetches the locked files of a private repository through the
-  builder's `fetchurl` argument, for example nixpkgs' `fetchurl` with
-  `netrcPhase`, or through Nix's own `netrc-file` setting, which the
-  default fetcher and the interactive mode use.
-- **Locking again moves SNAPSHOTs and version ranges.** A lock holds what
-  they resolved to in its lock run. The next lock run resolves them
-  afresh, which is what Maven does on every online build.
-- **A file a plugin downloads without declaring it** fails the lock with
-  its path listed, since Maven reports nothing about it; declaring it in
-  `.mvn/maven-purifier.json` locks it.
-
-## Acknowledgements
-
-maven-purifier follows the design of sbt-purifier. The purifier idea was
-inspired by nixcloud's [cargo (libnix)](https://github.com/nixcloud/cargo).
+maven-purifier follows the design of
+[sbt-purifier](https://github.com/nix-purifiers/sbt-purifier): a lock run
+that records every download of the build tool, a Nix library that builds
+from the lockfile, offline work on the locked downloads, and a publish step
+for what Nix built. The purifier idea was inspired by nixcloud's
+[cargo (libnix)](https://github.com/nixcloud/cargo).
