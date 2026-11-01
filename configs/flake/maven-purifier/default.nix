@@ -20,8 +20,8 @@
     # package overlay registry (pkg-overlays/): the package set applies it
     # by default, and the flake exports it as `pkgOverlays` and as the plain
     # `overlays.default`. The scope holds the builder, a function, so the
-    # flake exports its derivations by name below rather than every
-    # attribute of the scope.
+    # packages output is the derivations of the scope, selected below,
+    # rather than every attribute of the scope.
     nixpkgs = {
       packages.export.enabled = false;
     };
@@ -33,8 +33,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages = {
-        inherit (pkgs.maven-purifier) cli extension;
+      packages = lib.filterAttrs (_: lib.isDerivation) pkgs.maven-purifier // {
         default = pkgs.maven-purifier.cli;
       };
     };
