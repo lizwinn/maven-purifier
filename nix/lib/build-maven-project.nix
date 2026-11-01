@@ -38,12 +38,12 @@
   writeText,
   writeShellScriptBin,
   unzip,
+  # The fetcher of the locked downloads; `fetchers.fetchurl` replaces it
+  # for one build.
+  fetchurl,
   # The JDKs a build can run on; the default JDK of a build is the headless
   # one of the Java major version its lock was made with.
   javaPackages,
-  # The package set that the purifier library fetches the locked downloads
-  # with, through nixpkgs' fetchers and the tools that unpack them.
-  pkgs,
   # The purifier library, which the overlay passes.
   purifier,
 }:
@@ -115,7 +115,12 @@ let
     name: entries:
     purifier.tree (
       {
-        inherit pkgs name entries;
+        inherit
+          name
+          entries
+          runCommand
+          fetchurl
+          ;
         link = false;
       }
       // fetchers

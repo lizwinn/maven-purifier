@@ -15,7 +15,8 @@ and meets their [contract](https://github.com/nix-purifiers/purifier/blob/main/C
 maven-purifier runs on x86_64-linux and aarch64-linux.
 
 Lock the build from its root, and commit the lockfile it writes,
-`maven-purifier.lock.json`:
+`maven-purifier.lock.json`, to the repository. We recommend this setup, and
+the builder and every command read the lockfile there by default:
 
 ```zsh
 nix run github:nix-purifiers/maven-purifier -- lock
@@ -83,11 +84,14 @@ To deploy what Nix built, with the target from the root POM's
 nix run github:nix-purifiers/maven-purifier -- publish
 ```
 
-`--repository-id ID --url URL` names another target. Every command takes
-`--lockfile FILE` for a lockfile outside the build root, or reads its path
-from the environment variable `MAVEN_PURIFIER_LOCKFILE`; `--lockfile` takes
-precedence. A dev shell can set the variable to the path it passes to the
-builder as `lockFile`.
+`--repository-id ID --url URL` names another target.
+
+A build whose repository cannot hold the lockfile, such as a project you
+package without being able to commit to it, can keep the lockfile outside
+it. The builder then takes the lockfile as `lockFile`. Every command takes
+`--lockfile FILE`, or reads the path from the environment variable
+`MAVEN_PURIFIER_LOCKFILE`; `--lockfile` takes precedence. A dev shell can
+set the variable to the path it passes to the builder as `lockFile`.
 
 ## Development loop
 
