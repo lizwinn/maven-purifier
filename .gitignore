@@ -1,0 +1,5 @@
+target/
+.maven-purifier/
+/result*
+.idea/
+__pycache__/
