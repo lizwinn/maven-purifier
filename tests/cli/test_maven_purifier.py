@@ -439,7 +439,13 @@ class Options(unittest.TestCase):
         self.assertEqual(o.flags, {"--force"})
         self.assertEqual(o.values, {"--settings": "s.xml"})
         self.assertEqual(o.rest, ["clean", "-Pa"])
-        self.assertEqual(mp.Options([]).lock_path(Path("/b")), Path("/b/maven-purifier.lock.json"))
+        with mock.patch.dict(os.environ, {"MAVEN_PURIFIER_LOCKFILE": ""}):
+            self.assertEqual(mp.Options([]).lock_path(Path("/b")), Path("/b/maven-purifier.lock.json"))
+
+    def test_lockfile_variable(self):
+        with mock.patch.dict(os.environ, {"MAVEN_PURIFIER_LOCKFILE": "/l/external.json"}):
+            self.assertEqual(mp.Options([]).lock_path(Path("/b")), Path("/l/external.json"))
+            self.assertEqual(mp.Options(["--lockfile", "/f/x.json"]).lock_path(Path("/b")), Path("/f/x.json"))
 
 
 if __name__ == "__main__":

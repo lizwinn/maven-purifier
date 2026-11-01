@@ -34,6 +34,9 @@
       ~/.m2/settings.xml, which holds the credentials. The default target is
       the root pom.xml's distributionManagement.
 
+Every command takes the lockfile from --lockfile, or else from the
+environment variable MAVEN_PURIFIER_LOCKFILE, or else from the build root.
+
 The package that installs this script sets the environment variables that
 pkgs/cli/default.nix describes.
 """
@@ -549,7 +552,11 @@ class Options:
     """The options of a command: --lockfile, the flags it names, and the rest in order."""
 
     def __init__(self, args, flags=(), values=()):
-        self.lockfile = None
+        # MAVEN_PURIFIER_LOCKFILE names the lockfile of an external build,
+        # such as the lockFile a dev shell passes to buildMavenProject;
+        # --lockfile takes precedence over it.
+        variable = os.environ.get("MAVEN_PURIFIER_LOCKFILE")
+        self.lockfile = Path(variable).resolve() if variable else None
         self.flags = set()
         self.values = {}
         self.rest = []

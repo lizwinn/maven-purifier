@@ -84,7 +84,10 @@ nix run github:nix-purifiers/maven-purifier -- publish
 ```
 
 `--repository-id ID --url URL` names another target. Every command takes
-`--lockfile FILE` for a lockfile outside the build root.
+`--lockfile FILE` for a lockfile outside the build root, or reads its path
+from the environment variable `MAVEN_PURIFIER_LOCKFILE`; `--lockfile` takes
+precedence. A dev shell can set the variable to the path it passes to the
+builder as `lockFile`.
 
 ## Development loop
 
@@ -110,6 +113,13 @@ nix run github:nix-purifiers/maven-purifier -- update org.slf4j:slf4j-api
 ```
 
 `maven-purifier update` locks with the goals that the lockfile recorded.
+Maven keeps no lockfile of its own, so `maven-purifier.lock.json` is the one
+file that `update` changes.
+
+maven-purifier is a Maven core extension and a command, rather than a Maven
+plugin with a goal. Maven Resolver reports each download only to core
+extensions, which Maven loads before it reads the build. The command runs
+Maven with the extension loaded.
 
 `maven-purifier lock` copies the build to a temporary directory and runs
 Maven there with an empty local repository and an empty home directory. The
@@ -134,7 +144,9 @@ nix run github:nix-purifiers/maven-purifier -- prefetch
 
 `maven-purifier prefetch` fetches everything the lockfile lists into the
 Nix store and keeps it there with a garbage-collector root in
-`.maven-purifier/`. Besides what the build downloads, the lock holds what
+`.maven-purifier/` at the build root, where Maven reads the locked
+repository. For a lockfile outside the build root, the root stays in the
+build root rather than beside the lockfile. Besides what the build downloads, the lock holds what
 day-to-day development asks for: every plugin the build declares, the source
 jars of its dependencies, and the default plugins of the Maven inside the
 editor. The command copies the locked repository to
