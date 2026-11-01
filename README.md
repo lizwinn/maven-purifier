@@ -22,9 +22,33 @@ the builder and every command read the lockfile there by default:
 nix run github:nix-purifiers/maven-purifier -- lock
 ```
 
-Build a module with Nix. The flake's `overlays.default` adds the scope
-`maven-purifier` to the package set. The scope holds the builder
-`buildMavenProject`, the command `cli` and the Maven extension:
+Then build a module with Nix from the project's directory. The flake's
+`overlays.default` adds the scope `maven-purifier` to the package set, and
+the scope holds the builder `buildMavenProject`, the command `cli` and the
+Maven extension. This command builds module `app`:
+
+```zsh
+nix build --impure --expr '
+  let
+    purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
+    pkgs = import purifier.inputs.nixpkgs {
+      system = builtins.currentSystem;
+      overlays = [ purifier.overlays.default ];
+    };
+  in
+  (pkgs.maven-purifier.buildMavenProject { src = ./.; }).packages.app'
+```
+
+This uses the purifier's pinned nixpkgs, matching the lock command above.
+To build with ambient `<nixpkgs>` from your Nix search path instead,
+replace `import purifier.inputs.nixpkgs` with `import <nixpkgs>`.
+Both forms need no Nix files in your project. The build tool and language
+versions must match the lockfile; with ambient nixpkgs, lock with the
+purifier from that package set or pass a compatible toolchain to the builder.
+
+A project whose authors want a flake that packages it can add one, in the
+project's repository or in another one. The flake calls the builder
+directly:
 
 ```nix
 {
@@ -47,14 +71,8 @@ Build a module with Nix. The flake's `overlays.default` adds the scope
 }
 ```
 
-`nix build '.#app'` builds module `app`. A package written for
-`callPackage`, such as one in an overlay, takes the scope by name:
-
-```nix
-# package.nix
-{ maven-purifier }:
-(maven-purifier.buildMavenProject { src = ./.; }).packages.app
-```
+`nix build '.#app'` builds module `app`. A package in an overlay takes the
+scope by name, as the argument `maven-purifier`.
 
 The builder's result has:
 
@@ -297,37 +315,23 @@ Gson offline on the locked JDK, and an editor that reads
 JAVA_HOME=$PWD/.maven-purifier/jdk .maven-purifier/bin/mvn clean install
 ```
 
-Add a `flake.nix` at the root of the clone to build Gson with Nix:
+From the same directory, Nix builds the `gson` module with this command:
 
-```nix
-{
-  inputs.maven-purifier.url = "github:nix-purifiers/maven-purifier";
-  inputs.nixpkgs.follows = "maven-purifier/nixpkgs";
-
-  outputs = { nixpkgs, maven-purifier, ... }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [ maven-purifier.overlays.default ];
-      };
-      gson = pkgs.maven-purifier.buildMavenProject { src = ./.; };
-    in
-    {
-      packages.${system} = {
-        gson = gson.packages.gson;
-        gson-extras = gson.packages.gson-extras;
-        proto = gson.packages.proto;
-        default = gson.release;
-      };
-      checks.${system}.tests = gson.tests;
+```zsh
+nix build --impure --expr '
+  let
+    purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
+    pkgs = import purifier.inputs.nixpkgs {
+      system = builtins.currentSystem;
+      overlays = [ purifier.overlays.default ];
     };
-}
+  in
+  (pkgs.maven-purifier.buildMavenProject { src = ./.; }).packages.gson'
 ```
 
-`nix build` builds every artifact Gson installs, `nix build '.#gson'` builds
-the library alone, and `nix flake check` runs Gson's tests in the Nix
-sandbox. After a change to a POM, lock and prefetch again.
+`packages.gson-extras` and `packages.proto` select the other modules,
+`release` selects every artifact Gson installs, and `tests` runs Gson's
+tests in the Nix sandbox. After a change to a POM, lock and prefetch again.
 
 ## Credits
 
