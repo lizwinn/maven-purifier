@@ -12,6 +12,8 @@ and meets their [contract](https://github.com/nix-purifiers/purifier/blob/main/C
 
 ## Quickstart
 
+maven-purifier runs on x86_64-linux and aarch64-linux.
+
 Lock the build from its root, and commit the lockfile it writes,
 `maven-purifier.lock.json`:
 
@@ -149,8 +151,7 @@ in IntelliJ IDEA, and the editor resolves from the locked files without the
 network: dependencies, their source jars, and the plugins of its own Maven.
 
 The lock holds the default plugins of the Maven that jdtls embeds, which
-the lock run reads from the jdtls of maven-purifier's nixpkgs. CI imports a
-fixture with jdtls with the network cut off. An editor whose Maven has other
+the lock run reads from the jdtls of maven-purifier's nixpkgs. An editor whose Maven has other
 default plugin versions finds them missing offline, unless the build pins
 the version of every plugin it uses in `<pluginManagement>`, as we
 recommend; then every Maven asks for the locked versions.
@@ -244,17 +245,59 @@ the same bytes.
 
 ## Examples
 
-[Gson](https://github.com/google/gson), Google's JSON library, is an
-example of maven-purifier at work. CI locks Gson at its release
-gson-parent-2.15.0 on both Linux systems, and the relock must reproduce the
-lockfile in `tests/real-world/gson/` byte for byte. The `real-world-gson`
-flake checks then build Gson and run its tests in the Nix sandbox from that
-lockfile, which lies outside Gson's source.
+### Gson
 
-Gson's build is a reactor of eight modules. Its protobuf module runs a
-native protoc, so the lockfile holds the protoc of each Linux system. Its
-moditect plugin writes temporary jars, so a lock run gives Java a temporary
-directory of its own. A lock of Gson takes between two and three minutes.
+[Gson](https://github.com/google/gson) is Google's JSON library, a Maven
+build of several modules. Its `proto` module runs protoc, a native binary
+that Maven downloads for the machine it runs on; the lock holds protoc for
+both Linux systems.
+
+From a clone of Gson, lock the build and prefetch it:
+
+```zsh
+nix run github:nix-purifiers/maven-purifier -- lock
+nix run github:nix-purifiers/maven-purifier -- prefetch
+```
+
+Commit `maven-purifier.lock.json`. The locked Maven now builds and tests
+Gson offline on the locked JDK, and an editor that reads
+`.maven-purifier/settings.xml` imports it offline:
+
+```zsh
+JAVA_HOME=$PWD/.maven-purifier/jdk .maven-purifier/bin/mvn clean install
+```
+
+Add a `flake.nix` at the root of the clone to build Gson with Nix:
+
+```nix
+{
+  inputs.maven-purifier.url = "github:nix-purifiers/maven-purifier";
+  inputs.nixpkgs.follows = "maven-purifier/nixpkgs";
+
+  outputs = { nixpkgs, maven-purifier, ... }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+      gson = maven-purifier.lib.maven-purifier.buildMavenProject {
+        inherit pkgs;
+        src = ./.;
+      };
+    in
+    {
+      packages.${system} = {
+        gson = gson.packages.gson;
+        gson-extras = gson.packages.gson-extras;
+        proto = gson.packages.proto;
+        default = gson.release;
+      };
+      checks.${system}.tests = gson.tests;
+    };
+}
+```
+
+`nix build` builds every artifact Gson installs, `nix build '.#gson'` builds
+the library alone, and `nix flake check` runs Gson's tests in the Nix
+sandbox. After a change to a POM, lock and prefetch again.
 
 ## Credits
 
