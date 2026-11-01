@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-{ ... }:
+{ closure-lib, ... }:
 {
   config,
   inputs,
@@ -8,23 +8,21 @@
 }:
 {
 
-  imports = [ inputs.flake-parts.flakeModules.partitions ];
+  imports = [
+    inputs.flake-parts.flakeModules.partitions
+    closure-lib.caisson.modules.flake."purifier/purifier-packages"
+  ];
+
+  # The scope `pkgs.maven-purifier` comes from the `default` entry of the
+  # package overlay registry (pkg-overlays/): the package set applies it by
+  # default, and the flake exports it as `pkgOverlays` and as the plain
+  # `overlays.default`. The purifier-packages module publishes the
+  # derivations of the scope as the packages.
+  purifier.scope = "maven-purifier";
 
   debug = false;
-  caisson = {
-    libOverlays.exported = libOverlays: {
-      inherit (libOverlays) default;
-    };
-
-    # The scope `pkgs.maven-purifier` comes from the `default` entry of the
-    # package overlay registry (pkg-overlays/): the package set applies it
-    # by default, and the flake exports it as `pkgOverlays` and as the plain
-    # `overlays.default`. The scope holds the builder, a function, so the
-    # packages output is the derivations of the scope, selected below,
-    # rather than every attribute of the scope.
-    nixpkgs = {
-      packages.export.enabled = false;
-    };
+  caisson.libOverlays.exported = libOverlays: {
+    inherit (libOverlays) default;
   };
 
   # `nix run github:nix-purifiers/maven-purifier -- lock` locks the build in
@@ -33,9 +31,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages = lib.filterAttrs (_: lib.isDerivation) pkgs.maven-purifier // {
-        default = pkgs.maven-purifier.cli;
-      };
+      packages.default = pkgs.maven-purifier.cli;
     };
 
   partitionedAttrs.checks = "checks";
