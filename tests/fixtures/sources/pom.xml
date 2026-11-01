@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: MIT -->
+<!--
+  A build that takes dependencies from every kind of source the lock run
+  records:
+  - Maven Central through a mirror that settings.xml declares
+    (commons-lang3);
+  - a repository this POM declares (Google's Maven repository,
+    annotation-jvm);
+  - a version range, which the resolver answers from metadata
+    (slf4j-api);
+  - a timestamped SNAPSHOT from a snapshot repository (snaplib, served from
+    tests/snapshot-repository on localhost:18080 while the build is locked);
+  - a profile that is active unless skipDefaults is set (commons-io), and a
+    profile that the lock goals enable with -Pextra (commons-text);
+  - a core extension in .mvn/extensions.xml (os-maven-plugin), whose
+    property reaches a filtered resource.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>example.sources</groupId>
+  <artifactId>sources</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>google</id>
+      <url>https://maven.google.com</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>test-snapshots</id>
+      <url>http://localhost:18080</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>androidx.annotation</groupId>
+      <artifactId>annotation-jvm</artifactId>
+      <version>1.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>[2.0.0,2.0.16]</version>
+    </dependency>
+    <dependency>
+      <groupId>example.snapshot</groupId>
+      <artifactId>snaplib</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>defaults</id>
+      <activation>
+        <property>
+          <name>!skipDefaults</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+          <version>2.18.0</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>extra</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-text</artifactId>
+          <version>1.13.0</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+</project>

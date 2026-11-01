@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: MIT
 #
 # The `maven-purifier` command (cli/maven_purifier.py). Its wrapper names
-# the recording extension, the Nix library that `maven-purifier mvn`
-# evaluates, the Maven version a build without a Maven wrapper locks, and
-# the JDK used when JAVA_HOME is unset.
+# the recording extension, the Nix library that `maven-purifier mvn` and
+# `maven-purifier deploy` evaluate, the nixpkgs that `deploy` builds with,
+# the Maven version a build without a Maven wrapper locks, and the JDK used
+# when JAVA_HOME is unset.
 {
   lib,
   stdenvNoCC,
@@ -11,6 +12,9 @@
   python3,
   jdk_headless,
   maven,
+  # The nixpkgs source of this package set, which `maven-purifier deploy`
+  # builds the artifacts with.
+  path,
   version,
   extension,
 }:
@@ -36,6 +40,7 @@ stdenvNoCC.mkDerivation {
       --add-flags $out/libexec/maven-purifier/maven_purifier.py \
       --set MAVEN_PURIFIER_EXTENSION ${extension}/share/java/maven-purifier-extension.jar \
       --set MAVEN_PURIFIER_NIX_LIB $out/share/maven-purifier/nix \
+      --set MAVEN_PURIFIER_NIXPKGS ${path} \
       --set MAVEN_PURIFIER_DEFAULT_MAVEN ${maven.version} \
       --set MAVEN_PURIFIER_DEFAULT_JAVA_HOME ${jdk_headless.home}
     runHook postInstall

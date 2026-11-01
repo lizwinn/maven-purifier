@@ -7,9 +7,10 @@
   "javaVersion": "21.0.12.1",
   "goals": [
     "clean",
-    "install"
+    "deploy"
   ],
-  "definitionHash": "sha256-OreiNaTPFzy9l733gF2w3VacnI5SSnsgpV9MMPthIwg=",
+  "settings": null,
+  "definitionHash": "sha256-lhIC3ah0UjiaacGzpKWaXj3rXrp3rlX7oBlMysYqg3E=",
   "projects": [
     {
       "groupId": "example.multi",
@@ -384,6 +385,16 @@
       "path": "org/apache/maven/plugins/maven-compiler-plugin/3.16.0/maven-compiler-plugin-3.16.0.pom",
       "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.16.0/maven-compiler-plugin-3.16.0.pom",
       "hash": "sha256-0LJBLyDy6s+lFCmeao4UEKj8pS5BceuZd5zKVYvpNDw="
+    },
+    {
+      "path": "org/apache/maven/plugins/maven-deploy-plugin/3.2.0/maven-deploy-plugin-3.2.0.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-deploy-plugin/3.2.0/maven-deploy-plugin-3.2.0.jar",
+      "hash": "sha256-fkZ2NqmYo3fHYWPiiRt50nS31ohoNKKfdAiareaK9Ko="
+    },
+    {
+      "path": "org/apache/maven/plugins/maven-deploy-plugin/3.2.0/maven-deploy-plugin-3.2.0.pom",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-deploy-plugin/3.2.0/maven-deploy-plugin-3.2.0.pom",
+      "hash": "sha256-h8c6i0dsnSbDc6D6sekVlRsGCgj9IUBv9jtcwb0FhiI="
     },
     {
       "path": "org/apache/maven/plugins/maven-install-plugin/3.2.0/maven-install-plugin-3.2.0.jar",

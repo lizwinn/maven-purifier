@@ -10,6 +10,8 @@
   extension,
 }:
 let
+  inherit (pkgs) lib;
+
   # Every fixture builds the way a consumer's package does: through
   # buildMavenProject of a package set the overlay applies to.
   withOverlay = pkgs.extend overlay;
@@ -44,6 +46,53 @@ let
         fi
         touch $out
       '';
+
+  # The deploy script deploys the artifacts Nix built, with the
+  # maven-deploy-plugin of the lock, to a file: repository.
+  multiDeploy = pkgs.runCommand "maven-purifier-test-multi-deploy" { } ''
+    export HOME=$TMPDIR/home
+    mkdir -p $HOME
+    ${multi.deploy}/bin/maven-purifier-deploy --repository-id local --url file://$TMPDIR/deployed
+    deployed=$TMPDIR/deployed/example/multi
+    cmp ${multi.packages.core.artifacts."core-sources.jar"} $deployed/core/1.0.0/core-1.0.0-sources.jar
+    cmp ${multi.packages.core.artifacts."core.jar"} $deployed/core/1.0.0/core-1.0.0.jar
+    cmp ${multi.packages.app.artifacts."app.jar"} $deployed/app/1.0.0/app-1.0.0.jar
+    cmp ${
+      multi.packages.multi-parent.artifacts."multi-parent.pom"
+    } $deployed/multi-parent/1.0.0/multi-parent-1.0.0.pom
+    test -f $deployed/core/maven-metadata.xml
+    touch $out
+  '';
+
+  # A build with every kind of dependency source; see the comment in its
+  # pom.xml. Its lock took the SNAPSHOT from tests/snapshot-repository on
+  # localhost:18080, so the check fetches those files from the committed
+  # repository instead, by their locked hashes. Its test checks that a
+  # class of every source is on the classpath, and that the core
+  # extension's property reached a resource.
+  snapshotUrl = "http://localhost:18080/";
+  fetchFromSnapshotRepository =
+    {
+      name,
+      url,
+      hash,
+    }:
+    if lib.hasPrefix snapshotUrl url then
+      pkgs.runCommand name
+        {
+          outputHash = hash;
+          outputHashMode = "flat";
+        }
+        ''
+          cp ${./snapshot-repository}/${lib.removePrefix snapshotUrl url} $out
+        ''
+    else
+      pkgs.fetchurl { inherit name url hash; };
+  sources = buildMavenProject {
+    src = ./fixtures/sources;
+    fetchurl = fetchFromSnapshotRepository;
+    doCheck = true;
+  };
 
   # A build whose Maven wrapper names Maven 3.9.11 as a zip: the lock run
   # and the sandboxed build both use that distribution.
@@ -96,6 +145,8 @@ in
   multi-app = multi.packages.app;
   multi-core = multi.packages.core;
   multi-runs = multiRuns;
+  multi-deploy = multiDeploy;
+  sources = sources.packages.sources;
   wrapper-version = wrapperVersion;
   lock-version = lockVersion;
   inherit packaging;

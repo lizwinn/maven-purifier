@@ -1,12 +1,16 @@
 # SPDX-License-Identifier: MIT
 #
-# The fetcher for locked artifacts.
+# The store path of a locked artifact.
 #
-# By default each artifact is a fixed-output derivation on Nix's built-in
-# fetcher (the same derivation <nix/fetchurl.nix> makes), so neither the
-# interactive mode nor a sandboxed build needs nixpkgs to download. A
-# fixed-output store path depends only on its name and hash, so the
-# default fetcher and nixpkgs' fetchurl produce the same paths.
+# A file entry ({ path, url, hash }) is fetched. By default the fetch is a
+# fixed-output derivation on Nix's built-in fetcher (the same derivation
+# <nix/fetchurl.nix> makes), so neither the interactive mode nor a
+# sandboxed build needs nixpkgs to download. A fixed-output store path
+# depends only on its name and hash, so the default fetcher and nixpkgs'
+# fetchurl produce the same paths.
+#
+# An inline entry ({ path, contents }) holds the text of a file whose URL
+# serves changing contents, and becomes a store file of that text.
 #
 # `fetchurl`, when given, replaces the built-in fetcher. It is called with
 # { name, url, hash } and is the place for credentials (nixpkgs' fetchurl
@@ -20,7 +24,9 @@ artifact:
 let
   name = lock.artifactName artifact;
 in
-if fetchurl != null then
+if artifact ? contents then
+  builtins.toFile name artifact.contents
+else if fetchurl != null then
   fetchurl {
     inherit name;
     inherit (artifact) url hash;

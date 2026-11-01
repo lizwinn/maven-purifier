@@ -25,9 +25,9 @@ import org.eclipse.aether.repository.RemoteRepository;
  * this spy appends one JSON object per line to it:
  *
  * <ul>
- *   <li>{@code {"event":"download","url":…,"file":…}} for each artifact or metadata file the
- *       resolver downloaded, with the URL it came from and the file it was stored at in the local
- *       repository;
+ *   <li>{@code {"event":"download","repository":…,"repositoryUrl":…,"url":…,"file":…}} for each
+ *       artifact or metadata file the resolver downloaded, with the id and URL of the repository it
+ *       came from, its own URL, and the file it was stored at in the local repository;
  *   <li>{@code {"event":"install","groupId":…,"artifactId":…,"version":…,"classifier":…,
  *       "extension":…,"file":…}} for each artifact the build installed into the local repository.
  * </ul>
@@ -65,12 +65,12 @@ public class RecordingEventSpy extends AbstractEventSpy {
     switch (e.getType()) {
       case ARTIFACT_DOWNLOADED:
         if (remote(e.getRepository()) != null) {
-          download(url(remote(e.getRepository()), artifactPath(e.getArtifact())), e);
+          download(remote(e.getRepository()), artifactPath(e.getArtifact()), e);
         }
         break;
       case METADATA_DOWNLOADED:
         if (remote(e.getRepository()) != null) {
-          download(url(remote(e.getRepository()), metadataPath(e.getMetadata())), e);
+          download(remote(e.getRepository()), metadataPath(e.getMetadata()), e);
         }
         break;
       case ARTIFACT_INSTALLED:
@@ -93,10 +93,15 @@ public class RecordingEventSpy extends AbstractEventSpy {
     return repository instanceof RemoteRepository ? (RemoteRepository) repository : null;
   }
 
-  private void download(String url, RepositoryEvent e) throws IOException {
+  private void download(RemoteRepository repository, String path, RepositoryEvent e)
+      throws IOException {
     out.write(
-        "{\"event\":\"download\",\"url\":"
-            + json(url)
+        "{\"event\":\"download\",\"repository\":"
+            + json(repository.getId())
+            + ",\"repositoryUrl\":"
+            + json(repository.getUrl())
+            + ",\"url\":"
+            + json(url(repository, path))
             + ",\"file\":"
             + json(e.getFile().getAbsolutePath())
             + "}\n");

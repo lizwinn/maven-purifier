@@ -3,11 +3,17 @@
 # Reads a purifier lockfile.
 #
 # A purifier lockfile is JSON whose top-level `artifacts` list holds one
-# entry per downloaded file:
+# entry per downloaded file. A file entry is fetched:
 #
 #   { "path": "<relative path in the output tree>",
 #     "url":  "<where the file was downloaded from>",
 #     "hash": "sha256-<base64>" }
+#
+# An inline entry holds the text of a file whose URL serves changing
+# contents, such as a Maven metadata file:
+#
+#   { "path": "<relative path in the output tree>",
+#     "contents": "<the file's text>" }
 #
 # This library treats `path` as opaque and only places each file at its
 # path. The purifier decides which path a downloaded file gets: here, the

@@ -20,6 +20,18 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <!--
+    The fixture is locked with `clean deploy`, which deploys into the build's
+    own target directory. The lock then holds maven-deploy-plugin, which the
+    deploy check runs offline.
+  -->
+  <distributionManagement>
+    <repository>
+      <id>fixture</id>
+      <url>file://${maven.multiModuleProjectDirectory}/target/deploy-repository</url>
+    </repository>
+  </distributionManagement>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
