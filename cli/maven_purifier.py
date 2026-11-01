@@ -317,6 +317,29 @@ def artifact_key(install):
     return f"{install['artifactId']}{classifier}{extension}"
 
 
+def declared_downloads(root):
+    """The downloads the build declares in .mvn/maven-purifier.json.
+
+    A plugin that downloads a file itself, outside Maven Resolver, gives the
+    recording extension nothing to see. The build declares such a file with
+    its URL and its path in the local repository, where such plugins cache
+    what they download.
+    """
+    config = root / ".mvn" / "maven-purifier.json"
+    if not config.is_file():
+        return []
+    try:
+        downloads = json.loads(config.read_text()).get("downloads", [])
+    except json.JSONDecodeError as e:
+        fail(f"cannot read {config}: {e}")
+    for d in downloads:
+        if not isinstance(d, dict) or not d.get("url") or not d.get("path"):
+            fail(f"each entry of `downloads` in {config} needs `url` and `path`")
+        if Path(d["path"]).is_absolute() or ".." in Path(d["path"]).parts:
+            fail(f"the path {d['path']} in {config} must be relative to the local repository")
+    return downloads
+
+
 def tracked_repository(path):
     """The repository id that Maven Resolver's tracking file names for a file, or None."""
     tracking = path.parent / "_remote.repositories"
@@ -379,6 +402,15 @@ def lock(args):
         copy_build(root, project)
         repo = tmp / "repository"
         repo.mkdir()
+        declared = []
+        for d in declared_downloads(root):
+            info(f"fetching {d['url']}")
+            declared_hash, declared_store = prefetch(d["url"])
+            target = repo / d["path"]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(declared_store, target)
+            declared.append(file_entry(Path(d["path"]).as_posix(), d["url"], declared_hash))
+        declared_paths = {d["path"] for d in declared}
         (tmp / "home").mkdir()
         write_run_settings(settings, tmp / "settings.xml")
         record = tmp / "record.jsonl"
@@ -457,7 +489,7 @@ def lock(args):
             rel = path.relative_to(repo).as_posix()
             if path.name in BOOKKEEPING or path.name.endswith(".lastUpdated"):
                 continue
-            if rel in downloads or rel in installed:
+            if rel in downloads or rel in installed or rel in declared_paths:
                 continue
             if path.name.startswith("maven-metadata") and Path(rel).parent.as_posix() in module_dirs:
                 continue
@@ -486,8 +518,10 @@ def lock(args):
         # serves new contents whenever a version is published, so a fetch
         # pinned by hash would break. The lock holds the contents the
         # resolver read. Every other download is immutable.
-        artifacts = [file_entry(dist_path, url, dist_hash)]
+        artifacts = [file_entry(dist_path, url, dist_hash), *declared]
         for rel, src in sorted(downloads.items()):
+            if rel in declared_paths:
+                continue
             if Path(rel).name.startswith("maven-metadata"):
                 artifacts.append({"path": rel, "contents": (repo / rel).read_text()})
             else:

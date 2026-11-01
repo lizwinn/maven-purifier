@@ -150,6 +150,12 @@ in
   multi-runs = multiRuns;
   multi-deploy = multiDeploy;
   sources = sources.packages.sources;
+  # The download that .mvn/maven-purifier.json declares is in the local
+  # repository, at the path it declares.
+  sources-declared = pkgs.runCommand "maven-purifier-test-sources-declared" { } ''
+    grep -q '<artifactId>slf4j-api</artifactId>' ${sources.repository}/declared/notice/1.0/notice-1.0.xml
+    touch $out
+  '';
   wrapper-version = wrapperVersion;
   lock-version = lockVersion;
   inherit packaging;

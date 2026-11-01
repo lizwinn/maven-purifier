@@ -14,7 +14,9 @@
   - a profile that is active unless skipDefaults is set (commons-io), and a
     profile that the lock goals enable with -Pextra (commons-text);
   - a core extension in .mvn/extensions.xml (os-maven-plugin), whose
-    property reaches a filtered resource.
+    property reaches a filtered resource;
+  - a download that .mvn/maven-purifier.json declares, as a build declares
+    a file that a plugin downloads outside Maven Resolver.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
