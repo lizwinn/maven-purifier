@@ -6,15 +6,18 @@
 # network and runs as a CI job of that name.
 {
   pkgs,
-  # lib.maven-purifier.buildMavenProject of this flake.
-  buildMavenProject,
+  # The flake's default package overlay, which adds buildMavenProject.
+  overlay,
   cli,
   extension,
 }:
 let
   inherit (pkgs) lib;
 
-  build = args: buildMavenProject ({ inherit pkgs; } // args);
+  # Every fixture builds the way a consumer's package does: through
+  # buildMavenProject of a package set the overlay applies to.
+  withOverlay = pkgs.extend overlay;
+  build = withOverlay.buildMavenProject;
 
   # A reactor of a parent POM and two modules. core depends on
   # commons-lang3 and installs a sources jar beside its jar; app depends on
@@ -334,6 +337,30 @@ let
         ${cli}/bin/maven-purifier --help | grep -q 'maven-purifier prefetch'
         touch $out
       '';
+
+  # A package set with a consumer's package, written for callPackage, that
+  # takes the builder by name, as a package in an overlay does. It builds
+  # the same derivation as multi-app.
+  withConsumer = withOverlay.extend (
+    final: prev: {
+      example = final.callPackage (
+        { buildMavenProject }: (buildMavenProject { src = ./fixtures/multi; }).packages.app
+      ) { };
+    }
+  );
+
+  # buildMavenProject.override replaces what the builder takes from the
+  # package set: here the JDKs, whose JDK of the lock's Java major version
+  # becomes the build's JDK.
+  markerJdk = pkgs.runCommand "marker-jdk" { } "mkdir $out";
+  overridden = withOverlay.buildMavenProject.override {
+    javaPackages.compiler."openjdk${multi.lock.maven.javaMajor}".headless = markerJdk;
+  };
+
+  nixLibrary =
+    assert withConsumer.example.drvPath == multi.packages.app.drvPath;
+    assert (overridden { src = ./fixtures/multi; }).jdk.outPath == markerJdk.outPath;
+    pkgs.runCommand "maven-purifier-test-nix-library" { } "touch $out";
 in
 {
   multi-app = multi.packages.app;
@@ -362,5 +389,6 @@ in
   conformance-external = conformanceExternal;
   unit-cli = unitCli;
   unit-extension = unitExtension;
+  nix-library = nixLibrary;
   inherit packaging;
 }

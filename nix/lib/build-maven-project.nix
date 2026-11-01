@@ -1,16 +1,18 @@
 # SPDX-License-Identifier: MIT
 #
 # buildMavenProject: the sandboxed build of a Maven build, from the lockfile
-# that `maven-purifier lock` writes. The flake publishes it as
-# `lib.maven-purifier.buildMavenProject`:
+# that `maven-purifier lock` writes.
 #
-#   (maven-purifier.lib.maven-purifier.buildMavenProject {
-#     inherit pkgs;
-#     src = ./.;
-#   }).packages.app
+# The file is a package for callPackage: the first argument set is what it
+# takes from the package set, and the result is the builder. The
+# maven-purifier overlay (`overlays.default`) adds it to the package set as
+# `buildMavenProject`, so a package written for callPackage takes it like
+# any other builder:
 #
-# The first argument set is the purifier library, which the library overlay
-# passes. The builder returns
+#   { buildMavenProject }: (buildMavenProject { src = ./.; }).packages.app
+#
+# and `buildMavenProject.override` replaces what it takes from the set. The
+# builder returns
 #
 #   packages.<id>   the artifacts of the module with artifactId <id>, in
 #                   Maven layout; `artifacts.<key>` names each file, where
@@ -29,9 +31,23 @@
 #   maven           the Maven distribution the lock run used
 #   jdk             the JDK that runs Maven
 #   lock            the lock in memory, as readLock (lock.nix) reads it
-{ purifier }:
 {
+  lib,
+  stdenvNoCC,
+  runCommand,
+  writeText,
+  writeShellScriptBin,
+  unzip,
+  # The JDKs a build can run on; the default JDK of a build is the headless
+  # one of the Java major version its lock was made with.
+  javaPackages,
+  # The package set that the purifier library fetches the locked downloads
+  # with, through nixpkgs' fetchers and the tools that unpack them.
   pkgs,
+  # The purifier library, which the overlay passes.
+  purifier,
+}:
+{
   # The root of the Maven build.
   src,
   # The fetchers that replace nixpkgs' own, passed to the purifier library
@@ -56,16 +72,6 @@
   checkDefinition ? true,
 }:
 let
-  inherit (pkgs)
-    lib
-    stdenvNoCC
-    runCommand
-    writeText
-    writeShellScriptBin
-    unzip
-    javaPackages
-    ;
-
   # The lock in memory (lock.nix), which checkLock fails on when the
   # lockfile is stale, tampered or malformed.
   checked = purifier.checkLock (
@@ -76,7 +82,7 @@ let
   lock = checked.maven;
   # The downloads of this system; those only development needs are left
   # out of a sandboxed build.
-  entries = purifier.entriesFor pkgs.stdenv.hostPlatform.system checked;
+  entries = purifier.entriesFor stdenvNoCC.hostPlatform.system checked;
   buildEntries = builtins.filter (e: !(e.development or false)) entries;
 
   defaultSrcFilter =

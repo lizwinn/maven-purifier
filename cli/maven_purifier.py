@@ -949,10 +949,12 @@ def nix_expression(attribute):
     return f"""
       let
         flake = builtins.getFlake ("path:" + builtins.getEnv "MAVEN_PURIFIER_FLAKE");
-        pkgs = import flake.inputs.nixpkgs {{ system = builtins.currentSystem; }};
+        pkgs = import flake.inputs.nixpkgs {{
+          system = builtins.currentSystem;
+          overlays = [ flake.overlays.default ];
+        }};
       in
-      (flake.lib.maven-purifier.buildMavenProject {{
-        inherit pkgs;
+      (pkgs.buildMavenProject {{
         src = /. + builtins.getEnv "MAVEN_PURIFIER_ROOT";
         lockFile = /. + builtins.getEnv "MAVEN_PURIFIER_LOCKFILE";
       }}).{attribute}

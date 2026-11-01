@@ -58,7 +58,7 @@
           {
             checks = import ../../../tests {
               inherit pkgs;
-              inherit (self.lib.maven-purifier) buildMavenProject;
+              overlay = self.overlays.default;
               inherit (self.packages.${system}) cli extension;
             };
             treefmt.programs.nixfmt.enable = true;

@@ -4,8 +4,8 @@ A command and a Nix library that make Nix the dependency and build backend
 of a Maven build. Maven still plans the build. maven-purifier records the
 files Maven downloads in a lockfile, Nix builds the project from that
 lockfile in its sandbox, and after a prefetch Maven and the editor work with
-the network cut off. You commit the lockfile; you do not commit generated
-Nix files.
+the network cut off. The lockfile is the one file maven-purifier adds to a
+repository.
 
 maven-purifier is one of the [nix-purifiers](https://nix-purifiers.github.io),
 and meets their [contract](https://github.com/nix-purifiers/purifier/blob/main/CONTRACT.md).
@@ -21,8 +21,8 @@ Lock the build from its root, and commit the lockfile it writes,
 nix run github:nix-purifiers/maven-purifier -- lock
 ```
 
-Build a module with Nix. The flake's library has the builder, which takes
-the package set it builds with as `pkgs`:
+Build a module with Nix. The flake's `overlays.default` adds the builder
+`buildMavenProject` to the package set:
 
 ```nix
 {
@@ -32,11 +32,11 @@ the package set it builds with as `pkgs`:
   outputs = { nixpkgs, maven-purifier, ... }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-      project = maven-purifier.lib.maven-purifier.buildMavenProject {
-        inherit pkgs;
-        src = ./.;
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ maven-purifier.overlays.default ];
       };
+      project = pkgs.buildMavenProject { src = ./.; };
     in
     {
       packages.${system}.app = project.packages.app;
@@ -45,7 +45,17 @@ the package set it builds with as `pkgs`:
 }
 ```
 
-`nix build '.#app'` builds module `app`. The builder's result has:
+`nix build '.#app'` builds module `app`. A package written for
+`callPackage`, such as one in an overlay, takes the builder by name like any
+other builder:
+
+```nix
+# package.nix
+{ buildMavenProject }:
+(buildMavenProject { src = ./.; }).packages.app
+```
+
+The builder's result has:
 
 - `packages.<artifactId>`: the files the module installs, in Maven layout.
   `artifacts.<key>` names each file, where the key is
@@ -62,7 +72,9 @@ The builder also takes `fetchers` (a company mirror or credentials go into
 `fetchers.fetchurl`), `lockFile` (a lockfile outside `src`), `jdk` (the
 default is nixpkgs' headless JDK of the Java major version the lock was made
 with), `mavenFlags`, `srcFilter` and `checkDefinition`;
-`nix/lib/build-maven-project.nix` documents them.
+`nix/lib/build-maven-project.nix` documents them. `buildMavenProject.override`
+replaces the packages the builder takes from the package set, such as
+`javaPackages` or `stdenvNoCC`.
 
 To deploy what Nix built, with the target from the root POM's
 `distributionManagement` and the credentials from `~/.m2/settings.xml`:
@@ -74,9 +86,9 @@ nix run github:nix-purifiers/maven-purifier -- publish
 `--repository-id ID --url URL` names another target. Every command takes
 `--lockfile FILE` for a lockfile outside the build root.
 
-## Everyday loop
+## Development loop
 
-After `maven-purifier prefetch` (see [Offline work](#offline-work)), you run
+After `maven-purifier prefetch` (see [Working offline](#working-offline)), you run
 Maven as usual: `mvn clean install`, `mvn test`, `mvn package`, `./mvnw
 verify`. Maven resolves from the locked files, offline.
 
@@ -114,7 +126,7 @@ version whatever `JAVA_HOME` names. A first lock runs on `JAVA_HOME`, or on
 the JDK that maven-purifier's nixpkgs provides. To move to another Java
 version, delete the lockfile and lock again.
 
-## Offline work
+## Working offline
 
 ```zsh
 nix run github:nix-purifiers/maven-purifier -- prefetch
@@ -156,7 +168,7 @@ default plugin versions finds them missing offline, unless the build pins
 the version of every plugin it uses in `<pluginManagement>`, as we
 recommend; then every Maven asks for the locked versions.
 
-## Errors and fixes
+## Troubleshooting
 
 Each common mistake fails with a message that says what went wrong and what
 to run.
@@ -178,9 +190,11 @@ to run.
   parser reports it.
 - When a lock run sees a file reach the local repository without a download
   that Maven reported, it fails with the list of such files: a plugin
-  downloaded them itself. Declare them as below.
+  downloaded them itself. Declare them in `.mvn/maven-purifier.json`, as
+  [Supported language repositories](#supported-language-repositories)
+  shows.
 
-## Sources supported and refused
+## Supported language repositories
 
 Each source of dependencies reaches the lock as follows.
 
@@ -231,9 +245,7 @@ makes a lock run download through another copy of Central without changing
 the lockfile. The lock run copies the proxy from `https_proxy` and
 `http_proxy` into its settings when they name none.
 
-maven-purifier refuses no source kind.
-
-Decisions recorded here: the sandboxed build runs the locked goals with
+The sandboxed build runs the locked goals with
 `deploy` replaced by `install`, since Maven refuses to deploy offline, and
 `release.publish` deploys exactly the files the Nix build made. The local
 repository holds copies rather than links into the store, since Maven 3.10
@@ -277,11 +289,11 @@ Add a `flake.nix` at the root of the clone to build Gson with Nix:
   outputs = { nixpkgs, maven-purifier, ... }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-      gson = maven-purifier.lib.maven-purifier.buildMavenProject {
-        inherit pkgs;
-        src = ./.;
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ maven-purifier.overlays.default ];
       };
+      gson = pkgs.buildMavenProject { src = ./.; };
     in
     {
       packages.${system} = {
