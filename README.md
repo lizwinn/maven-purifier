@@ -105,7 +105,12 @@ The lock holds what those goals need, so lock the goals you run. The lock
 run also runs the tests, so the lock holds what they need even when a Nix
 build skips them. It locks again only when a `pom.xml`, anything under
 `.mvn/`, the goals or the settings changed; `--force` locks regardless. A
-relock of an unchanged build writes the same lockfile, byte for byte.
+relock of an unchanged build writes the same lockfile, byte for byte. It
+keeps the recorded resolution of version ranges and SNAPSHOTs. It also
+keeps the recorded Java major version, and runs on the nixpkgs JDK of that
+version whatever `JAVA_HOME` names. A first lock runs on `JAVA_HOME`, or on
+the JDK that maven-purifier's nixpkgs provides. To move to another Java
+version, delete the lockfile and lock again.
 
 ## Offline work
 

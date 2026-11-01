@@ -320,6 +320,27 @@ def java_home():
     return home
 
 
+def locked_jdk(major):
+    """The JAVA_HOME of nixpkgs' headless JDK of a Java major version, from the nixpkgs of this flake."""
+    expression = f"""
+      let
+        flake = builtins.getFlake ("path:" + builtins.getEnv "MAVEN_PURIFIER_FLAKE");
+        pkgs = import flake.inputs.nixpkgs {{ system = builtins.currentSystem; }};
+      in
+      pkgs.javaPackages.compiler."openjdk{major}".headless
+    """
+    try:
+        jdk = subprocess.run(
+            ["nix", "build", "--impure", "--no-link", "--print-out-paths", "--expr", expression],
+            check=True,
+            stdout=subprocess.PIPE,
+            text=True,
+        ).stdout.strip()
+    except subprocess.CalledProcessError:
+        fail(f"nixpkgs has no headless JDK {major}, the Java major version of the lock")
+    return f"{jdk}/lib/openjdk"
+
+
 def java_version(home):
     out = subprocess.run(
         [f"{home}/bin/java", "-XshowSettings:properties", "-version"],
@@ -686,7 +707,10 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             info(f"{lock_path} is up to date; pass --force to lock again")
             return
 
-    home = java_home()
+    # A relock keeps the Java major version of the previous lock, on
+    # nixpkgs' JDK of that version, so that JAVA_HOME does not move it. A
+    # first lock runs on JAVA_HOME, or on the JDK of this maven-purifier.
+    home = locked_jdk(previous["javaMajor"]) if previous and previous.get("javaMajor") else java_home()
     with tempfile.TemporaryDirectory(prefix="maven-purifier-lock-") as tmp:
         tmp = Path(tmp)
         url = distribution_url(root)
