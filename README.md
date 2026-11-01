@@ -1,50 +1,108 @@
 # maven-purifier
 
-A command and a Nix library that make Nix the dependency and build backend
-of a Maven build. Maven still plans the build. maven-purifier records the
-files Maven downloads in a lockfile, Nix builds the project from that
-lockfile in its sandbox, and after a prefetch Maven and the editor work with
-the network cut off. The lockfile is the one file maven-purifier adds to a
-repository.
+maven-purifier keeps Maven's development workflow on locked,
+Nix-resolved dependencies. Use the normal build and test commands in your
+working tree; building the project itself in the Nix sandbox is an
+optional next step.
+
+It follows the [purifier contract](https://github.com/nix-purifiers/purifier/blob/main/CONTRACT.md).
 
 maven-purifier is one of the [nix-purifiers](https://nix-purifiers.github.io),
 and meets their [contract](https://github.com/nix-purifiers/purifier/blob/main/CONTRACT.md).
 
+## Installation
+
+Install the integration into your Nix profile once:
+
+```sh
+nix profile install 'github:nix-purifiers/maven-purifier'
+```
+
+This installs the purifier CLI. The workflow below prepares the native
+tool's cache, hook or environment; follow that activation step before using
+your usual commands. The ordinary tool itself remains your normal
+installation unless the setup explicitly supplies a toolchain.
+
+`nix shell` makes an integration available temporarily instead of installing
+it. Keep using the activation steps below where a project environment or
+prefetched cache is required.
+
 ## Quickstart
 
-maven-purifier runs on x86_64-linux and aarch64-linux.
-
-Lock the build from its root, and commit the lockfile it writes,
-`maven-purifier.lock.json`, to the repository. We recommend this setup, and
-the builder and every command read the lockfile there by default:
+Install Nix, then run the following from your existing project's root.
+The setup prepares the locked dependencies and the integration that
+Maven's normal commands use:
 
 ```zsh
 nix run github:nix-purifiers/maven-purifier -- lock
+nix run github:nix-purifiers/maven-purifier -- prefetch
+mvn test
+mvn package
 ```
 
-Then build a module with Nix from the project's directory. The flake's
-`overlays.default` adds the scope `maven-purifier` to the package set, and
-the scope holds the builder `buildMavenProject`, the command `cli` and the
-Maven extension. This command builds module `app`:
+Commit the lockfiles that the lock command writes, including the build
+tool's own lockfile when it has one. Keep using the project's usual build,
+test and editor commands with this setup. Nix provides the locked
+dependencies; the development commands above run outside the Nix sandbox.
+No project Nix files are needed for this workflow.
+
+Sandboxed builds of the whole project are an optional
+[next step](#building-the-project-with-nix).
+
+## Development loop
+
+After `maven-purifier prefetch` (see [Working offline](#working-offline)), you run
+Maven as usual: `mvn clean install`, `mvn test`, `mvn package`, `./mvnw
+verify`. Maven resolves from the locked files, offline.
+
+To add or upgrade a dependency or a plugin, edit the POM and lock again:
 
 ```zsh
-nix build --impure --expr '
-  let
-    purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
-    pkgs = import purifier.inputs.nixpkgs {
-      system = builtins.currentSystem;
-      overlays = [ purifier.overlays.default ];
-    };
-  in
-  (pkgs.maven-purifier.buildMavenProject { src = ./.; }).packages.app'
+nix run github:nix-purifiers/maven-purifier -- lock
+nix run github:nix-purifiers/maven-purifier -- prefetch
 ```
 
-This uses the purifier's pinned nixpkgs, matching the lock command above.
-To build with ambient `<nixpkgs>` from your Nix search path instead,
-replace `import purifier.inputs.nixpkgs` with `import <nixpkgs>`.
-Both forms need no Nix files in your project. The build tool and language
-versions must match the lockfile; with ambient nixpkgs, lock with the
-purifier from that package set or pass a compatible toolchain to the builder.
+A relock keeps what version ranges and SNAPSHOTs resolved to in the
+previous lock: the lock run starts from the metadata files the lockfile
+recorded. To move them to what the repositories hold now, update instead,
+for every package or for the ones you name:
+
+```zsh
+nix run github:nix-purifiers/maven-purifier -- update
+nix run github:nix-purifiers/maven-purifier -- update org.slf4j:slf4j-api
+```
+
+`maven-purifier update` locks with the goals that the lockfile recorded.
+Maven keeps no lockfile of its own, so `maven-purifier.lock.json` is the one
+file that `update` changes.
+
+maven-purifier is a Maven core extension and a command, rather than a Maven
+plugin with a goal. Maven Resolver reports each download only to core
+extensions, which Maven loads before it reads the build. The command runs
+Maven with the extension loaded.
+
+`maven-purifier lock` copies the build to a temporary directory and runs
+Maven there with an empty local repository and an empty home directory. The
+default goals are `clean install`; pass others as arguments, with any Maven
+options they need, such as `maven-purifier lock clean deploy -Prelease`.
+The lock holds what those goals need, so lock the goals you run. The lock
+run also runs the tests, so the lock holds what they need even when a Nix
+build skips them. It locks again only when a `pom.xml`, anything under
+`.mvn/`, the goals or the settings changed; `--force` locks regardless. A
+relock of an unchanged build writes the same lockfile, byte for byte. It
+keeps the recorded resolution of version ranges and SNAPSHOTs. It also
+keeps the recorded Java major version, and runs on the nixpkgs JDK of that
+version whatever `JAVA_HOME` names. A first lock runs on `JAVA_HOME`, or on
+the JDK that maven-purifier's nixpkgs provides. To move to another Java
+version, delete the lockfile and lock again.
+
+## Building the project with Nix
+
+Once the native development workflow is working, you can also build and
+test the whole project in the Nix sandbox. For this step, keep a flake or
+another Nix build definition in the project's repository, or maintain an
+external packaging repository that points at its sources and lockfiles.
+The builder consumes the same lockfiles as the development workflow.
 
 A project whose authors want a flake that packages it can add one, in the
 project's repository or in another one. The flake calls the builder
@@ -113,52 +171,29 @@ it. The builder then takes the lockfile as `lockFile`. Every command takes
 `MAVEN_PURIFIER_LOCKFILE`; `--lockfile` takes precedence. A dev shell can
 set the variable to the path it passes to the builder as `lockFile`.
 
-## Development loop
+### One-off builds without a project Nix file
 
-After `maven-purifier prefetch` (see [Working offline](#working-offline)), you run
-Maven as usual: `mvn clean install`, `mvn test`, `mvn package`, `./mvnw
-verify`. Maven resolves from the locked files, offline.
-
-To add or upgrade a dependency or a plugin, edit the POM and lock again:
+For an ad hoc build, the builder can also be evaluated directly from the
+project root. Replace the example package name with one from your project:
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- lock
-nix run github:nix-purifiers/maven-purifier -- prefetch
+nix build --impure --expr '
+  let
+    purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
+    pkgs = import purifier.inputs.nixpkgs {
+      system = builtins.currentSystem;
+      overlays = [ purifier.overlays.default ];
+    };
+  in
+  (pkgs.maven-purifier.buildMavenProject { src = ./.; }).packages.app'
 ```
 
-A relock keeps what version ranges and SNAPSHOTs resolved to in the
-previous lock: the lock run starts from the metadata files the lockfile
-recorded. To move them to what the repositories hold now, update instead,
-for every package or for the ones you name:
-
-```zsh
-nix run github:nix-purifiers/maven-purifier -- update
-nix run github:nix-purifiers/maven-purifier -- update org.slf4j:slf4j-api
-```
-
-`maven-purifier update` locks with the goals that the lockfile recorded.
-Maven keeps no lockfile of its own, so `maven-purifier.lock.json` is the one
-file that `update` changes.
-
-maven-purifier is a Maven core extension and a command, rather than a Maven
-plugin with a goal. Maven Resolver reports each download only to core
-extensions, which Maven loads before it reads the build. The command runs
-Maven with the extension loaded.
-
-`maven-purifier lock` copies the build to a temporary directory and runs
-Maven there with an empty local repository and an empty home directory. The
-default goals are `clean install`; pass others as arguments, with any Maven
-options they need, such as `maven-purifier lock clean deploy -Prelease`.
-The lock holds what those goals need, so lock the goals you run. The lock
-run also runs the tests, so the lock holds what they need even when a Nix
-build skips them. It locks again only when a `pom.xml`, anything under
-`.mvn/`, the goals or the settings changed; `--force` locks regardless. A
-relock of an unchanged build writes the same lockfile, byte for byte. It
-keeps the recorded resolution of version ranges and SNAPSHOTs. It also
-keeps the recorded Java major version, and runs on the nixpkgs JDK of that
-version whatever `JAVA_HOME` names. A first lock runs on `JAVA_HOME`, or on
-the JDK that maven-purifier's nixpkgs provides. To move to another Java
-version, delete the lockfile and lock again.
+This uses the purifier's pinned nixpkgs, matching the lock command above.
+To build with ambient `<nixpkgs>` from your Nix search path instead,
+replace `import purifier.inputs.nixpkgs` with `import <nixpkgs>`.
+Both forms need no Nix files in your project. The build tool and language
+versions must match the lockfile; with ambient nixpkgs, lock with the
+purifier from that package set or pass a compatible toolchain to the builder.
 
 ## Working offline
 
@@ -292,6 +327,11 @@ nothing. The jars of a Nix build get a fixed timestamp, so a rebuild gives
 the same bytes.
 
 ## Examples
+
+For day-to-day work on these projects, use the native-tool setup and
+commands in [Quickstart](#quickstart) and [Development loop](#development-loop).
+The Nix expressions below show optional sandboxed packaging of those
+projects.
 
 ### Gson
 
