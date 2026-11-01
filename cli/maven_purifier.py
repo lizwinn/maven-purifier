@@ -961,7 +961,7 @@ def nix_expression(attribute):
           overlays = [ flake.overlays.default ];
         }};
       in
-      (pkgs.buildMavenProject {{
+      (pkgs.maven-purifier.buildMavenProject {{
         src = /. + builtins.getEnv "MAVEN_PURIFIER_ROOT";
         lockFile = /. + builtins.getEnv "MAVEN_PURIFIER_LOCKFILE";
       }}).{attribute}

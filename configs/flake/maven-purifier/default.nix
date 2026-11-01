@@ -16,12 +16,14 @@
       inherit (libOverlays) default;
     };
 
-    # The packages are the `default` entry of this flake's package overlay
-    # registry (pkg-overlays/): the package set applies it by default, and
-    # the flake exports it as `pkgOverlays` and as the plain
-    # `overlays.default`.
+    # The scope `pkgs.maven-purifier` comes from the `default` entry of the
+    # package overlay registry (pkg-overlays/): the package set applies it
+    # by default, and the flake exports it as `pkgOverlays` and as the plain
+    # `overlays.default`. The scope holds the builder, a function, so the
+    # flake exports its derivations by name below rather than every
+    # attribute of the scope.
     nixpkgs = {
-      packages.export.enabled = true;
+      packages.export.enabled = false;
     };
   };
 
@@ -29,9 +31,12 @@
   # the current directory, and `… -- mvn <args>` runs Maven offline from
   # the lock.
   perSystem =
-    { config, ... }:
+    { pkgs, ... }:
     {
-      packages.default = config.packages.cli;
+      packages = {
+        inherit (pkgs.maven-purifier) cli extension;
+        default = pkgs.maven-purifier.cli;
+      };
     };
 
   partitionedAttrs.checks = "checks";

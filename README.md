@@ -22,8 +22,9 @@ the builder and every command read the lockfile there by default:
 nix run github:nix-purifiers/maven-purifier -- lock
 ```
 
-Build a module with Nix. The flake's `overlays.default` adds the builder
-`buildMavenProject` to the package set:
+Build a module with Nix. The flake's `overlays.default` adds the scope
+`maven-purifier` to the package set. The scope holds the builder
+`buildMavenProject`, the command `cli` and the Maven extension:
 
 ```nix
 {
@@ -37,7 +38,7 @@ Build a module with Nix. The flake's `overlays.default` adds the builder
         inherit system;
         overlays = [ maven-purifier.overlays.default ];
       };
-      project = pkgs.buildMavenProject { src = ./.; };
+      project = pkgs.maven-purifier.buildMavenProject { src = ./.; };
     in
     {
       packages.${system}.app = project.packages.app;
@@ -47,13 +48,12 @@ Build a module with Nix. The flake's `overlays.default` adds the builder
 ```
 
 `nix build '.#app'` builds module `app`. A package written for
-`callPackage`, such as one in an overlay, takes the builder by name like any
-other builder:
+`callPackage`, such as one in an overlay, takes the scope by name:
 
 ```nix
 # package.nix
-{ buildMavenProject }:
-(buildMavenProject { src = ./.; }).packages.app
+{ maven-purifier }:
+(maven-purifier.buildMavenProject { src = ./.; }).packages.app
 ```
 
 The builder's result has:
@@ -73,9 +73,11 @@ The builder also takes `fetchers` (a company mirror or credentials go into
 `fetchers.fetchurl`), `lockFile` (a lockfile outside `src`), `jdk` (the
 default is nixpkgs' headless JDK of the Java major version the lock was made
 with), `mavenFlags`, `srcFilter` and `checkDefinition`;
-`nix/lib/build-maven-project.nix` documents them. `buildMavenProject.override`
-replaces the packages the builder takes from the package set, such as
-`javaPackages` or `stdenvNoCC`.
+`nix/lib/build-maven-project.nix` documents them.
+`maven-purifier.buildMavenProject.override` replaces the packages the
+builder takes, such as `javaPackages` or `stdenvNoCC`, and
+`maven-purifier.overrideScope` replaces what the scope shares, such as
+`fetchurl`.
 
 To deploy what Nix built, with the target from the root POM's
 `distributionManagement` and the credentials from `~/.m2/settings.xml`:
@@ -309,7 +311,7 @@ Add a `flake.nix` at the root of the clone to build Gson with Nix:
         inherit system;
         overlays = [ maven-purifier.overlays.default ];
       };
-      gson = pkgs.buildMavenProject { src = ./.; };
+      gson = pkgs.maven-purifier.buildMavenProject { src = ./.; };
     in
     {
       packages.${system} = {

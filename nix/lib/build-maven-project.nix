@@ -5,14 +5,16 @@
 #
 # The file is a package for callPackage: the first argument set is what it
 # takes from the package set, and the result is the builder. The
-# maven-purifier overlay (`overlays.default`) adds it to the package set as
-# `buildMavenProject`, so a package written for callPackage takes it like
-# any other builder:
+# maven-purifier overlay (`overlays.default`) adds it to the scope
+# `pkgs.maven-purifier`, so a package written for callPackage takes the
+# scope by name:
 #
-#   { buildMavenProject }: (buildMavenProject { src = ./.; }).packages.app
+#   { maven-purifier }:
+#   (maven-purifier.buildMavenProject { src = ./.; }).packages.app
 #
-# and `buildMavenProject.override` replaces what it takes from the set. The
-# builder returns
+# `maven-purifier.buildMavenProject.override` replaces what the builder
+# takes, and `maven-purifier.overrideScope` replaces what the scope shares.
+# The builder returns
 #
 #   packages.<id>   the artifacts of the module with artifactId <id>, in
 #                   Maven layout; `artifacts.<key>` names each file, where

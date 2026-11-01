@@ -6,7 +6,7 @@
 # network and runs as a CI job of that name.
 {
   pkgs,
-  # The flake's default package overlay, which adds buildMavenProject.
+  # The flake's default package overlay, which adds the maven-purifier scope.
   overlay,
   cli,
   extension,
@@ -15,9 +15,9 @@ let
   inherit (pkgs) lib;
 
   # Every fixture builds the way a consumer's package does: through
-  # buildMavenProject of a package set the overlay applies to.
+  # buildMavenProject of the scope in a package set the overlay applies to.
   withOverlay = pkgs.extend overlay;
-  build = withOverlay.buildMavenProject;
+  build = withOverlay.maven-purifier.buildMavenProject;
 
   # A reactor of a parent POM and two modules. core depends on
   # commons-lang3 and installs a sources jar beside its jar; app depends on
@@ -344,22 +344,33 @@ let
   withConsumer = withOverlay.extend (
     final: prev: {
       example = final.callPackage (
-        { buildMavenProject }: (buildMavenProject { src = ./fixtures/multi; }).packages.app
+        { maven-purifier }: (maven-purifier.buildMavenProject { src = ./fixtures/multi; }).packages.app
       ) { };
     }
   );
 
   # buildMavenProject.override replaces what the builder takes from the
-  # package set: here the JDKs, whose JDK of the lock's Java major version
+  # scope: here the JDKs, whose JDK of the lock's Java major version
   # becomes the build's JDK.
   markerJdk = pkgs.runCommand "marker-jdk" { } "mkdir $out";
-  overridden = withOverlay.buildMavenProject.override {
-    javaPackages.compiler."openjdk${multi.lock.maven.javaMajor}".headless = markerJdk;
+  javaPackagesWithMarker = {
+    compiler."openjdk${multi.lock.maven.javaMajor}".headless = markerJdk;
   };
+  overridden = withOverlay.maven-purifier.buildMavenProject.override {
+    javaPackages = javaPackagesWithMarker;
+  };
+
+  # overrideScope replaces what the scope shares: here the fetcher, which
+  # the builder and the other packages of the scope all take.
+  markerFetchurl = args: pkgs.runCommand args.name { } "mkdir $out";
+  scopeOverridden =
+    (withOverlay.maven-purifier.overrideScope (final: prev: { fetchurl = markerFetchurl; }))
+    .buildMavenProject;
 
   nixLibrary =
     assert withConsumer.example.drvPath == multi.packages.app.drvPath;
     assert (overridden { src = ./fixtures/multi; }).jdk.outPath == markerJdk.outPath;
+    assert (scopeOverridden { src = ./fixtures/multi; }).repository.drvPath != multi.repository.drvPath;
     pkgs.runCommand "maven-purifier-test-nix-library" { } "touch $out";
 in
 {

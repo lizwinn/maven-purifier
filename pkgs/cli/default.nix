@@ -6,8 +6,8 @@
 #                                     the downloads of a lock run and guards
 #                                     an offline Maven after a prefetch
 #   MAVEN_PURIFIER_FLAKE              this flake's source, whose
-#                                     overlays.default adds the
-#                                     buildMavenProject that `prefetch`
+#                                     overlays.default adds the scope
+#                                     whose buildMavenProject `prefetch`
 #                                     and `publish` build with
 #   MAVEN_PURIFIER_DEFAULT_MAVEN      the Maven version a build without a
 #                                     Maven wrapper locks
