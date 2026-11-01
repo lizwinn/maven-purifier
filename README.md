@@ -246,7 +246,7 @@ the same bytes.
 
 | Project | Commit | What it showed |
 | --- | --- | --- |
-| [google/gson](https://github.com/google/gson) | gson-parent-2.15.0 (`fcd41690`) | A reactor of eight modules locks in under three minutes, and builds and tests offline in the Nix sandbox from a lockfile kept outside its source (the `real-world-gson` checks). Its protobuf module runs a native protoc, which made the lock fetch each system's build of files named by an os-maven-plugin classifier. Its moditect plugin writes temporary jars, which made the lock run keep Java's temporary directory in its own. |
+| [google/gson](https://github.com/google/gson) | gson-parent-2.15.0 (`fcd41690`) | A reactor of eight modules locks in under three minutes, and builds and tests offline in the Nix sandbox from a lockfile kept outside its source (the `real-world-gson` checks). Its protobuf module runs a native protoc, which made the lock fetch each system's build of files named by an os-maven-plugin classifier. Its moditect plugin writes temporary jars, which made the lock run keep Java's temporary directory in its own. In the everyday loop, a new dependency in `extras` failed the offline build with the extension's message, a relock took just over two minutes, and after a prefetch both Maven and jdtls resolved it offline. |
 
 ## Credits
 

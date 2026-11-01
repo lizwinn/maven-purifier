@@ -4,8 +4,8 @@
     python3 jdtls_check.py JDTLS BUILD_ROOT SETTINGS SOURCE_FILE
 
 JDTLS is the jdtls launcher, BUILD_ROOT the root of a build that
-`maven-purifier ide-settings` prepared, SETTINGS the ide-settings.xml it
-printed, and SOURCE_FILE a Java file of the build, relative to BUILD_ROOT,
+`maven-purifier prefetch` prepared, SETTINGS the settings.xml it wrote
+under .maven-purifier, and SOURCE_FILE a Java file of the build, relative to BUILD_ROOT,
 that uses a dependency. The script starts jdtls with SETTINGS as the user
 settings of its embedded Maven and Maven's offline mode on, opens
 SOURCE_FILE, and fails when jdtls reports an error in it, such as an import
