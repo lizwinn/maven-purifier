@@ -5,9 +5,10 @@
 # A purifier lockfile is JSON whose top-level `artifacts` list holds one
 # entry per downloaded file. A file entry is fetched:
 #
-#   { "path": "<relative path in the output tree>",
-#     "url":  "<where the file was downloaded from>",
-#     "hash": "sha256-<base64>" }
+#   { "path":    "<relative path in the output tree>",
+#     "url":     "<where the file was downloaded from>",
+#     "mirrors": [ "<another URL that serves the same bytes>", ... ],
+#     "hash":    "sha256-<base64>" }
 #
 # An inline entry holds the text of a file whose URL serves changing
 # contents, such as a Maven metadata file:

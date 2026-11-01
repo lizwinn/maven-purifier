@@ -74,9 +74,12 @@ let
   fetchFromSnapshotRepository =
     {
       name,
-      url,
+      urls,
       hash,
     }:
+    let
+      url = builtins.head urls;
+    in
     if lib.hasPrefix snapshotUrl url then
       pkgs.runCommand name
         {
@@ -87,7 +90,7 @@ let
           cp ${./snapshot-repository}/${lib.removePrefix snapshotUrl url} $out
         ''
     else
-      pkgs.fetchurl { inherit name url hash; };
+      pkgs.fetchurl { inherit name urls hash; };
   sources = buildMavenProject {
     src = ./fixtures/sources;
     fetchurl = fetchFromSnapshotRepository;

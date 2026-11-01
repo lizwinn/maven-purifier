@@ -132,6 +132,7 @@ let
         -s ${settings} \
         -Dmaven.repo.local="$TMPDIR/repository" \
         -Duser.home="$HOME" \
+        -Daether.remoteRepositoryFilter.prefixes=false \
         ${lib.optionalString (!doCheck) "-DskipTests"} \
         ${lib.escapeShellArgs mavenFlags} \
         ${lib.escapeShellArgs buildGoals} </dev/null
@@ -254,7 +255,8 @@ let
     cp -rL --no-preserve=mode ${repository}/. "$work/repository"
     cd "$work"
     deploy_file() {
-      ${maven}/bin/mvn -B -ntp -Dmaven.repo.local="$work/repository" "''${args[@]}" \
+      ${maven}/bin/mvn -B -ntp -Dmaven.repo.local="$work/repository" \
+        -Daether.remoteRepositoryFilter.prefixes=false "''${args[@]}" \
         org.apache.maven.plugins:maven-deploy-plugin:${deployPluginVersion}:deploy-file \
         -DrepositoryId="$repository_id" -Durl="$url" -DgeneratePom=false "$@"
     }

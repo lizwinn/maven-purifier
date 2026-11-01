@@ -59,6 +59,13 @@ BOOKKEEPING = {"_remote.repositories", "resolver-status.properties", "maven-meta
 # beside the download. An offline build validates no checksums.
 CHECKSUM_SUFFIXES = (".sha1", ".md5", ".sha256", ".sha512")
 
+# Flags of every Maven run of the purifier. Maven Resolver 2 downloads a
+# list of the groups each repository holds (.meta/prefixes.txt), whose
+# contents change as groups are published; the list only saves requests,
+# so the runs switch the filter that reads it off. Maven Resolver 1 does
+# not know the property.
+MAVEN_FLAGS = ["-Daether.remoteRepositoryFilter.prefixes=false"]
+
 # Directories that never belong to the build definition or the build input.
 SKIPPED_DIRS = {"target", ".git", STATE_DIR, ".idea", "node_modules"}
 
@@ -118,6 +125,22 @@ def distribution_url(root):
                 return value.strip().replace("\\:", ":")
     version = os.environ["MAVEN_PURIFIER_DEFAULT_MAVEN"]
     return f"{CENTRAL}org/apache/maven/apache-maven/{version}/apache-maven-{version}-bin.tar.gz"
+
+
+# Maven Central serves the same files under both of these URLs.
+CENTRAL_HOSTS = ("https://repo.maven.apache.org/maven2/", "https://repo1.maven.org/maven2/")
+
+
+def mirrors(url):
+    """Other URLs that serve the same bytes as url."""
+    for host in CENTRAL_HOSTS:
+        if url.startswith(host):
+            return [other + url[len(host) :] for other in CENTRAL_HOSTS if other != host]
+    return []
+
+
+def file_entry(path, url, hash_):
+    return {"path": path, "url": url, "mirrors": mirrors(url), "hash": hash_}
 
 
 def download_path(url):
@@ -394,6 +417,7 @@ def lock(args):
             f"-Dmaven.repo.local={repo}",
             f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}",
             f"-Duser.home={tmp / 'home'}",
+            *MAVEN_FLAGS,
             *goals,
         ]
         info(f"running Maven {maven_version} on a copy of the build: {' '.join(goals)}")
@@ -462,12 +486,12 @@ def lock(args):
         # serves new contents whenever a version is published, so a fetch
         # pinned by hash would break. The lock holds the contents the
         # resolver read. Every other download is immutable.
-        artifacts = [{"path": dist_path, "url": url, "hash": dist_hash}]
+        artifacts = [file_entry(dist_path, url, dist_hash)]
         for rel, src in sorted(downloads.items()):
             if Path(rel).name.startswith("maven-metadata"):
                 artifacts.append({"path": rel, "contents": (repo / rel).read_text()})
             else:
-                artifacts.append({"path": rel, "url": src, "hash": sri(repo / rel)})
+                artifacts.append(file_entry(rel, src, sri(repo / rel)))
         artifacts.sort(key=lambda a: str(a["path"]))
 
         projects = {}
@@ -574,7 +598,7 @@ def run_mvn(args):
     settings = root / STATE_DIR / "settings.xml"
     recorded_settings(lock_data, settings)
     result = subprocess.run(
-        [str(mvn), "-o", "-s", str(settings), f"-Dmaven.repo.local={repo}", *args],
+        [str(mvn), "-o", "-s", str(settings), f"-Dmaven.repo.local={repo}", *MAVEN_FLAGS, *args],
         env=env,
         check=False,
     )
