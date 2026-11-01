@@ -2,17 +2,17 @@
 <!-- SPDX-License-Identifier: MIT -->
 <!--
   The settings the fixture is locked with; tests/relock-fixtures.sh passes
-  this file to `maven-purifier lock`. The mirror sends every request for Maven Central to
-  repo1.maven.org under the id central-mirror, so the metadata files of the
-  local repository carry that id, and the sandboxed build must use these
-  settings to read them.
+  this file to `maven-purifier lock`. The mirror sends every request for
+  Maven Central to Google's copy of it under the id central-mirror, so the
+  metadata files of the local repository carry that id, and the sandboxed
+  build must use these settings to read them.
 -->
 <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
   <mirrors>
     <mirror>
       <id>central-mirror</id>
       <mirrorOf>central</mirrorOf>
-      <url>https://repo1.maven.org/maven2</url>
+      <url>https://maven-central.storage-download.googleapis.com/maven2</url>
     </mirror>
   </mirrors>
 </settings>

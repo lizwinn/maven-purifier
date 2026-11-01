@@ -51,9 +51,25 @@
   # `filter` of builtins.path. The default leaves out build outputs, the
   # interactive mode's state and editor state.
   srcFilter ? null,
+  # Compares the build definition with the one the lock was made from, and
+  # fails at evaluation time when they differ. The comparison reads `src`
+  # at evaluation time, so it applies only when `src` is a path; a `src`
+  # that a derivation produces is not compared.
+  checkDefinition ? true,
 }:
 let
-  lock = import ./lock.nix { inherit lockFile; };
+  lock =
+    let
+      read = import ./lock.nix { inherit lockFile; };
+      current = import ./definition-hash.nix {
+        inherit src;
+        inherit (read) goals;
+      };
+    in
+    if checkDefinition && builtins.isPath src && read.definitionHash != current then
+      throw "maven-purifier: the build definition (a pom.xml, .mvn/ or the goals) changed since ${toString lockFile} was made. Run `maven-purifier lock` at the build root to lock it again."
+    else
+      read;
 
   defaultSrcFilter =
     path: type:
@@ -128,6 +144,10 @@ let
       # path in the repository. A file without a tracking entry counts as
       # available offline.
       cp -rL --no-preserve=mode ${repository}/. "$TMPDIR/repository"
+      maven_failed() {
+        echo "maven-purifier: Maven failed offline. If it reports an artifact that has not been downloaded, the lock does not hold everything this build needs: run \`maven-purifier lock --force\` at the build root, with the goals and -P options you build with. If it reports a compile or test failure, the build itself failed." >&2
+        exit 1
+      }
       ${maven}/bin/mvn -o -B -ntp \
         -s ${settings} \
         -Dmaven.repo.local="$TMPDIR/repository" \
@@ -135,7 +155,7 @@ let
         -Daether.remoteRepositoryFilter.prefixes=false \
         ${lib.optionalString (!doCheck) "-DskipTests"} \
         ${lib.escapeShellArgs mavenFlags} \
-        ${lib.escapeShellArgs buildGoals} </dev/null
+        ${lib.escapeShellArgs buildGoals} </dev/null || maven_failed
       runHook postBuild
     '';
     installPhase = ''

@@ -15,6 +15,11 @@
       Runs Maven offline from the locked downloads, which Nix fetches into
       .maven-purifier/ at the build root.
 
+  maven-purifier ide-settings
+      Fetches the locked downloads like `mvn` and prints the path of
+      .maven-purifier/ide-settings.xml: settings for an editor's embedded
+      Maven that resolve offline from the same files.
+
   maven-purifier deploy [--repository-id ID --url URL] [ARG...]
       Builds the artifacts with Nix and deploys them with the locked Maven
       and ~/.m2/settings.xml (for credentials). The default target is the
@@ -95,24 +100,39 @@ def sri(path):
 
 
 def definition_files(root):
-    """The files that define the build: every pom.xml, and .mvn/."""
+    """The files that define the build, as relative path strings in sorted order.
+
+    They are every regular file named pom.xml, and every regular file under
+    .mvn/ at the build root. Directories in SKIPPED_DIRS, directories whose
+    names start with "result", and symbolic links take no part.
+    nix/lib/definition-hash.nix walks the build root by the same rules.
+    """
     files = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = sorted(d for d in dirnames if d not in SKIPPED_DIRS and not d.startswith("result"))
+        dirnames[:] = [d for d in dirnames if d not in SKIPPED_DIRS and not d.startswith("result")]
         rel = Path(dirpath).relative_to(root)
-        for name in sorted(filenames):
+        for name in filenames:
+            path = Path(dirpath) / name
+            if path.is_symlink() or not path.is_file():
+                continue
             if name == "pom.xml" or (rel.parts and rel.parts[0] == ".mvn"):
-                files.append(rel / name)
-    return files
+                files.append((rel / name).as_posix())
+    return sorted(files)
 
 
 def definition_hash(root, goals):
-    digest = hashlib.sha256()
-    digest.update(json.dumps(goals).encode() + b"\0")
+    """A hash of the build definition and the lock goals.
+
+    It is the SHA-256, in hex, of the text "goals <goals joined by spaces>"
+    followed by a line "<relative path> <SHA-256 of the file in hex>" for
+    each definition file. Nix computes the same text from the build root
+    (nix/lib/definition-hash.nix), so a sandboxed build can tell a stale
+    lock at evaluation time.
+    """
+    lines = ["goals " + " ".join(goals)]
     for rel in definition_files(root):
-        digest.update(str(rel).encode() + b"\0")
-        digest.update((root / rel).read_bytes() + b"\0")
-    return "sha256-" + base64.b64encode(digest.digest()).decode()
+        lines.append(f"{rel} {hashlib.sha256((root / rel).read_bytes()).hexdigest()}")
+    return "sha256:" + hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()
 
 
 def distribution_url(root):
@@ -127,20 +147,40 @@ def distribution_url(root):
     return f"{CENTRAL}org/apache/maven/apache-maven/{version}/apache-maven-{version}-bin.tar.gz"
 
 
-# Maven Central serves the same files under both of these URLs.
-CENTRAL_HOSTS = ("https://repo.maven.apache.org/maven2/", "https://repo1.maven.org/maven2/")
+# Maven Central serves the same files under each of these URLs. The lock
+# records the first as a file's URL and the others as its mirrors.
+CENTRAL_HOSTS = (
+    "https://repo1.maven.org/maven2/",
+    "https://repo.maven.apache.org/maven2/",
+    "https://maven-central.storage-download.googleapis.com/maven2/",
+)
 
 
-def mirrors(url):
-    """Other URLs that serve the same bytes as url."""
+def central_path(url):
+    """The path of url in Maven Central, when one of its hosts serves it, or None."""
     for host in CENTRAL_HOSTS:
         if url.startswith(host):
-            return [other + url[len(host) :] for other in CENTRAL_HOSTS if other != host]
-    return []
+            return url[len(host) :]
+    return None
 
 
 def file_entry(path, url, hash_):
-    return {"path": path, "url": url, "mirrors": mirrors(url), "hash": hash_}
+    """A file entry of the lock; a file of Maven Central gets its canonical URL and mirrors."""
+    rest = central_path(url)
+    if rest is None:
+        return {"path": path, "url": url, "mirrors": [], "hash": hash_}
+    return {
+        "path": path,
+        "url": CENTRAL_HOSTS[0] + rest,
+        "mirrors": [host + rest for host in CENTRAL_HOSTS[1:]],
+        "hash": hash_,
+    }
+
+
+def central_mirror():
+    """The URL the lock run downloads Maven Central's files from, when MAVEN_PURIFIER_CENTRAL_MIRROR names one."""
+    mirror = os.environ.get("MAVEN_PURIFIER_CENTRAL_MIRROR")
+    return (mirror.rstrip("/") + "/") if mirror else None
 
 
 def download_path(url):
@@ -185,6 +225,32 @@ def java_home():
     if not home:
         fail("set JAVA_HOME to the JDK that runs Maven")
     return home
+
+
+def locked_java_home(lock_data):
+    """The JDK of the Java major version the lock was made with, from nixpkgs.
+
+    The sandboxed build runs on nixpkgs' headless JDK of that major, so the
+    interactive mode and the deploy step run on it too, whatever JAVA_HOME
+    names.
+    """
+    major = lock_data["javaVersion"].split(".")[0]
+    try:
+        jdk = subprocess.run(
+            [
+                "nix-build",
+                os.environ["MAVEN_PURIFIER_NIXPKGS"],
+                "-A",
+                f"javaPackages.compiler.openjdk{major}.headless",
+                "--no-out-link",
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            text=True,
+        ).stdout.strip()
+    except subprocess.CalledProcessError:
+        fail(f"nixpkgs has no headless JDK {major}, the Java major version the lock was made with")
+    return f"{jdk}/lib/openjdk"
 
 
 def java_version(home):
@@ -291,12 +357,53 @@ def write_run_settings(settings, path):
         if proxies:
             element = ET.SubElement(settings, qualify("proxies"))
             element.extend(proxies)
+
+    # A mirror of Maven Central under the id `central`, so that the names of
+    # metadata files stay those of Central. Mirrors the settings declare
+    # come first.
+    mirror = central_mirror()
+    if mirror:
+        mirrors = next((c for c in settings if local_name(c.tag) == "mirrors"), None)
+        declared = [] if mirrors is None else [m.findtext(qualify("mirrorOf")) or "" for m in mirrors]
+        if not any("central" in d.split(",") or d.strip() == "*" for d in declared):
+            if mirrors is None:
+                mirrors = ET.SubElement(settings, qualify("mirrors"))
+            element = ET.SubElement(mirrors, qualify("mirror"))
+            for name, text in (("id", "central"), ("mirrorOf", "central"), ("url", mirror)):
+                ET.SubElement(element, qualify(name)).text = text
     path.write_text(ET.tostring(settings, encoding="unicode") + "\n")
 
 
 def recorded_settings(lock_data, path):
     """Writes the settings a lock recorded, or empty settings."""
     path.write_text(lock_data.get("settings") or "<settings/>\n")
+
+
+def ide_settings(lock_data, repo, path):
+    """Writes settings for an editor's embedded Maven: the recorded settings, offline, on the locked repository.
+
+    An editor that imports the build with these as its user settings (the
+    `java.configuration.maven.userSettings` of jdtls, the user settings file
+    of IntelliJ IDEA) resolves from the same files as `maven-purifier mvn`.
+    """
+    settings = ET.fromstring(lock_data.get("settings") or "<settings/>")
+    namespace = settings.tag[1:].split("}")[0] if settings.tag.startswith("{") else ""
+    if namespace:
+        ET.register_namespace("", namespace)
+
+    def qualify(name):
+        return f"{{{namespace}}}{name}" if namespace else name
+
+    for child in list(settings):
+        if local_name(child.tag) in ("localRepository", "offline"):
+            settings.remove(child)
+    local = ET.Element(qualify("localRepository"))
+    local.text = str(repo)
+    offline = ET.Element(qualify("offline"))
+    offline.text = "true"
+    settings.insert(0, offline)
+    settings.insert(0, local)
+    path.write_text(ET.tostring(settings, encoding="unicode") + "\n")
 
 
 def copy_build(root, dest):
@@ -392,8 +499,11 @@ def lock(args):
     with tempfile.TemporaryDirectory(prefix="maven-purifier-lock-") as tmp:
         tmp = Path(tmp)
         url = distribution_url(root)
-        info(f"fetching {url}")
-        dist_hash, dist_store = prefetch(url)
+        fetch_url = url
+        if central_mirror() and central_path(url) is not None:
+            fetch_url = central_mirror() + central_path(url)
+        info(f"fetching {fetch_url}")
+        dist_hash, dist_store = prefetch(fetch_url)
         dist_path = download_path(url)
         mvn = unpack_maven(Path(dist_store), tmp / "maven")
         maven_version = mvn.parent.parent.name.removeprefix("apache-maven-")
@@ -404,8 +514,11 @@ def lock(args):
         repo.mkdir()
         declared = []
         for d in declared_downloads(root):
-            info(f"fetching {d['url']}")
-            declared_hash, declared_store = prefetch(d["url"])
+            fetch_url = d["url"]
+            if central_mirror() and central_path(fetch_url) is not None:
+                fetch_url = central_mirror() + central_path(fetch_url)
+            info(f"fetching {fetch_url}")
+            declared_hash, declared_store = prefetch(fetch_url)
             target = repo / d["path"]
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(declared_store, target)
@@ -625,12 +738,13 @@ def run_mvn(args):
     lock_data = read_lock(root)
     repo, mvn = realize(root, lock_data)
     env = dict(os.environ)
-    env.setdefault("JAVA_HOME", java_home())
+    env["JAVA_HOME"] = locked_java_home(lock_data)
     if lock_data.get("definitionHash") != definition_hash(root, lock_data["goals"]):
         info(f"the build definition changed since {LOCK_NAME} was made; Maven resolves online until `maven-purifier lock` renews it")
         os.execve(str(mvn), [str(mvn), *args], env)
     settings = root / STATE_DIR / "settings.xml"
     recorded_settings(lock_data, settings)
+    ide_settings(lock_data, repo, root / STATE_DIR / "ide-settings.xml")
     result = subprocess.run(
         [str(mvn), "-o", "-s", str(settings), f"-Dmaven.repo.local={repo}", *MAVEN_FLAGS, *args],
         env=env,
@@ -646,11 +760,27 @@ def run_mvn(args):
     sys.exit(result.returncode)
 
 
+def write_ide_settings(args):
+    if args:
+        fail("`maven-purifier ide-settings` takes no arguments")
+    root = build_root()
+    lock_data = read_lock(root)
+    repo, _ = realize(root, lock_data)
+    path = root / STATE_DIR / "ide-settings.xml"
+    ide_settings(lock_data, repo, path)
+    print(path)
+
+
 def read_lock(root):
     lock_path = root / LOCK_NAME
     if not lock_path.is_file():
         fail(f"{root} has no {LOCK_NAME}; run `maven-purifier lock` first")
-    lock_data = json.loads(lock_path.read_text())
+    try:
+        lock_data = json.loads(lock_path.read_text())
+    except json.JSONDecodeError as e:
+        fail(f"{lock_path} is not valid JSON ({e}); run `maven-purifier lock --force` to write it again")
+    if not isinstance(lock_data, dict):
+        fail(f"{lock_path} is not a lock that maven-purifier wrote; run `maven-purifier lock --force`")
     if lock_data.get("version") != FORMAT_VERSION:
         fail(f"{LOCK_NAME} has lock format version {lock_data.get('version')}; run `maven-purifier lock --force`")
     return lock_data
@@ -721,7 +851,7 @@ def deploy(args):
         fail("the Nix build of the artifacts failed")
     deploy_bin = Path(script) / "bin" / "maven-purifier-deploy"
     env = dict(os.environ)
-    env.setdefault("JAVA_HOME", java_home())
+    env["JAVA_HOME"] = locked_java_home(lock_data)
     os.execve(
         str(deploy_bin),
         [str(deploy_bin), "--repository-id", repository_id, "--url", url, *maven_args],
@@ -740,8 +870,10 @@ def main():
         run_mvn(args)
     elif verb == "deploy":
         deploy(args)
+    elif verb == "ide-settings":
+        write_ide_settings(args)
     else:
-        fail(f"unknown command {verb!r}; the commands are `lock`, `mvn` and `deploy`")
+        fail(f"unknown command {verb!r}; the commands are `lock`, `mvn`, `ide-settings` and `deploy`")
 
 
 if __name__ == "__main__":

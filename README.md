@@ -89,6 +89,48 @@ To run Maven offline from the lock, for example while developing:
 nix run github:nix-purifiers/maven-purifier -- mvn clean install
 ```
 
+### Editors
+
+An editor that imports a Maven build, such as VS Code or Neovim through
+jdtls, or IntelliJ IDEA, runs a Maven of its own. `maven-purifier
+ide-settings` fetches the locked downloads and prints the path of
+`.maven-purifier/ide-settings.xml`, which holds the lock's settings with
+offline mode on and the locked repository as the local repository. Make
+it the editor's Maven user settings, `java.configuration.maven.userSettings`
+for jdtls or *User settings file* in IntelliJ IDEA, and the editor
+resolves from the same files as `maven-purifier mvn`, without the network.
+
+The Maven inside an editor has default plugin versions of its own, which
+differ from those of the Maven that made the lock. We recommend pinning the
+version of every plugin the build uses in `<pluginManagement>`, the
+lifecycle plugins such as maven-compiler-plugin and maven-resources-plugin
+included, as Maven's own guidance does. The editor's Maven then asks for
+the locked versions. Without the pins, the editor reports that it could not
+resolve a plugin in offline mode, such as maven-resources-plugin 3.4.0.
+
+### Errors
+
+Each common mistake fails with a message that says what went wrong and what
+to run.
+
+- When a pom.xml, `.mvn/` or the lock goals changed after locking, a Nix
+  build fails at evaluation, saying that the build definition changed
+  since the lock was made and to run `maven-purifier lock`.
+  `maven-purifier mvn` says the same, and resolves online until the lock
+  is renewed.
+- When the build needs a dependency or plugin that the lock does not hold,
+  Maven reports that it cannot reach the repository in offline mode.
+  maven-purifier adds that the lock does not hold everything the build
+  needs, and to run `maven-purifier lock --force` with the goals and `-P`
+  options of the build.
+- When someone edited the lockfile, a missing or misshaped field fails
+  with the name of the field and asks for `maven-purifier lock --force`. A
+  changed hash fails the fetch of that file with Nix's hash mismatch. A
+  lockfile that is not JSON fails `maven-purifier mvn` with the parse error
+  and the same command; for a Nix build, Nix's own JSON parser reports it.
+
+### Deploying
+
 To deploy, with the target from the root POM's `distributionManagement`
 and the credentials from `~/.m2/settings.xml`:
 
@@ -182,6 +224,17 @@ such a proxy.
 - **The prefix filter of Maven Resolver 2 is off in every run.** It reads
   a list of the groups each repository holds, which changes as groups are
   published, and offline it saves nothing.
+- **A file of Maven Central is recorded under repo1.maven.org**, whichever
+  of Central's hosts served it, with repo.maven.apache.org and Google's
+  copy of Central as mirrors. `MAVEN_PURIFIER_CENTRAL_MIRROR` makes a lock
+  run download through another copy of Central, which spares Central's
+  rate limit, without changing the lock.
+- **The interactive mode and the deploy step run on nixpkgs' JDK of the
+  locked Java major version**, as the sandboxed build does, whatever
+  `JAVA_HOME` names.
+- **A stale lock fails a Nix build** at evaluation time, since the lock
+  also names the build's outputs. `checkDefinition = false` turns the
+  comparison off, and it applies only when `src` is a path.
 
 ## Limits
 

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 #
-# Runs the flake checks, evaluates them for every system, and exercises
-# the two parts of maven-purifier that need the network or a Nix
-# installation, which the Nix sandbox has neither of: the lock run and the
-# interactive mode.
+# Runs the flake checks on x86_64-linux and aarch64-linux, and the tests
+# that need the network or a Nix installation, which the Nix sandbox has
+# neither of: the lock run, the interactive mode, and builds of locks
+# someone edited.
 name: check
 
 on:
@@ -16,20 +16,24 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
       - name: Run the flake checks
         run: nix flake check --print-build-logs
 
-  evaluate:
+  negative:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
-      - name: Evaluate the checks of every system
-        run: nix flake check --no-build --all-systems
+      - name: Build locks someone edited
+        run: tests/negative-builds.sh
 
   lock-and-interactive:
     runs-on: ubuntu-latest
@@ -42,16 +46,19 @@ jobs:
         run: |
           cp -r tests/fixtures/wrapper "$RUNNER_TEMP/wrapper"
           cd "$RUNNER_TEMP/wrapper"
-          "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force
-          # The lock run of this checkout must record the downloads and
-          # modules of the committed lock.
-          nix shell 'nixpkgs#jq' -c sh -c '
-            jq -S "{artifacts, projects, maven}" maven-purifier.lock.json > relocked.json
-            jq -S "{artifacts, projects, maven}" "$GITHUB_WORKSPACE/tests/fixtures/wrapper/maven-purifier.lock.json" > committed.json
-            diff -u committed.json relocked.json
-          '
+          # An empty home, so that no settings of the runner take part.
+          mkdir "$RUNNER_TEMP/home"
+          HOME="$RUNNER_TEMP/home" "$RUNNER_TEMP/cli/bin/maven-purifier" lock --force
+          # The relock must reproduce the committed lockfile byte for byte.
+          diff -u "$GITHUB_WORKSPACE/tests/fixtures/wrapper/maven-purifier.lock.json" maven-purifier.lock.json
       - name: Run Maven offline from the lock of the multi fixture
         run: |
           cp -r tests/fixtures/multi "$RUNNER_TEMP/multi"
           cd "$RUNNER_TEMP/multi"
           "$RUNNER_TEMP/cli/bin/maven-purifier" mvn -B -ntp clean install
+      - name: Tell a stale lock in the interactive mode
+        run: |
+          cd "$RUNNER_TEMP/multi"
+          sed -i 's|<version>1.0.0</version>|<version>1.0.1</version>|' core/pom.xml
+          "$RUNNER_TEMP/cli/bin/maven-purifier" mvn -B -ntp -q validate 2>&1 | tee "$RUNNER_TEMP/stale.log" || true
+          grep -F 'the build definition changed' "$RUNNER_TEMP/stale.log"

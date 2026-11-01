@@ -126,7 +126,7 @@ public class RecordingEventSpy extends AbstractEventSpy {
     out.flush();
   }
 
-  private static String url(RemoteRepository repository, String path) {
+  static String url(RemoteRepository repository, String path) {
     String base = repository.getUrl();
     return (base.endsWith("/") ? base : base + "/") + path;
   }
@@ -134,7 +134,7 @@ public class RecordingEventSpy extends AbstractEventSpy {
   // The path of an artifact in the Maven 2 repository layout. A SNAPSHOT
   // artifact's directory is its base version and its file name carries the
   // resolved timestamp version.
-  private static String artifactPath(Artifact a) {
+  static String artifactPath(Artifact a) {
     StringBuilder path = new StringBuilder();
     path.append(a.getGroupId().replace('.', '/')).append('/');
     path.append(a.getArtifactId()).append('/');
@@ -152,7 +152,7 @@ public class RecordingEventSpy extends AbstractEventSpy {
   // The path of a metadata file in the Maven 2 repository layout: the
   // group, artifact and version directories it applies to, each only when
   // set, then its type, such as maven-metadata.xml.
-  private static String metadataPath(Metadata m) {
+  static String metadataPath(Metadata m) {
     StringBuilder path = new StringBuilder();
     if (!m.getGroupId().isEmpty()) {
       path.append(m.getGroupId().replace('.', '/')).append('/');

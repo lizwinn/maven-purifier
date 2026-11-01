@@ -108,20 +108,112 @@ let
       touch $out
     '';
 
-  # The lock reader rejects a lock of another format version.
-  lockVersion =
-    let
-      lockFile = builtins.toFile "maven-purifier.lock.json" (
-        builtins.toJSON {
-          version = 999;
-          artifacts = [ ];
-          projects = [ ];
-        }
-      );
-      result = builtins.tryEval (import ../nix/lib/lock.nix { inherit lockFile; }).version;
-    in
-    assert !result.success;
-    pkgs.runCommand "maven-purifier-test-lock-version" { } "touch $out";
+  # Each of these locks fails to read: the reader names the field at fault
+  # and the command to run, rather than failing deep inside a build.
+  validLock = {
+    version = 1;
+    maven = {
+      version = "3.10.0";
+      distribution = "dist.tar.gz";
+    };
+    javaVersion = "21";
+    goals = [ "install" ];
+    settings = null;
+    definitionHash = "sha256:0";
+    projects = [
+      {
+        groupId = "g";
+        artifactId = "a";
+        version = "1";
+        artifacts = [
+          {
+            key = "a.jar";
+            path = "g/a/1/a-1.jar";
+          }
+        ];
+      }
+    ];
+    artifacts = [
+      {
+        path = "dist.tar.gz";
+        url = "https://example.org/dist.tar.gz";
+        mirrors = [ ];
+        hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      }
+    ];
+  };
+  readsAs =
+    lock:
+    (builtins.tryEval
+      (import ../nix/lib/lock.nix {
+        lockFile = builtins.toFile "maven-purifier.lock.json" (builtins.toJSON lock);
+      }).projectsByArtifactId
+    ).success;
+  invalidLocks = {
+    wrong-version = validLock // {
+      version = 999;
+    };
+    no-artifacts = removeAttrs validLock [ "artifacts" ];
+    no-projects = removeAttrs validLock [ "projects" ];
+    no-maven = removeAttrs validLock [ "maven" ];
+    entry-without-hash = validLock // {
+      artifacts = [ (removeAttrs (builtins.head validLock.artifacts) [ "hash" ]) ];
+    };
+    entry-without-mirrors = validLock // {
+      artifacts = [ (removeAttrs (builtins.head validLock.artifacts) [ "mirrors" ]) ];
+    };
+    entry-without-url = validLock // {
+      artifacts = [ (removeAttrs (builtins.head validLock.artifacts) [ "url" ]) ];
+    };
+    missing-distribution = validLock // {
+      maven = validLock.maven // {
+        distribution = "elsewhere.tar.gz";
+      };
+    };
+    project-without-artifact-id = validLock // {
+      projects = [ (removeAttrs (builtins.head validLock.projects) [ "artifactId" ]) ];
+    };
+  };
+  negativeLocks =
+    assert readsAs validLock;
+    assert lib.all (name: !readsAs invalidLocks.${name}) (builtins.attrNames invalidLocks);
+    pkgs.runCommand "maven-purifier-test-negative-locks" { } "touch $out";
+
+  # A build whose pom.xml differs from the one its lock was made from fails
+  # at evaluation time, before anything is fetched or built.
+  negativeStale =
+    assert !(builtins.tryEval (buildMavenProject { src = ./negative/stale; }).build.drvPath).success;
+    pkgs.runCommand "maven-purifier-test-negative-stale" { } "touch $out";
+
+  # The unit tests of the lock tool: settings, tracking files, mirrors,
+  # paths, the definition hash, declared downloads and the deploy target.
+  unitCli =
+    pkgs.runCommand "maven-purifier-test-unit-cli"
+      {
+        nativeBuildInputs = [ pkgs.python3 ];
+        MAVEN_PURIFIER_CLI = ../cli/maven_purifier.py;
+      }
+      ''
+        python3 ${./cli/test_maven_purifier.py}
+        touch $out
+      '';
+
+  # The unit tests of the recording extension: the remote path of an
+  # artifact or metadata file, and the URL it joins with its repository.
+  unitExtension =
+    pkgs.runCommand "maven-purifier-test-unit-extension"
+      {
+        nativeBuildInputs = [ pkgs.jdk_headless ];
+      }
+      ''
+        mkdir classes src
+        # javac wants each public class in a file of its name.
+        cp ${../extension/src/io/github/nixpurifiers/maven/RecordingEventSpy.java} src/RecordingEventSpy.java
+        cp ${./extension/io/github/nixpurifiers/maven/RecordingEventSpyTest.java} src/RecordingEventSpyTest.java
+        javac -Xlint:-deprecation -d classes -cp "${pkgs.maven}/maven/lib/*" src/*.java
+        java -cp "classes:${pkgs.maven}/maven/lib/*" io.github.nixpurifiers.maven.RecordingEventSpyTest
+        touch $out
+      '';
 
   # The extension jar holds the class Maven loads and the index that names
   # it, and the command's Python parses.
@@ -157,6 +249,9 @@ in
     touch $out
   '';
   wrapper-version = wrapperVersion;
-  lock-version = lockVersion;
+  negative-locks = negativeLocks;
+  negative-stale = negativeStale;
+  unit-cli = unitCli;
+  unit-extension = unitExtension;
   inherit packaging;
 }

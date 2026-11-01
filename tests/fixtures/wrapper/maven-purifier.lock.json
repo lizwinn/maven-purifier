@@ -10,7 +10,7 @@
     "install"
   ],
   "settings": null,
-  "definitionHash": "sha256-H9plBgH77Qcrf2Vt21XGSsnMdmpmaNif9ar87xrZ6nE=",
+  "definitionHash": "sha256:dc7003414cbd08e0ed640165f73af375a6f46b92a9251c3a1a479e6802e382c0",
   "projects": [
     {
       "groupId": "example.wrapper",
@@ -35,1633 +35,1837 @@
   "artifacts": [
     {
       "path": "aopalliance/aopalliance/1.0/aopalliance-1.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.pom",
+      "url": "https://repo1.maven.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.pom"
+        "https://repo.maven.apache.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.pom"
       ],
       "hash": "sha256-JugjMBV9a4RLZ6gGSUXiBlgedyl3GD4+Mf7GBYqppZs="
     },
     {
       "path": "com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar",
-      "url": "https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar",
+      "url": "https://repo1.maven.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar"
+        "https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.jar"
       ],
       "hash": "sha256-11ss7WBZ+BrSPgIcVUJZuQa2xPKZHLdyQJgnVp6tTBo="
     },
     {
       "path": "com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom",
-      "url": "https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom",
+      "url": "https://repo1.maven.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom"
+        "https://repo.maven.apache.org/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/com/github/luben/zstd-jni/1.5.5-11/zstd-jni-1.5.5-11.pom"
       ],
       "hash": "sha256-oBUrGJfEpufdNuX2hvDmMcODm12yCLONqhGk9tybJf8="
     },
     {
       "path": "com/google/guava/guava-parent/16.0.1/guava-parent-16.0.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/com/google/guava/guava-parent/16.0.1/guava-parent-16.0.1.pom",
+      "url": "https://repo1.maven.org/maven2/com/google/guava/guava-parent/16.0.1/guava-parent-16.0.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/com/google/guava/guava-parent/16.0.1/guava-parent-16.0.1.pom"
+        "https://repo.maven.apache.org/maven2/com/google/guava/guava-parent/16.0.1/guava-parent-16.0.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/com/google/guava/guava-parent/16.0.1/guava-parent-16.0.1.pom"
       ],
       "hash": "sha256-LJiJLL98YGuRtPDw0dkdomdGu/X4WVYm9bTWpaGRSCQ="
     },
     {
       "path": "com/google/guava/guava/16.0.1/guava-16.0.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/com/google/guava/guava/16.0.1/guava-16.0.1.pom",
+      "url": "https://repo1.maven.org/maven2/com/google/guava/guava/16.0.1/guava-16.0.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/com/google/guava/guava/16.0.1/guava-16.0.1.pom"
+        "https://repo.maven.apache.org/maven2/com/google/guava/guava/16.0.1/guava-16.0.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/com/google/guava/guava/16.0.1/guava-16.0.1.pom"
       ],
       "hash": "sha256-xnZXWEX8itbc/soIJ/QFBmoUD1+lQ0cVWYF5yLocCBc="
     },
     {
       "path": "com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar",
-      "url": "https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar",
+      "url": "https://repo1.maven.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar"
+        "https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.jar"
       ],
       "hash": "sha256-/3DBAWVxT+lUbEGKZddOzV1XYjukCM7N6UKPCmCbXRw="
     },
     {
       "path": "com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.pom",
-      "url": "https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.pom",
+      "url": "https://repo1.maven.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.pom"
+        "https://repo.maven.apache.org/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/com/thoughtworks/qdox/qdox/2.0.3/qdox-2.0.3.pom"
       ],
       "hash": "sha256-5+uurTyV50k0RR/Fta6dAgZjA9tnQw9Z/iGXFO/PO/M="
     },
     {
       "path": "commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar",
+      "url": "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar"
+        "https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar"
       ],
       "hash": "sha256-7Ie/tV8iy9GyHiGQ7toosrMS7SpDHuSfvcwBgS0EpeQ="
     },
     {
       "path": "commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom",
+      "url": "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom"
+        "https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.pom"
       ],
       "hash": "sha256-uCbd2S+dfMZDcaAvoIMMFU1nyYNw6lSi0ZbnLrWQrSg="
     },
     {
       "path": "commons-io/commons-io/2.11.0/commons-io-2.11.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar"
       ],
       "hash": "sha256-lhsvbYfbrMXVSr9Fq3puJJX4m3VZiWLYxyPOqbwhCQg="
     },
     {
       "path": "commons-io/commons-io/2.11.0/commons-io-2.11.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.pom"
       ],
       "hash": "sha256-LgFv1+MkS18sIKytg02TqkeQSG7h5FZGQTYaPoMe71k="
     },
     {
       "path": "commons-io/commons-io/2.15.1/commons-io-2.15.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar"
       ],
       "hash": "sha256-pYrxLuG2jP0uuwwnyu8WTwhDgaAOyBpIzCdf1+pU4VQ="
     },
     {
       "path": "commons-io/commons-io/2.15.1/commons-io-2.15.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.pom",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.pom"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.15.1/commons-io-2.15.1.pom"
       ],
       "hash": "sha256-Fxoa+CtnWetXQLO4gJrKgBE96vEVMDby9ERZAd/T+R0="
     },
     {
       "path": "commons-io/commons-io/2.16.1/commons-io-2.16.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar"
       ],
       "hash": "sha256-9B97qs1xaJZEes6XWGIfYsHGsKkdiazuSI2ib8R3yE8="
     },
     {
       "path": "commons-io/commons-io/2.16.1/commons-io-2.16.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.16.1/commons-io-2.16.1.pom"
       ],
       "hash": "sha256-V3fSkiUceJXASkxXAVaD7Ds1OhJIbJs+cXjpsLPDj/8="
     },
     {
       "path": "commons-io/commons-io/2.6/commons-io-2.6.jar",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.6/commons-io-2.6.jar"
       ],
       "hash": "sha256-+HfTBGYKwqFC84ZbrfyXHex+1zx0fH+NXS9ROcpzZRM="
     },
     {
       "path": "commons-io/commons-io/2.6/commons-io-2.6.pom",
-      "url": "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom",
+      "url": "https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom"
+        "https://repo.maven.apache.org/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/commons-io/commons-io/2.6/commons-io-2.6.pom"
       ],
       "hash": "sha256-DCOGOJOiKR9aev29jRWSOzlIr9h+Vj+jQc3Pbq4zimA="
     },
     {
       "path": "javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom",
+      "url": "https://repo1.maven.org/maven2/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom"
+        "https://repo.maven.apache.org/maven2/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom"
       ],
       "hash": "sha256-Utc/NffmOM48tWVG+HnCDn9wGfcqogzeH6gOl4Zd/UA="
     },
     {
       "path": "javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom",
+      "url": "https://repo1.maven.org/maven2/javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom"
+        "https://repo.maven.apache.org/maven2/javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom"
       ],
       "hash": "sha256-19cTyZM2N2S6Fmcpa4Ne6RThmy5wkh6v6Ws38NW0CI8="
     },
     {
       "path": "javax/inject/javax.inject/1/javax.inject-1.jar",
-      "url": "https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+      "url": "https://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar"
+        "https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/javax/inject/javax.inject/1/javax.inject-1.jar"
       ],
       "hash": "sha256-kcdwRKUMSBY2wy2Rb9ickRinIZU5BFLIEGUID5V95/8="
     },
     {
       "path": "javax/inject/javax.inject/1/javax.inject-1.pom",
-      "url": "https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom",
+      "url": "https://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom"
+        "https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/javax/inject/javax.inject/1/javax.inject-1.pom"
       ],
       "hash": "sha256-lD4SsQBieARjj6KFgFoKt4imgCZlMeZQkh6/5GIai/o="
     },
     {
       "path": "net/java/jvnet-parent/3/jvnet-parent-3.pom",
-      "url": "https://repo.maven.apache.org/maven2/net/java/jvnet-parent/3/jvnet-parent-3.pom",
+      "url": "https://repo1.maven.org/maven2/net/java/jvnet-parent/3/jvnet-parent-3.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/net/java/jvnet-parent/3/jvnet-parent-3.pom"
+        "https://repo.maven.apache.org/maven2/net/java/jvnet-parent/3/jvnet-parent-3.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/net/java/jvnet-parent/3/jvnet-parent-3.pom"
       ],
       "hash": "sha256-MPV4nvo53b+WCVqto/wSYMRWH68vcUaGcXyy3FBJR1o="
     },
     {
       "path": "org/apache/apache/13/apache-13.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/13/apache-13.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/13/apache-13.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/13/apache-13.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/13/apache-13.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/13/apache-13.pom"
       ],
       "hash": "sha256-/1E9sDYf1BI3vvR4SWi8FarkeNTsCpSW+BEHLMrzhB0="
     },
     {
       "path": "org/apache/apache/15/apache-15.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/15/apache-15.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/15/apache-15.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/15/apache-15.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/15/apache-15.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/15/apache-15.pom"
       ],
       "hash": "sha256-NsLy+XmsZ7RQwMtIDk6br2tA86aB8iupaSKH0ROa1JQ="
     },
     {
       "path": "org/apache/apache/18/apache-18.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/18/apache-18.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/18/apache-18.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/18/apache-18.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/18/apache-18.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/18/apache-18.pom"
       ],
       "hash": "sha256-eDEwcoX9R1u8NrIK4454gvEcMVOx1ZMPhS1E7ajzPBc="
     },
     {
       "path": "org/apache/apache/23/apache-23.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/23/apache-23.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/23/apache-23.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/23/apache-23.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/23/apache-23.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/23/apache-23.pom"
       ],
       "hash": "sha256-vBBiTgYj82V3+sVjnKKTbTJA7RUvttjVM6tNJwVDSRw="
     },
     {
       "path": "org/apache/apache/25/apache-25.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/25/apache-25.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/25/apache-25.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/25/apache-25.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/25/apache-25.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/25/apache-25.pom"
       ],
       "hash": "sha256-5o/BmkjOxYKmcy/QsQ2/6f7KJQYJY974nlR/ijdZ03k="
     },
     {
       "path": "org/apache/apache/26/apache-26.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/26/apache-26.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/26/apache-26.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/26/apache-26.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/26/apache-26.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/26/apache-26.pom"
       ],
       "hash": "sha256-dluccYMtL6rZYRhpwfByY+Pf0ADr79zUNNHxTLK+PqE="
     },
     {
       "path": "org/apache/apache/29/apache-29.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/29/apache-29.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/29/apache-29.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/29/apache-29.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/29/apache-29.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/29/apache-29.pom"
       ],
       "hash": "sha256-PkkDcXSCC70N9jQgqXclWIY5iVTCoGKR+mH3J6w1s3c="
     },
     {
       "path": "org/apache/apache/30/apache-30.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/30/apache-30.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/30/apache-30.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/30/apache-30.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/30/apache-30.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/30/apache-30.pom"
       ],
       "hash": "sha256-Y91KOTqcDfyzFO/oOHGkHSQ7yNIAy8fy0ZfzDaeCOdg="
     },
     {
       "path": "org/apache/apache/31/apache-31.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/31/apache-31.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/31/apache-31.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/31/apache-31.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/31/apache-31.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/31/apache-31.pom"
       ],
       "hash": "sha256-VV0MnqppwEKv+SSSe5OB6PgXQTbTVe6tRFIkRS5ikcw="
     },
     {
       "path": "org/apache/apache/32/apache-32.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/apache/32/apache-32.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/apache/32/apache-32.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/apache/32/apache-32.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/apache/32/apache-32.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/apache/32/apache-32.pom"
       ],
       "hash": "sha256-z9hywOwn9Trmj0PbwP7N7YrddzB5pTr705DkB7Qs5y8="
     },
     {
       "path": "org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar"
       ],
       "hash": "sha256-J7tdQPN8O7cgW0oFQCR98FdxXp9su9l9Ymq4tQMYuwQ="
     },
     {
       "path": "org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.pom"
       ],
       "hash": "sha256-X0SKAh2IyW84QN/mGRKNYuXPticSzW5m3KincElFsG4="
     },
     {
       "path": "org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar"
       ],
       "hash": "sha256-2RnZBEhsA3+NGTQS2gyS4iqfokIwudZ6V4VcXDHH6U4="
     },
     {
       "path": "org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.pom"
       ],
       "hash": "sha256-gtMfHcxFg+/9dE6XkWWxbaZL+GvKYj/F0bA+2U9FyFo="
     },
     {
       "path": "org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar"
       ],
       "hash": "sha256-e5a/PuaJSau1vEZVWawnDgVRWW+jRSP934kOxBjd4Tw="
     },
     {
       "path": "org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.pom"
       ],
       "hash": "sha256-EQQ4hjutN8KPkGv4cBbjjHqMdYujIeCdEdxaI2Oo554="
     },
     {
       "path": "org/apache/commons/commons-parent/42/commons-parent-42.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/42/commons-parent-42.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/42/commons-parent-42.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/42/commons-parent-42.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/42/commons-parent-42.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-parent/42/commons-parent-42.pom"
       ],
       "hash": "sha256-zTE0lMZwtIPsJWlyrxaYszDlmPgHACNU63ZUefYEsJw="
     },
     {
       "path": "org/apache/commons/commons-parent/52/commons-parent-52.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-parent/52/commons-parent-52.pom"
       ],
       "hash": "sha256-ddvo806Y5MP/QtquSi+etMvNO18QR9VEYKzpBtu0UC4="
     },
     {
       "path": "org/apache/commons/commons-parent/64/commons-parent-64.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-parent/64/commons-parent-64.pom"
       ],
       "hash": "sha256-bxljiZToNXtO1zRpb5kgV++q+hI1ZzmYEzKZeY4szds="
     },
     {
       "path": "org/apache/commons/commons-parent/65/commons-parent-65.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/65/commons-parent-65.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/65/commons-parent-65.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/65/commons-parent-65.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/65/commons-parent-65.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-parent/65/commons-parent-65.pom"
       ],
       "hash": "sha256-bPNJX8LmrJE6K38uA/tZCPs/Ip+wbTNY3EVnjVrz424="
     },
     {
       "path": "org/apache/commons/commons-parent/66/commons-parent-66.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-parent/66/commons-parent-66.pom"
       ],
       "hash": "sha256-SP1tyEblax9AhmDRY+dTAPnjhLtjvkgqgIKiHXKo25w="
     },
     {
       "path": "org/apache/commons/commons-parent/69/commons-parent-69.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/commons/commons-parent/69/commons-parent-69.pom"
       ],
       "hash": "sha256-1Q2pw5vcqCPWGNG0oDtz8ZZJf8uGFv0NpyfIYjWSqbs="
     },
     {
       "path": "org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip"
       ],
       "hash": "sha256-DXEl6MkQl7Nu25kOpZNObGi0RA7vTqllEKD2gV5+6ts="
     },
     {
       "path": "org/apache/maven/maven-aether-provider/3.2.5/maven-aether-provider-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-aether-provider/3.2.5/maven-aether-provider-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-aether-provider/3.2.5/maven-aether-provider-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-aether-provider/3.2.5/maven-aether-provider-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-aether-provider/3.2.5/maven-aether-provider-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-aether-provider/3.2.5/maven-aether-provider-3.2.5.pom"
       ],
       "hash": "sha256-MX1RXFxpJ4qYDGIZkB0yfvtCEMpErh8HwqME1IfsfK4="
     },
     {
       "path": "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.jar"
       ],
       "hash": "sha256-H4laWH30hE2bdWXo6aY1Kv4dVVMkWKDb63RrwdAukhY="
     },
     {
       "path": "org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-archiver/3.6.2/maven-archiver-3.6.2.pom"
       ],
       "hash": "sha256-ixF7DcIFpxq9ozRj+Mf/iRUTz7kiQdigEfnorF6iHnc="
     },
     {
       "path": "org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.pom"
       ],
       "hash": "sha256-Tn8RYdXpVUkhmGmbR6QTrhBZ6boYfeKXCnWqZVqM/SE="
     },
     {
       "path": "org/apache/maven/maven-core/3.2.5/maven-core-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-core/3.2.5/maven-core-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-core/3.2.5/maven-core-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-core/3.2.5/maven-core-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-core/3.2.5/maven-core-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-core/3.2.5/maven-core-3.2.5.pom"
       ],
       "hash": "sha256-iP/mq3VIvaGnEdQ0pnz7FZm/s4SX9ls20Qam6Y9uuVU="
     },
     {
       "path": "org/apache/maven/maven-model-builder/3.2.5/maven-model-builder-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-model-builder/3.2.5/maven-model-builder-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-model-builder/3.2.5/maven-model-builder-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-model-builder/3.2.5/maven-model-builder-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-model-builder/3.2.5/maven-model-builder-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-model-builder/3.2.5/maven-model-builder-3.2.5.pom"
       ],
       "hash": "sha256-6/E0HUJOn6o+jQLF6RowhovmWD7LdTxyIIY09cBfBzg="
     },
     {
       "path": "org/apache/maven/maven-parent/23/maven-parent-23.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/23/maven-parent-23.pom"
       ],
       "hash": "sha256-VCVQHt2eC9ewHspTzJLgaDbSSFEVEwT5xnWeFxNUFoU="
     },
     {
       "path": "org/apache/maven/maven-parent/25/maven-parent-25.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/25/maven-parent-25.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/25/maven-parent-25.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/25/maven-parent-25.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/25/maven-parent-25.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/25/maven-parent-25.pom"
       ],
       "hash": "sha256-PmYUZwe8dunVts2MmM932THAiU55Vajn8QT2eQdpq/E="
     },
     {
       "path": "org/apache/maven/maven-parent/34/maven-parent-34.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom"
       ],
       "hash": "sha256-Go+vemorhIrLJqlZlU7hFcDXnb51piBvs7jHwvRaI38="
     },
     {
       "path": "org/apache/maven/maven-parent/35/maven-parent-35.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/35/maven-parent-35.pom"
       ],
       "hash": "sha256-0u3UB3wKvJzIICiDxFlQMYBCRjbLOagwMewREjlLJXY="
     },
     {
       "path": "org/apache/maven/maven-parent/36/maven-parent-36.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/36/maven-parent-36.pom"
       ],
       "hash": "sha256-/MOrZMPMgJZtViqapgTYwoCztwkkQd0J5SkLCB377bU="
     },
     {
       "path": "org/apache/maven/maven-parent/39/maven-parent-39.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/39/maven-parent-39.pom"
       ],
       "hash": "sha256-z+SCCqHZauUdHcWw4qncWCxCR4wkyVyoI49UfmC+9yE="
     },
     {
       "path": "org/apache/maven/maven-parent/41/maven-parent-41.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/41/maven-parent-41.pom"
       ],
       "hash": "sha256-di/N1M6GIcX6Ciz2SVrSaXKoCT60Mqo+QCvC1OJQDFM="
     },
     {
       "path": "org/apache/maven/maven-parent/42/maven-parent-42.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-parent/42/maven-parent-42.pom"
       ],
       "hash": "sha256-BFNN6jUKIYeXClt0REM4vPeLqOU31E8mKs+6FuuzMFY="
     },
     {
       "path": "org/apache/maven/maven-plugin-api/3.2.5/maven-plugin-api-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-plugin-api/3.2.5/maven-plugin-api-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-plugin-api/3.2.5/maven-plugin-api-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-plugin-api/3.2.5/maven-plugin-api-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-plugin-api/3.2.5/maven-plugin-api-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-plugin-api/3.2.5/maven-plugin-api-3.2.5.pom"
       ],
       "hash": "sha256-LDumLuJv/GlM+y/GEy5MzXtKz1U6qG2RQ9wPd4IvaOw="
     },
     {
       "path": "org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-repository-metadata/3.2.5/maven-repository-metadata-3.2.5.pom"
       ],
       "hash": "sha256-FxyYoeKlokRbDd2D7hXLUxIrgsRL7ARf0A2BfHKUix4="
     },
     {
       "path": "org/apache/maven/maven-settings-builder/3.2.5/maven-settings-builder-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings-builder/3.2.5/maven-settings-builder-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-settings-builder/3.2.5/maven-settings-builder-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-settings-builder/3.2.5/maven-settings-builder-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings-builder/3.2.5/maven-settings-builder-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-settings-builder/3.2.5/maven-settings-builder-3.2.5.pom"
       ],
       "hash": "sha256-wYN9ZpHjmmFMkXm7r6osQydFd2PPcf/Y9nt/gc4whOs="
     },
     {
       "path": "org/apache/maven/maven-settings/3.2.5/maven-settings-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings/3.2.5/maven-settings-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven-settings/3.2.5/maven-settings-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven-settings/3.2.5/maven-settings-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven-settings/3.2.5/maven-settings-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven-settings/3.2.5/maven-settings-3.2.5.pom"
       ],
       "hash": "sha256-JEVklRMAREwMTEoaP4cHVqEQy5pAQFrtTOzMPjP1GC8="
     },
     {
       "path": "org/apache/maven/maven/3.2.5/maven-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/maven/3.2.5/maven-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/maven/3.2.5/maven-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/maven/3.2.5/maven-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/maven/3.2.5/maven-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/maven/3.2.5/maven-3.2.5.pom"
       ],
       "hash": "sha256-dfgTXQqa6NY8NVPy6u/iXxsKAddnbgf1YYNblaiK7fU="
     },
     {
       "path": "org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.jar"
       ],
       "hash": "sha256-tle+8uHrEeAppwzWiL3mra0p5OmdrLGFFr9lHsyjJDU="
     },
     {
       "path": "org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-clean-plugin/3.2.0/maven-clean-plugin-3.2.0.pom"
       ],
       "hash": "sha256-WyWlJ+i0N9DhvA5Ym0NWUsWaY+s2APgzMDKr2msRs3Y="
     },
     {
       "path": "org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.jar"
       ],
       "hash": "sha256-b4GZR6Knc3ktyR0X+QbiIRO/sv77a2TeyDYXVxXXQCo="
     },
     {
       "path": "org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.13.0/maven-compiler-plugin-3.13.0.pom"
       ],
       "hash": "sha256-DQC4Tyb/Xz6EW/NJMCNFYzymX42OkQGzEIIIJBWRLB4="
     },
     {
       "path": "org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.jar"
       ],
       "hash": "sha256-NUHgQyUtr05zueDoutzHSom9aFVBliLXc5hz/JMk/qw="
     },
     {
       "path": "org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-install-plugin/3.1.2/maven-install-plugin-3.1.2.pom"
       ],
       "hash": "sha256-SyoZARfD0D5z6GbUgtRmrsTijq/E0hFIXfahLnE73tk="
     },
     {
       "path": "org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.jar"
       ],
       "hash": "sha256-JeCltVuHLZXjoJpdglvBBh9c4l7oHxR+YjQF2Ovt+l8="
     },
     {
       "path": "org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-jar-plugin/3.4.1/maven-jar-plugin-3.4.1.pom"
       ],
       "hash": "sha256-vpMYzBmJX/1VMt8JDfN621uXOW2agn+WH95ldTtaki8="
     },
     {
       "path": "org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-plugins/35/maven-plugins-35.pom"
       ],
       "hash": "sha256-QtdZxVDXIzc640VW6Akwue0uE0ldrOE0rfmeZN3I0uE="
     },
     {
       "path": "org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-plugins/39/maven-plugins-39.pom"
       ],
       "hash": "sha256-GAha++86F5QrRCE1o/DncBjNpm7dM8axj9GEQGYbwp4="
     },
     {
       "path": "org/apache/maven/plugins/maven-plugins/41/maven-plugins-41.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/41/maven-plugins-41.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/41/maven-plugins-41.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/41/maven-plugins-41.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/41/maven-plugins-41.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-plugins/41/maven-plugins-41.pom"
       ],
       "hash": "sha256-nmRZMjm7adgLLbnlldjA/Dy0TPKqXB7VR3GLTP1zLv4="
     },
     {
       "path": "org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-plugins/42/maven-plugins-42.pom"
       ],
       "hash": "sha256-WzFoHqZ+g4qO0fCK+JHRrlDxbfrdP8K3h5AO1p1fJQM="
     },
     {
       "path": "org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.jar"
       ],
       "hash": "sha256-60Bpx/5QoxOz9SlczSFPMEAvY5ccJvRD9/PnmL6Mwqc="
     },
     {
       "path": "org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-resources-plugin/3.3.1/maven-resources-plugin-3.3.1.pom"
       ],
       "hash": "sha256-MmnQpuPNYUopSG9X/IZIiw8eRYoRvrxh+UCP1sfPha4="
     },
     {
       "path": "org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.jar"
       ],
       "hash": "sha256-41qNIRS0wBZsO/jkCsY91GCHNDR9cpRVW2FgpmEpSpI="
     },
     {
       "path": "org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.2.5/maven-surefire-plugin-3.2.5.pom"
       ],
       "hash": "sha256-KExh3ckpu8nuujyMESE/Hw978PiqVYBn4Pm+O5DI3cA="
     },
     {
       "path": "org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.jar"
       ],
       "hash": "sha256-6/ueHf7qPCAXkFGEWB4AeHS06qydKL//z+UTPXCsYzk="
     },
     {
       "path": "org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/resolver/maven-resolver-api/1.9.18/maven-resolver-api-1.9.18.pom"
       ],
       "hash": "sha256-gpDaoM1/u6B2ewc2hmkig4fKuumaE8NDP71FcGKa44Q="
     },
     {
       "path": "org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.jar"
       ],
       "hash": "sha256-LrDqZnvEiThEeCMd2nUWQH1LWyKhOAdyKYcd6TYqeuI="
     },
     {
       "path": "org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/resolver/maven-resolver-util/1.9.18/maven-resolver-util-1.9.18.pom"
       ],
       "hash": "sha256-qY5q9c3xskVkhq4LuBKOUv7o1plmKa9gYGu8nBqt+Ow="
     },
     {
       "path": "org/apache/maven/resolver/maven-resolver/1.9.18/maven-resolver-1.9.18.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.18/maven-resolver-1.9.18.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.18/maven-resolver-1.9.18.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.18/maven-resolver-1.9.18.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/resolver/maven-resolver/1.9.18/maven-resolver-1.9.18.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/resolver/maven-resolver/1.9.18/maven-resolver-1.9.18.pom"
       ],
       "hash": "sha256-+x3U5VTNLbzt6WFSlJIecLGDUz9GeROs2aN4f/3WlDs="
     },
     {
       "path": "org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.jar"
       ],
       "hash": "sha256-Loyy1UagHCJZyxfx4Gcy2z0UsHnRliK/hADILLHua5Y="
     },
     {
       "path": "org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/file-management/3.1.0/file-management-3.1.0.pom"
       ],
       "hash": "sha256-XpOmOzBCAj5VjcvrGZFM6C5qb7zNvWh5f4CxNRIai94="
     },
     {
       "path": "org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.jar"
       ],
       "hash": "sha256-So7qdmOZLkkgbZ+SgTjzNKg1rT+7xAkpNC7wB8z1Rxs="
     },
     {
       "path": "org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-common-artifact-filters/3.1.1/maven-common-artifact-filters-3.1.1.pom"
       ],
       "hash": "sha256-VJjQIJQTGMI6cHsRtzAyYy2pFnLjbMSn4vxOGXJsEwY="
     },
     {
       "path": "org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.jar"
       ],
       "hash": "sha256-sSZjGH2f/Goe52E5wO9Jf+lADvvi6+AWFv4nA2VvtPA="
     },
     {
       "path": "org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-filtering/3.3.1/maven-filtering-3.3.1.pom"
       ],
       "hash": "sha256-odkCeKnD7/72xF24bGYHSdKRDY1zYe2BmDVllQ9mfoU="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-components/19/maven-shared-components-19.pom"
       ],
       "hash": "sha256-2CQIJpqtousVIe6P8X98ZzM2hPjtKgmp41ut0udXWVc="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom"
       ],
       "hash": "sha256-ZNDttfIc//YAscOrfUX5dUzRi6X7+Ds9G7fEhJQ32OM="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-components/36/maven-shared-components-36.pom"
       ],
       "hash": "sha256-7I6XPnlkqvSQ293TnzEjQOANETuEcPE1oT415F9Lr58="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-components/39/maven-shared-components-39.pom"
       ],
       "hash": "sha256-F+gTiNiLphxAVUUOyQoy7jCs0H9G3G4x4Ja45Tc19LI="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-components/41/maven-shared-components-41.pom"
       ],
       "hash": "sha256-xr2B4liODw+HOS1NtZDh2BwSaiXuklMlLvicUGzeHjQ="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.jar"
       ],
       "hash": "sha256-YZiOVEhqXcOPBscP2uWxCFVsY71DNpe59DBfzbMPpA4="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-incremental/1.1/maven-shared-incremental-1.1.pom"
       ],
       "hash": "sha256-8h0Z60m0pmzYU1Sp7nM1Q56pKjaBc3YKICdmAIzBmSQ="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar"
       ],
       "hash": "sha256-eSXZxaDiBA0kuPrj9hLrOZy//lg4szujaHd9x73fbdo="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom"
       ],
       "hash": "sha256-v4NILZb3bWNpnWPhJeZPSsc8gXiYVzNmLb1pr5xgM54="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.jar"
       ],
       "hash": "sha256-thM1fhutTfwd6tgBaRyUYPlYX+fGtGa8JRhiEtfRhIc="
     },
     {
       "path": "org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/shared/maven-shared-utils/3.4.2/maven-shared-utils-3.4.2.pom"
       ],
       "hash": "sha256-qUF0XX+uuNyade3CwzDJlLdEC5pE0hFCcWtgU5Z6QcE="
     },
     {
       "path": "org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.jar"
       ],
       "hash": "sha256-AMZsiaWjA8Zl2zDaPZXt+pk2YMhad48nr3OvY+aXJoU="
     },
     {
       "path": "org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/maven-surefire-common/3.2.5/maven-surefire-common-3.2.5.pom"
       ],
       "hash": "sha256-8QM0vQ5AI/aJ/ba4Q0vnYS2cy+iBFA1567EHASIN++s="
     },
     {
       "path": "org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.jar"
       ],
       "hash": "sha256-IKS0WNn22TIj1ruQbGEDL6ZpJfnoZ6DWdi01vAtSi7k="
     },
     {
       "path": "org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-api/3.2.5/surefire-api-3.2.5.pom"
       ],
       "hash": "sha256-0GJeSj+IovpoDyeIRfKrCMn708ImHmsm6La4oN/aFvY="
     },
     {
       "path": "org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar"
       ],
       "hash": "sha256-gw/zc/rTHSRu9RYjM/MVPSjHRP2VsFpXLrO+TPtGPpY="
     },
     {
       "path": "org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.pom"
       ],
       "hash": "sha256-d+P3V5uqsYobH8vc4wmuA5KmNGLZO3GRmOBm8xay4uY="
     },
     {
       "path": "org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.jar"
       ],
       "hash": "sha256-VJz7JWE8B1bSOrFSJ/MPDykK81n8LSG0Ej9AxECzQgk="
     },
     {
       "path": "org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-extensions-api/3.2.5/surefire-extensions-api-3.2.5.pom"
       ],
       "hash": "sha256-P3SJv7sXLVRei009SeAyWMY1chumNkeaLI5KYdLz/fc="
     },
     {
       "path": "org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.jar"
       ],
       "hash": "sha256-r1IsEqd/ln6DzyQ/nPu4YhfwHfZuuqRpCtPOwQNtTBg="
     },
     {
       "path": "org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-extensions-spi/3.2.5/surefire-extensions-spi-3.2.5.pom"
       ],
       "hash": "sha256-PTFcfJnzpkAigC71yT3tT27M4RLmx/+RnZSRcUxybBo="
     },
     {
       "path": "org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.jar"
       ],
       "hash": "sha256-2idcBL0INVQD+YfYP27O8a+lTpKGTLc8puyJzAYu1Q0="
     },
     {
       "path": "org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-logger-api/3.2.5/surefire-logger-api-3.2.5.pom"
       ],
       "hash": "sha256-0UsPBz59XXsFH0vqhTuckhzW9DAeKxSPZqcQghBQTcg="
     },
     {
       "path": "org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.jar"
       ],
       "hash": "sha256-7bu+Tp/u6JuGTgLPw3eWOvaj1sPwt9hg6/mXeNaIZXk="
     },
     {
       "path": "org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire-shared-utils/3.2.5/surefire-shared-utils-3.2.5.pom"
       ],
       "hash": "sha256-UMmoAAlJ/hTnLtSEhHpuxXF05mObkJJEBw8MokxsajI="
     },
     {
       "path": "org/apache/maven/surefire/surefire/3.2.5/surefire-3.2.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire/3.2.5/surefire-3.2.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire/3.2.5/surefire-3.2.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/apache/maven/surefire/surefire/3.2.5/surefire-3.2.5.pom"
+        "https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire/3.2.5/surefire-3.2.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/apache/maven/surefire/surefire/3.2.5/surefire-3.2.5.pom"
       ],
       "hash": "sha256-xw4Loi4+oCa8RqRwKKBzdcuRJNF0jYSvnU+jPYWCA3k="
     },
     {
       "path": "org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.jar"
       ],
       "hash": "sha256-qDe9fXMpFWTcjoyCbeD+3nWJZSejW9zdt3sFRe5lakw="
     },
     {
       "path": "org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-archiver/4.9.2/plexus-archiver-4.9.2.pom"
       ],
       "hash": "sha256-e0pWnJL2DIWa5pWU+JNdEby7lA2GxRh0LDDwklpIup8="
     },
     {
       "path": "org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom"
       ],
       "hash": "sha256-iYEYl7gVvu+glMObRgPj9gxCJ2os1dgLkkqxkYNimSU="
     },
     {
       "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom"
       ],
       "hash": "sha256-RppsWfku/6YsB5fOfVLSwDz47hA0uSPDYN14qfUFp7o="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.jar"
       ],
       "hash": "sha256-0x10Trafd9/9NyLcpAlHWOD5DnmRins7n9w3zkm2A0I="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler-api/2.15.0/plexus-compiler-api-2.15.0.pom"
       ],
       "hash": "sha256-TInKsFBbCskBGX0t0TY/5eJry/1D6Z3SGorgI7RDzE4="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.jar"
       ],
       "hash": "sha256-iWAzNJiEU7nPTX7EBNS1TxQN4otnjWqOjtxEgkDdDpA="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler-javac/2.15.0/plexus-compiler-javac-2.15.0.pom"
       ],
       "hash": "sha256-u+eWxf4QlzaYCv95hgVI2Cir0ns2hyuAoOgxZCtl8yg="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.jar"
       ],
       "hash": "sha256-wTsSwyoYsA5Ffem5PPw9VZO/ofuZKyxGo0mL4ad8SIk="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler-manager/2.15.0/plexus-compiler-manager-2.15.0.pom"
       ],
       "hash": "sha256-Er07+4A9IATtgxhYOseychFai5MD6rzRAICMVNRNIBc="
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compiler/2.15.0/plexus-compiler-2.15.0.pom"
       ],
       "hash": "sha256-nJtip3A9SZS2D7f55CgF+avHmNE5fk0iwRGM0SqmeNg="
     },
     {
       "path": "org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-compilers/2.15.0/plexus-compilers-2.15.0.pom"
       ],
       "hash": "sha256-HOFNMCdoZqlJOixy5C+ZCi48G9eUAmzNmDBHWhLZqR0="
     },
     {
       "path": "org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.pom"
       ],
       "hash": "sha256-gV8+wxa4xfpwE4X99ACb+1HgfXgOj2puKv5yDFLX4pI="
     },
     {
       "path": "org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.pom"
       ],
       "hash": "sha256-BnC2BSVffcmkVNqux5EpGMzxtUdcv8o3Q2O1H8/U6gA="
     },
     {
       "path": "org/codehaus/plexus/plexus-components/1.3.1/plexus-components-1.3.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-components/1.3.1/plexus-components-1.3.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-components/1.3.1/plexus-components-1.3.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-components/1.3.1/plexus-components-1.3.1.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-components/1.3.1/plexus-components-1.3.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-components/1.3.1/plexus-components-1.3.1.pom"
       ],
       "hash": "sha256-jLyyqs1/SndZhmzpGy+RAxD75aWGtfx7m9t2r5JX58Q="
     },
     {
       "path": "org/codehaus/plexus/plexus-containers/1.5.5/plexus-containers-1.5.5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-containers/1.5.5/plexus-containers-1.5.5.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-containers/1.5.5/plexus-containers-1.5.5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-containers/1.5.5/plexus-containers-1.5.5.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-containers/1.5.5/plexus-containers-1.5.5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-containers/1.5.5/plexus-containers-1.5.5.pom"
       ],
       "hash": "sha256-G8Jkgk7IdrDKb09YOBdcVBxjjLxDMmomi5rufUd4te8="
     },
     {
       "path": "org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom"
       ],
       "hash": "sha256-lNWu2zxGAjJlOWUnz4zn/JRLe9eeTrq5BzhkGOtaCNc="
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.21/plexus-interpolation-1.21.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.21/plexus-interpolation-1.21.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.21/plexus-interpolation-1.21.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.21/plexus-interpolation-1.21.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.21/plexus-interpolation-1.21.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-interpolation/1.21/plexus-interpolation-1.21.pom"
       ],
       "hash": "sha256-4Hish4DG8tpcEcXSFkvywiYhEqiagohN6cmIYzMmf30="
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar"
       ],
       "hash": "sha256-s7VBLOF4iRA+pWS838+fs9+lQDRP/qxrU4pzydcYJmI="
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom"
       ],
       "hash": "sha256-4cELOmM1ZB63SmaNqp7oauSrBmEBdOWboHyMaAQjJ/c="
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.jar"
       ],
       "hash": "sha256-P7T7YUP9+WQCTDy3OFUVJLnqhOXCEc1mDFWa0HA+UjA="
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-interpolation/1.27/plexus-interpolation-1.27.pom"
       ],
       "hash": "sha256-1U+8vEOZ41IyKHSkEoudKP6f4Vg/iew2HeJC6jjTP5s="
     },
     {
       "path": "org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.jar"
       ],
       "hash": "sha256-a6f7Dba/o0jCSN8/mDrjExjpwU81qGqTKvX/10UKpio="
     },
     {
       "path": "org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-io/3.4.2/plexus-io-3.4.2.pom"
       ],
       "hash": "sha256-qvyQzin+ebxqCur7K/a96vl5obghFJNCiiKQIoFwNV0="
     },
     {
       "path": "org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.jar"
       ],
       "hash": "sha256-TS1jzcrUb+ukMhEO9kvNyPj61IU4/aXNIlNoa0WpQwQ="
     },
     {
       "path": "org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-java/1.2.0/plexus-java-1.2.0.pom"
       ],
       "hash": "sha256-0GlWTU9JCuIq2IXdSzq5rDOifiOm+FQnYJcKNpNcz0I="
     },
     {
       "path": "org/codehaus/plexus/plexus-languages/1.2.0/plexus-languages-1.2.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-languages/1.2.0/plexus-languages-1.2.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-languages/1.2.0/plexus-languages-1.2.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-languages/1.2.0/plexus-languages-1.2.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-languages/1.2.0/plexus-languages-1.2.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-languages/1.2.0/plexus-languages-1.2.0.pom"
       ],
       "hash": "sha256-oo8DTXmBXNeksQf2YYLCHr9F+7L74sFWl4YLcgyKO/c="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/3.5.0/plexus-utils-3.5.0.pom"
       ],
       "hash": "sha256-qk6kUbtvqS6cyWZU7vU+M0/002qUZjPgF2X+1B6EXgM="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar"
       ],
       "hash": "sha256-huAlXUyHnGG0gz7X8TEk6LtnnfR967EnMm59t91JoHs="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.pom"
       ],
       "hash": "sha256-lP9o7etIIE0SyZGJx2cWTTqfd4oTctHc4RpBRi5iNvI="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.jar"
       ],
       "hash": "sha256-JwzXA7SMblyMaR8YdfItYtIs/gcsc64vWBTYPWjB2gs="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/4.0.0/plexus-utils-4.0.0.pom"
       ],
       "hash": "sha256-pExUeUJt6g57//0uw630nGhRUBl4iWXE0jH8PwTaQSk="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.jar"
       ],
       "hash": "sha256-lrnMREORkdLQY1l04tROdoc2tPsqvLZflM2V5BkS+os="
     },
     {
       "path": "org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-utils/4.0.1/plexus-utils-4.0.1.pom"
       ],
       "hash": "sha256-vEI1qVzR665CZEyB67qcHUxSVl+B6WqyBLblbj43jME="
     },
     {
       "path": "org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.jar"
       ],
       "hash": "sha256-0mItyTObFvW4ycrSrdRA6WWDHQ4W8Zrh3iThICsN5TY="
     },
     {
       "path": "org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus-xml/3.0.0/plexus-xml-3.0.0.pom"
       ],
       "hash": "sha256-wH1nFhzff4/c5M2SG+XTzMueLCWRBcoa/rdyy8sMvsU="
     },
     {
       "path": "org/codehaus/plexus/plexus/10/plexus-10.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/10/plexus-10.pom"
       ],
       "hash": "sha256-u6nFIQZLnKEyzpfMHMfrSvwtvjK8iMuHLIjpn2FiMB8="
     },
     {
       "path": "org/codehaus/plexus/plexus/13/plexus-13.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/13/plexus-13.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/13/plexus-13.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/13/plexus-13.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/13/plexus-13.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/13/plexus-13.pom"
       ],
       "hash": "sha256-V1lF3AiWbGbrA9W66RNb0iyjkgoYZbuZ0+zZO+9Vq9M="
     },
     {
       "path": "org/codehaus/plexus/plexus/15/plexus-15.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/15/plexus-15.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/15/plexus-15.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/15/plexus-15.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/15/plexus-15.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/15/plexus-15.pom"
       ],
       "hash": "sha256-ltwPvnNmSg8FxncJEEc8GhLhwRLLZINk/Khn2qaJwh0="
     },
     {
       "path": "org/codehaus/plexus/plexus/16/plexus-16.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/16/plexus-16.pom"
       ],
       "hash": "sha256-aNTu1lo9u8NC7YDdE4++nGfLf7TCq8T1IBzbW59kWGg="
     },
     {
       "path": "org/codehaus/plexus/plexus/17/plexus-17.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/17/plexus-17.pom"
       ],
       "hash": "sha256-kVJu5mMnx/UPuyW9Qb/LkW4oRBS4aOMdUKIwBL197qc="
     },
     {
       "path": "org/codehaus/plexus/plexus/2.0.7/plexus-2.0.7.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/2.0.7/plexus-2.0.7.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/2.0.7/plexus-2.0.7.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/2.0.7/plexus-2.0.7.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/2.0.7/plexus-2.0.7.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/2.0.7/plexus-2.0.7.pom"
       ],
       "hash": "sha256-K1kGIDCrChXF0Jd7oiQhcGNokmSIc5pl8leT5xXMinQ="
     },
     {
       "path": "org/codehaus/plexus/plexus/3.3.1/plexus-3.3.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/3.3.1/plexus-3.3.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/3.3.1/plexus-3.3.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/3.3.1/plexus-3.3.1.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/3.3.1/plexus-3.3.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/3.3.1/plexus-3.3.1.pom"
       ],
       "hash": "sha256-bslviJvCklD5CxZ8FOVH8bBaojVlxj+QeVlb773oFrs="
     },
     {
       "path": "org/codehaus/plexus/plexus/5.1/plexus-5.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom"
+        "https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/codehaus/plexus/plexus/5.1/plexus-5.1.pom"
       ],
       "hash": "sha256-o0PkT/V5au0OpgvhFFTJNc4gqxxfFkrMjaV0SC3Lx+k="
     },
     {
       "path": "org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.jar"
       ],
       "hash": "sha256-hLmFIWhKsi+VKEcPptiraKIw4bIRYjyYm6cBbDBut3M="
     },
     {
       "path": "org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether-api/1.0.0.v20140518/aether-api-1.0.0.v20140518.pom"
       ],
       "hash": "sha256-LLtrZm3RUYFTr9STmxJsIzZQbPOxvEVBJjwJuofDS5Y="
     },
     {
       "path": "org/eclipse/aether/aether-impl/1.0.0.v20140518/aether-impl-1.0.0.v20140518.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-impl/1.0.0.v20140518/aether-impl-1.0.0.v20140518.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether-impl/1.0.0.v20140518/aether-impl-1.0.0.v20140518.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether-impl/1.0.0.v20140518/aether-impl-1.0.0.v20140518.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-impl/1.0.0.v20140518/aether-impl-1.0.0.v20140518.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether-impl/1.0.0.v20140518/aether-impl-1.0.0.v20140518.pom"
       ],
       "hash": "sha256-WoCnMkHWzy6YJoiw/g2s0jjZINgdhPqUNdbS3VlRhOQ="
     },
     {
       "path": "org/eclipse/aether/aether-spi/1.0.0.v20140518/aether-spi-1.0.0.v20140518.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-spi/1.0.0.v20140518/aether-spi-1.0.0.v20140518.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether-spi/1.0.0.v20140518/aether-spi-1.0.0.v20140518.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether-spi/1.0.0.v20140518/aether-spi-1.0.0.v20140518.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-spi/1.0.0.v20140518/aether-spi-1.0.0.v20140518.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether-spi/1.0.0.v20140518/aether-spi-1.0.0.v20140518.pom"
       ],
       "hash": "sha256-fVRwh0WcibhxfsUIGqRZItYFKZ2jnjKoEQQdsbfiUU4="
     },
     {
       "path": "org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.jar"
       ],
       "hash": "sha256-r/CVFjmDfE46RpmkIfp59BADL2A/XGpbukNemFMfOYQ="
     },
     {
       "path": "org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether-util/1.0.0.v20140518/aether-util-1.0.0.v20140518.pom"
       ],
       "hash": "sha256-XItQeoCQH82u+J9QxjkXa1FuiGbGvwe+GrirnaWkh38="
     },
     {
       "path": "org/eclipse/aether/aether/1.0.0.v20140518/aether-1.0.0.v20140518.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether/1.0.0.v20140518/aether-1.0.0.v20140518.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/aether/aether/1.0.0.v20140518/aether-1.0.0.v20140518.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/aether/aether/1.0.0.v20140518/aether-1.0.0.v20140518.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/aether/aether/1.0.0.v20140518/aether-1.0.0.v20140518.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/aether/aether/1.0.0.v20140518/aether-1.0.0.v20140518.pom"
       ],
       "hash": "sha256-YGtfoDsXHYIEqsD7rOEe4o5xF1oPhpvUXwnJMZ5+iNw="
     },
     {
       "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.pom"
       ],
       "hash": "sha256-BWZvJ5QRF8yt+rYykRjBw0j4uDjOie0jGCwVHLKUPuk="
     },
     {
       "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M2/org.eclipse.sisu.plexus-0.9.0.M2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M2/org.eclipse.sisu.plexus-0.9.0.M2.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M2/org.eclipse.sisu.plexus-0.9.0.M2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M2/org.eclipse.sisu.plexus-0.9.0.M2.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M2/org.eclipse.sisu.plexus-0.9.0.M2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/sisu/org.eclipse.sisu.plexus/0.9.0.M2/org.eclipse.sisu.plexus-0.9.0.M2.pom"
       ],
       "hash": "sha256-j+tWk+LSsjefn59IPy0rR6tU8PDtIssjLpaMVE93h1I="
     },
     {
       "path": "org/eclipse/sisu/sisu-inject/0.9.0.M2/sisu-inject-0.9.0.M2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/sisu/sisu-inject/0.9.0.M2/sisu-inject-0.9.0.M2.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/sisu-inject/0.9.0.M2/sisu-inject-0.9.0.M2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/sisu/sisu-inject/0.9.0.M2/sisu-inject-0.9.0.M2.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/sisu/sisu-inject/0.9.0.M2/sisu-inject-0.9.0.M2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/sisu/sisu-inject/0.9.0.M2/sisu-inject-0.9.0.M2.pom"
       ],
       "hash": "sha256-djD0zU0WIAZ/qD4ddIsBLP+gZV5TgMwOSl4oPTtEH9s="
     },
     {
       "path": "org/eclipse/sisu/sisu-plexus/0.9.0.M2/sisu-plexus-0.9.0.M2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/eclipse/sisu/sisu-plexus/0.9.0.M2/sisu-plexus-0.9.0.M2.pom",
+      "url": "https://repo1.maven.org/maven2/org/eclipse/sisu/sisu-plexus/0.9.0.M2/sisu-plexus-0.9.0.M2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/eclipse/sisu/sisu-plexus/0.9.0.M2/sisu-plexus-0.9.0.M2.pom"
+        "https://repo.maven.apache.org/maven2/org/eclipse/sisu/sisu-plexus/0.9.0.M2/sisu-plexus-0.9.0.M2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/eclipse/sisu/sisu-plexus/0.9.0.M2/sisu-plexus-0.9.0.M2.pom"
       ],
       "hash": "sha256-7G6ZQHA2AU+Bo52BxWukDZJMctluQCrRT379KbLHdc0="
     },
     {
       "path": "org/iq80/snappy/snappy/0.4/snappy-0.4.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar",
+      "url": "https://repo1.maven.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar"
+        "https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.jar"
       ],
       "hash": "sha256-RqDIfVBM6dYGPh/25NIHOP60nYq/hbUHGn0Y308Rusk="
     },
     {
       "path": "org/iq80/snappy/snappy/0.4/snappy-0.4.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom",
+      "url": "https://repo1.maven.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom"
+        "https://repo.maven.apache.org/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/iq80/snappy/snappy/0.4/snappy-0.4.pom"
       ],
       "hash": "sha256-pwnOFxEeQUnZt5pSlWRODNWoNVrsSy70wENqunsl0Io="
     },
     {
       "path": "org/jboss/weld/weld-parent/26/weld-parent-26.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/jboss/weld/weld-parent/26/weld-parent-26.pom",
+      "url": "https://repo1.maven.org/maven2/org/jboss/weld/weld-parent/26/weld-parent-26.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/jboss/weld/weld-parent/26/weld-parent-26.pom"
+        "https://repo.maven.apache.org/maven2/org/jboss/weld/weld-parent/26/weld-parent-26.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/jboss/weld/weld-parent/26/weld-parent-26.pom"
       ],
       "hash": "sha256-EwI0cUGLiQVXuYLky6srX2lnrfHOvlS/Yw/iAaY5Y8w="
     },
     {
       "path": "org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom",
+      "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom"
+        "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/junit/junit-bom/5.10.0/junit-bom-5.10.0.pom"
       ],
       "hash": "sha256-4AbdiJT5/Ht1/DK7Ev5e2L5lZn1bRU+Z4uC4xbuNMLM="
     },
     {
       "path": "org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom"
+        "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/junit/junit-bom/5.10.1/junit-bom-5.10.1.pom"
       ],
       "hash": "sha256-IcSwKG9LIAaVd/9LIJeKhcEArIpGtvHIZy+6qzN7w/I="
     },
     {
       "path": "org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom"
+        "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/junit/junit-bom/5.10.2/junit-bom-5.10.2.pom"
       ],
       "hash": "sha256-Fp3ZBKSw9lIM/+ZYzGIpK/6fPBSpifqSEgckzeQ6mWg="
     },
     {
       "path": "org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom"
+        "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/junit/junit-bom/5.7.1/junit-bom-5.7.1.pom"
       ],
       "hash": "sha256-C5sUo9YhBvr+jGinF7h7h60YaFiZRRt1PAT6QbaFd4Q="
     },
     {
       "path": "org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
+      "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom"
+        "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/junit/junit-bom/5.7.2/junit-bom-5.7.2.pom"
       ],
       "hash": "sha256-zRSqqGmZH4ICHFhdVw0x/zQry6WLtEIztwGTdxuWSHs="
     },
     {
       "path": "org/junit/junit-bom/5.9.3/junit-bom-5.9.3.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.9.3/junit-bom-5.9.3.pom",
+      "url": "https://repo1.maven.org/maven2/org/junit/junit-bom/5.9.3/junit-bom-5.9.3.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/junit/junit-bom/5.9.3/junit-bom-5.9.3.pom"
+        "https://repo.maven.apache.org/maven2/org/junit/junit-bom/5.9.3/junit-bom-5.9.3.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/junit/junit-bom/5.9.3/junit-bom-5.9.3.pom"
       ],
       "hash": "sha256-TQMpzZ5y8kIOXKFXJMv+b/puX9KIg2FRYnEZD9w0Ltc="
     },
     {
       "path": "org/ow2/asm/asm/9.6/asm-9.6.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar",
+      "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar"
+        "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar"
       ],
       "hash": "sha256-PG+sJCTbPUqFO2afTj0dnDxVIjXhmjGWc/iHCDwjA6E="
     },
     {
       "path": "org/ow2/asm/asm/9.6/asm-9.6.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom",
+      "url": "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom"
+        "https://repo.maven.apache.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/ow2/asm/asm/9.6/asm-9.6.pom"
       ],
       "hash": "sha256-ku7iS8PIQ+SIHUbB3WUFRx7jFC+s+0ZrQoz+paVsa2A="
     },
     {
       "path": "org/ow2/ow2/1.5.1/ow2-1.5.1.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom",
+      "url": "https://repo1.maven.org/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom"
+        "https://repo.maven.apache.org/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/ow2/ow2/1.5.1/ow2-1.5.1.pom"
       ],
       "hash": "sha256-Mh3bt+5v5PU96mtM1tt0FU1r+kI5HB92OzYbn0hazwU="
     },
     {
       "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar",
+      "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
+        "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar"
       ],
       "hash": "sha256-0+9XXj5JeWeNwBvx3M5RAhSTtNEft/G+itmCh3wWocA="
     },
     {
       "path": "org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom",
+      "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom"
+        "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.pom"
       ],
       "hash": "sha256-+wRqnCKUN5KLsRwtJ8i113PriiXmDL0lPZhSEN7cJoQ="
     },
     {
       "path": "org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom",
+      "url": "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom"
+        "https://repo.maven.apache.org/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/slf4j/slf4j-parent/1.7.36/slf4j-parent-1.7.36.pom"
       ],
       "hash": "sha256-uziNN/vN083mTDzt4hg4aTIY3EUfBAQMXfNgp47X6BI="
     },
     {
       "path": "org/sonatype/forge/forge-parent/10/forge-parent-10.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/10/forge-parent-10.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/10/forge-parent-10.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/10/forge-parent-10.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/10/forge-parent-10.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/forge/forge-parent/10/forge-parent-10.pom"
       ],
       "hash": "sha256-wU+5wytZzAMlH2CUFtt8DP8B+BHtzMtPaoZdbnBGvQs="
     },
     {
       "path": "org/sonatype/forge/forge-parent/38/forge-parent-38.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/38/forge-parent-38.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/38/forge-parent-38.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/38/forge-parent-38.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/38/forge-parent-38.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/forge/forge-parent/38/forge-parent-38.pom"
       ],
       "hash": "sha256-pAavbR80UVi003wPgLxrp8Kx2nzTTRvp7xGNX+APAg8="
     },
     {
       "path": "org/sonatype/forge/forge-parent/4/forge-parent-4.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/4/forge-parent-4.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/4/forge-parent-4.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/4/forge-parent-4.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/4/forge-parent-4.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/forge/forge-parent/4/forge-parent-4.pom"
       ],
       "hash": "sha256-GDjRMkeQBbS3RZt5jp2ZFVFQkMKICC/c2G2wsQmDokw="
     },
     {
       "path": "org/sonatype/forge/forge-parent/5/forge-parent-5.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/forge/forge-parent/5/forge-parent-5.pom"
       ],
       "hash": "sha256-5WGIqozlEngAaqkLx+DzBKgeLxIZ9GLn0h8mJTXNJ5U="
     },
     {
       "path": "org/sonatype/oss/oss-parent/7/oss-parent-7.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/oss/oss-parent/7/oss-parent-7.pom"
       ],
       "hash": "sha256-tR+IZ8kranIkmVV/w6H96ne9+e9XRyL+kM5DailVlFQ="
     },
     {
       "path": "org/sonatype/oss/oss-parent/9/oss-parent-9.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/oss/oss-parent/9/oss-parent-9.pom"
       ],
       "hash": "sha256-+0AmX5glSCEv+C42LllzKyGH7G8NgBgohcFO8fmCgno="
     },
     {
       "path": "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar"
+        "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar"
       ],
       "hash": "sha256-k0FxZA+9PSSVxQt5sNmtsR4sg+ZbrRV9+P40vKwP95g="
     },
     {
       "path": "org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.pom"
       ],
       "hash": "sha256-4GcxekftnoSyuoWnbTz3KYDisNyHOpC5y/50/oDDfBc="
     },
     {
       "path": "org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/plexus/plexus-cipher/1.4/plexus-cipher-1.4.pom"
       ],
       "hash": "sha256-pjouI5iMyn+sbJOIbW8FBv0m2I1+jMDLibnG4NbJlK0="
     },
     {
       "path": "org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/plexus/plexus-sec-dispatcher/1.3/plexus-sec-dispatcher-1.3.pom"
       ],
       "hash": "sha256-1eZQxQ72lYwCjtAktZrwTPPTjhRTp31UK2tIS8D0ygs="
     },
     {
       "path": "org/sonatype/sisu/inject/guice-parent/3.2.3/guice-parent-3.2.3.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/sisu/inject/guice-parent/3.2.3/guice-parent-3.2.3.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/sisu/inject/guice-parent/3.2.3/guice-parent-3.2.3.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/sisu/inject/guice-parent/3.2.3/guice-parent-3.2.3.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/sisu/inject/guice-parent/3.2.3/guice-parent-3.2.3.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/sisu/inject/guice-parent/3.2.3/guice-parent-3.2.3.pom"
       ],
       "hash": "sha256-WqjZi1kEeN+Io0m9Hb4R0GIL/ivfEcTlLVGyf+MdYWg="
     },
     {
       "path": "org/sonatype/sisu/sisu-guice/3.2.3/sisu-guice-3.2.3.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/sisu/sisu-guice/3.2.3/sisu-guice-3.2.3.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/sisu/sisu-guice/3.2.3/sisu-guice-3.2.3.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/sisu/sisu-guice/3.2.3/sisu-guice-3.2.3.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/sisu/sisu-guice/3.2.3/sisu-guice-3.2.3.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/sisu/sisu-guice/3.2.3/sisu-guice-3.2.3.pom"
       ],
       "hash": "sha256-ShTsA/pf3+80tZXT+ruDgyQjpdbpsxVx5EyKSDBAFN8="
     },
     {
       "path": "org/sonatype/spice/spice-parent/12/spice-parent-12.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/12/spice-parent-12.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/spice/spice-parent/12/spice-parent-12.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/spice/spice-parent/12/spice-parent-12.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/12/spice-parent-12.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/spice/spice-parent/12/spice-parent-12.pom"
       ],
       "hash": "sha256-IaGbJtvlw43bURTPTq2/XMtBG8axKP3VlJscyxLzaD4="
     },
     {
       "path": "org/sonatype/spice/spice-parent/15/spice-parent-15.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/spice/spice-parent/15/spice-parent-15.pom"
       ],
       "hash": "sha256-E9Fd3+mUa4Qnu3tLCBq2OWIoXu0L9vpRQq6iWkbhWBQ="
     },
     {
       "path": "org/sonatype/spice/spice-parent/17/spice-parent-17.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/17/spice-parent-17.pom",
+      "url": "https://repo1.maven.org/maven2/org/sonatype/spice/spice-parent/17/spice-parent-17.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/sonatype/spice/spice-parent/17/spice-parent-17.pom"
+        "https://repo.maven.apache.org/maven2/org/sonatype/spice/spice-parent/17/spice-parent-17.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/sonatype/spice/spice-parent/17/spice-parent-17.pom"
       ],
       "hash": "sha256-kVH5pbM+w27od4hC/FYUT7AkLTnLzEIGGwU7iQmWm98="
     },
     {
       "path": "org/tukaani/xz/1.9/xz-1.9.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar",
+      "url": "https://repo1.maven.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar"
+        "https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.jar",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/tukaani/xz/1.9/xz-1.9.jar"
       ],
       "hash": "sha256-IRswbPxE+Plt86Cj3a91uoxSie7XfWDXL4ibuFX1NeU="
     },
     {
       "path": "org/tukaani/xz/1.9/xz-1.9.pom",
-      "url": "https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.pom",
+      "url": "https://repo1.maven.org/maven2/org/tukaani/xz/1.9/xz-1.9.pom",
       "mirrors": [
-        "https://repo1.maven.org/maven2/org/tukaani/xz/1.9/xz-1.9.pom"
+        "https://repo.maven.apache.org/maven2/org/tukaani/xz/1.9/xz-1.9.pom",
+        "https://maven-central.storage-download.googleapis.com/maven2/org/tukaani/xz/1.9/xz-1.9.pom"
       ],
       "hash": "sha256-CTvhsDMxvOKTLWglw36YJy12Ieap6fuTKJoAJRi43Vo="
     }

@@ -7,6 +7,9 @@
 # on localhost:18080 while it locks.
 set -euo pipefail
 root=$(pwd)
+# Maven Central's files come through Google's copy of it, which spares
+# Central's rate limit; the lock still records the repo1.maven.org URLs.
+export MAVEN_PURIFIER_CENTRAL_MIRROR=${MAVEN_PURIFIER_CENTRAL_MIRROR-https://maven-central.storage-download.googleapis.com/maven2/}
 cli=$(nix build --no-link --print-out-paths "$root#cli")
 python=$(nix build --no-link --print-out-paths 'nixpkgs#python3')
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: MIT -->
+<!--
+  A build whose lock was made from another build definition: the
+  definitionHash in its lock matches no pom.xml. The `negative-stale` check
+  requires its evaluation to fail.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>example.stale</groupId>
+  <artifactId>stale</artifactId>
+  <version>2.0.0</version>
+</project>
