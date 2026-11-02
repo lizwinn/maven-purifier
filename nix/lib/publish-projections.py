@@ -12,7 +12,8 @@ for name in ('maven', 'repository', 'catalog', 'local-repository', 'plugin-versi
 parser.add_argument('arguments', nargs=argparse.REMAINDER)
 args = parser.parse_args()
 extra = args.arguments[1:] if args.arguments[:1] == ['--'] else args.arguments
-modules = json.loads(Path(args.catalog).read_text())['modules']
+catalog = json.loads(Path(args.catalog).read_text())
+modules = catalog.get('publications', catalog['modules'])
 for module in modules:
     group, name, version = (module[key] for key in ('group', 'name', 'version'))
     directory = Path(args.repository) / group.replace('.', '/') / name / version

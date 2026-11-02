@@ -8,12 +8,24 @@
 let
   # Deliberately claims a native version outside the consumer's constraints.
   # Its sole source of authority is the Nix input, not Maven version ordering.
+  runtimeModels = pkgs.runCommand "private-runtime-parent" { } ''
+    dir=$out/example/purifier/metadata/private-parent/7
+    mkdir -p "$dir"
+    cat > "$dir/private-parent-7.pom" <<'POM'
+    <project xmlns="http://maven.apache.org/POM/4.0.0">
+      <modelVersion>4.0.0</modelVersion><groupId>example.purifier.metadata</groupId>
+      <artifactId>private-parent</artifactId><version>7</version><packaging>pom</packaging>
+    </project>
+    POM
+    echo '{"modules":[]}' > "$out/purifier-runtime-modules.json"
+  '';
   producer =
     pkgs.runCommand "nix-built-commons-lang3"
       {
         nativeBuildInputs = [ pkgs.jdk_headless ];
         passthru.projections = purifier.jvmProjections {
           repository = producer;
+          runtimeRepository = runtimeModels;
           inherit (pkgs) runCommand python3;
         };
       }
@@ -38,7 +50,10 @@ let
           --date=1980-01-01T00:00:02Z -C classes .
         cat > "$dir/commons-lang3-0.0.1.pom" <<'POM'
         <project xmlns="http://maven.apache.org/POM/4.0.0">
-          <modelVersion>4.0.0</modelVersion><groupId>org.apache.commons</groupId>
+          <modelVersion>4.0.0</modelVersion>
+          <parent><groupId>example.purifier.metadata</groupId>
+          <artifactId>private-parent</artifactId><version>7</version></parent>
+          <groupId>org.apache.commons</groupId>
           <artifactId>commons-lang3</artifactId><version>0.0.1</version>
         </project>
         POM
@@ -140,6 +155,8 @@ pkgs.runCommand "maven-nix-composition"
     cp -r --no-preserve=mode ${consumer.repository} local-repository
     ${consumer.release.publish}/bin/maven-purifier-publish \
       --repository-id local --url "file://$TMPDIR/published"
+    test -f "$TMPDIR/published/example/purifier/metadata/private-parent/7/private-parent-7.pom"
+    rm -rf local-repository/example/purifier/metadata
     cp -r --no-preserve=mode "$TMPDIR/published"/. local-repository/
     ${pkgs.python3}/bin/python ${purifier.jvmRepositoryTool} \
       --rewrite-sources downstream --catalog ${consumer.projections.maven.catalog}
