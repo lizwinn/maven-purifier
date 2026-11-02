@@ -52,14 +52,19 @@ let
     export HOME=$TMPDIR/home
     mkdir -p $HOME
     ${multi.release.publish}/bin/maven-purifier-publish --repository-id local --url file://$TMPDIR/published
-    published=$TMPDIR/published/example/multi
-    cmp ${multi.packages.core.artifacts."core-sources.jar"} $published/core/1.0.0/core-1.0.0-sources.jar
-    cmp ${multi.packages.core.artifacts."core.jar"} $published/core/1.0.0/core-1.0.0.jar
-    cmp ${multi.packages.app.artifacts."app.jar"} $published/app/1.0.0/app-1.0.0.jar
-    cmp ${
-      multi.packages.multi-parent.artifacts."multi-parent.pom"
-    } $published/multi-parent/1.0.0/multi-parent-1.0.0.pom
-    test -f $published/core/maven-metadata.xml
+    ${pkgs.python3}/bin/python - ${multi.projections.maven.catalog} "$TMPDIR/published" <<'PYTHON'
+    import json, pathlib, sys
+    modules = json.load(open(sys.argv[1]))['modules']
+    root = pathlib.Path(sys.argv[2])
+    for module in modules:
+        directory = root / module['group'].replace('.', '/') / module['name'] / module['version']
+        prefix = module['name'] + '-' + module['version']
+        assert (directory / (prefix + '.pom')).is_file()
+        if module['name'] != 'multi-parent':
+            assert (directory / (prefix + '.jar')).is_file()
+        if module['name'] == 'core':
+            assert (directory / (prefix + '-sources.jar')).is_file()
+    PYTHON
     touch $out
   '';
 
@@ -333,7 +338,9 @@ let
         jar=${extension}/share/java/maven-purifier-extension.jar
         jar tf $jar | grep -qx 'io/github/nixpurifiers/maven/RecordingEventSpy.class'
         index=$(jar xf $jar META-INF/sisu/javax.inject.Named && cat META-INF/sisu/javax.inject.Named)
-        test "$index" = io.github.nixpurifiers.maven.RecordingEventSpy
+        grep -qx io.github.nixpurifiers.maven.RecordingEventSpy <<<"$index"
+        grep -qx io.github.nixpurifiers.maven.ProjectedModelProcessor <<<"$index"
+        grep -qx io.github.nixpurifiers.maven.ProjectedLifecycleParticipant <<<"$index"
         ${cli}/bin/maven-purifier --help | grep -q 'maven-purifier prefetch'
         touch $out
       '';
@@ -374,6 +381,12 @@ let
     pkgs.runCommand "maven-purifier-test-nix-library" { } "touch $out";
 in
 {
+  jvm-projection = multi.projections.maven;
+
+  composition = import ./composition.nix {
+    inherit pkgs build extension;
+    purifier = withOverlay.lib.purifier;
+  };
   multi-app = multi.packages.app;
   multi-core = multi.packages.core;
   multi-tests = multi.tests;

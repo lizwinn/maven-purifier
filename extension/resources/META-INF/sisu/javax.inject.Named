@@ -1,1 +1,3 @@
 io.github.nixpurifiers.maven.RecordingEventSpy
+io.github.nixpurifiers.maven.ProjectedModelProcessor
+io.github.nixpurifiers.maven.ProjectedLifecycleParticipant

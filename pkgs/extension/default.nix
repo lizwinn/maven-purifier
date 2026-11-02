@@ -8,8 +8,22 @@
   stdenvNoCC,
   jdk_headless,
   maven,
+  maven_4,
   version,
 }:
+let
+  # Compile against Maven 4's API jars without depending on its default JDK.
+  maven4Api = stdenvNoCC.mkDerivation {
+    name = "maven4-model-api";
+    src = maven_4.src;
+    dontConfigure = true;
+    dontBuild = true;
+    installPhase = ''
+      mkdir -p $out
+      cp -r lib $out/lib
+    '';
+  };
+in
 stdenvNoCC.mkDerivation {
   pname = "maven-purifier-extension";
   inherit version;
@@ -20,6 +34,8 @@ stdenvNoCC.mkDerivation {
     mkdir classes
     javac --release 8 -Xlint:-options -Xlint:-deprecation -d classes \
       -cp "${maven}/maven/lib/*" $(find src -name '*.java')
+    javac --release 17 -Xlint:-options -Xlint:-deprecation -d classes \
+      -cp "classes:${maven4Api}/lib/*" $(find src-maven4 -name '*.java')
     cp -r resources/. classes/
     jar --create --file maven-purifier-extension.jar \
       --date=1980-01-01T00:00:02Z -C classes .

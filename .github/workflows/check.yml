@@ -98,6 +98,9 @@ jobs:
           cp -r tests/fixtures/multi "$RUNNER_TEMP/multi"
           cd "$RUNNER_TEMP/multi"
           "$RUNNER_TEMP/cli/bin/maven-purifier" prefetch
+      - name: Lock and use a Nix-built JVM dependency
+        run: |
+          "$RUNNER_TEMP/python/bin/python3" tests/composition-native.py "$RUNNER_TEMP/cli/bin/maven-purifier"
       - name: Build, test and open the editor with the network cut off
         run: |
           cd "$RUNNER_TEMP/multi"

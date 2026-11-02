@@ -28,6 +28,7 @@
   maven,
   version,
   extension,
+  purifier ? lib.purifier,
 }:
 let
   # The flake, as the command evaluates it with builtins.getFlake.
@@ -73,6 +74,7 @@ stdenvNoCC.mkDerivation {
     install -Dm644 cli/maven_purifier.py $out/libexec/maven-purifier/maven_purifier.py
     makeWrapper ${python3.interpreter} $out/bin/maven-purifier \
       --add-flags $out/libexec/maven-purifier/maven_purifier.py \
+      --prefix PYTHONPATH : ${purifier.projectInputsTool} \
       --set MAVEN_PURIFIER_EXTENSION ${extension}/share/java/maven-purifier-extension.jar \
       --set MAVEN_PURIFIER_FLAKE ${flake} \
       --set MAVEN_PURIFIER_DEFAULT_MAVEN ${maven.version} \

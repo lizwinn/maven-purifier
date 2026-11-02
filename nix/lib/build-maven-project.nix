@@ -40,6 +40,7 @@
   writeText,
   writeShellScriptBin,
   unzip,
+  python3,
   # The fetcher of the locked downloads; `fetchers.fetchurl` replaces it
   # for one build.
   fetchurl,
@@ -55,6 +56,12 @@
   # The fetchers that replace nixpkgs' own, passed to the purifier library
   # unchanged; a company mirror or credentials go into `fetchers.fetchurl`.
   fetchers ? { },
+  # Nix-built JVM dependencies; their typed repository projections supply
+  # artifacts and the actual native versions without download-lock entries.
+  projectDependencies ? purifier.lockedProjectInputs {
+    inputs = (builtins.fromJSON (builtins.readFile lockFile)).projectInputs or [ ];
+    system = stdenvNoCC.hostPlatform.system;
+  },
   # The lockfile. It may lie outside `src`, for a build whose source does
   # not hold one; a lockfile given here replaces any copy in `src`.
   lockFile ? src + "/maven-purifier.lock.json",
@@ -94,6 +101,7 @@ let
     in
     !(
       (type == "directory" && (name == "target" || name == ".maven-purifier"))
+      || name == ".maven-purifier-pom.xml"
       || name == ".git"
       || name == ".idea"
       || lib.hasPrefix "result" name
@@ -127,8 +135,34 @@ let
       }
       // fetchers
     );
-  repository = mkRepository "maven-repository" buildEntries;
-  developmentRepository = mkRepository "maven-development-repository" entries;
+  lockedRepository = mkRepository "maven-repository" buildEntries;
+  provided = purifier.jvmProjections {
+    repository = null;
+    dependencies = projectDependencies;
+    inherit runCommand python3;
+    name = "maven-provided-dependencies";
+  };
+  repository =
+    if projectDependencies == [ ] then
+      lockedRepository
+    else
+      runCommand "maven-composed-repository" { } ''
+        mkdir $out
+        cp -r --no-preserve=mode ${lockedRepository}/. $out/
+        ${python3}/bin/python ${./project-inputs.py} merge \
+          ${purifier.jvmRepositoryTool} ${provided.maven} "$out"
+      '';
+  lockedDevelopmentRepository = mkRepository "maven-development-repository" entries;
+  developmentRepository =
+    if projectDependencies == [ ] then
+      lockedDevelopmentRepository
+    else
+      runCommand "maven-composed-development-repository" { } ''
+        mkdir $out
+        cp -r --no-preserve=mode ${lockedDevelopmentRepository}/. $out/
+        ${python3}/bin/python ${./project-inputs.py} merge \
+          ${purifier.jvmRepositoryTool} ${provided.maven} "$out"
+      '';
 
   maven = stdenvNoCC.mkDerivation {
     pname = "maven";
@@ -170,6 +204,10 @@ let
     if [ -f .mvn/maven.config ]; then
       sed -i ${lib.escapeShellArg "/^${marker}$/,$d"} .mvn/maven.config
     fi
+    ${lib.optionalString (projectDependencies != [ ]) ''
+      ${python3}/bin/python ${purifier.jvmRepositoryTool} \
+        --rewrite-sources . --catalog ${provided.maven.catalog}
+    ''}
     maven_failed() {
       echo "maven-purifier: Maven failed offline. If it reports an artifact that has not been downloaded, the lock does not hold everything this build needs: run \`maven-purifier lock --force\` at the build root, with the goals and -P options you build with. If it reports a compile or test failure, the build itself failed." >&2
       exit 1
@@ -243,6 +281,13 @@ let
           {
             passthru = {
               mavenProject = project;
+              projections = purifier.jvmProjections {
+                repository = releaseBuild;
+                producer = releaseBuild;
+                dependencies = projectDependencies;
+                inherit runCommand python3;
+                name = "maven-publications";
+              };
               inherit (project) groupId artifactId version;
               # The files of the package by key, such as
               # artifacts."core-sources.jar". They are known from the lock
@@ -284,27 +329,12 @@ let
     else
       "3.1.4";
 
-  # The arguments of deploy:deploy-file for a module: its main artifact (the
-  # one without a classifier that is not the POM, or else the POM), its POM,
-  # and every other artifact attached by classifier and type.
-  deployArguments =
-    project:
-    let
-      pom = lib.findFirst (
-        a: a.classifier == "" && a.extension == "pom"
-      ) (throw "maven-purifier: ${project.artifactId} installs no POM") project.artifacts;
-      main = lib.findFirst (a: a.classifier == "" && a.extension != "pom") pom project.artifacts;
-      attached = builtins.filter (a: a != pom && a != main) project.artifacts;
-    in
-    [
-      "-Dfile=${releaseBuild}/${main.path}"
-      "-DpomFile=${releaseBuild}/${pom.path}"
-    ]
-    ++ lib.optionals (attached != [ ]) [
-      "-Dfiles=${lib.concatMapStringsSep "," (a: "${releaseBuild}/${a.path}") attached}"
-      "-Dclassifiers=${lib.concatMapStringsSep "," (a: a.classifier) attached}"
-      "-Dtypes=${lib.concatMapStringsSep "," (a: a.extension) attached}"
-    ];
+  rootProjections = purifier.jvmProjections {
+    repository = releaseBuild;
+    dependencies = projectDependencies;
+    inherit runCommand python3;
+    name = "maven-publications";
+  };
 
   # Deploys the artifacts of the release, module by module, with
   # deploy:deploy-file of the locked Maven:
@@ -336,16 +366,13 @@ let
     trap 'rm -rf "$work"' EXIT
     cp -r --no-preserve=mode ${repository}/. "$work/repository"
     cd "$work"
-    deploy_file() {
-      ${maven}/bin/mvn -B -Dmaven.repo.local="$work/repository" \
-        -Daether.remoteRepositoryFilter.prefixes=false "''${args[@]}" \
-        org.apache.maven.plugins:maven-deploy-plugin:${deployPluginVersion}:deploy-file \
-        -DrepositoryId="$repository_id" -Durl="$url" -DgeneratePom=false "$@"
-    }
-    ${lib.concatMapStrings (p: ''
-      echo "maven-purifier: publishing ${p.groupId}:${p.artifactId}:${p.version}" >&2
-      deploy_file ${lib.escapeShellArgs (deployArguments p)}
-    '') lock.projects}
+    ${python3}/bin/python ${./project-inputs.py} merge \
+      ${purifier.jvmRepositoryTool} ${rootProjections.maven} "$work/repository"
+    ${python3}/bin/python ${./publish-projections.py} \
+      --maven ${maven}/bin/mvn --repository ${rootProjections.maven} \
+      --catalog ${rootProjections.maven.catalog} --local-repository "$work/repository" \
+      --plugin-version ${deployPluginVersion} --repository-id "$repository_id" \
+      --url "$url" -- "''${args[@]}"
   '';
 
   prefetch = runCommand "maven-purifier-prefetch" { } ''
@@ -354,11 +381,16 @@ let
     ln -s ${maven} $out/maven
     ln -s ${jdk'.home} $out/jdk
     ln -s ${settings} $out/settings.xml
+    ${lib.optionalString (projectDependencies != [ ]) ''
+      ${python3}/bin/python ${./project-inputs.py} properties \
+        ${provided.maven.catalog} "$out/project-inputs.properties"
+    ''}
   '';
 in
 {
   packages = builtins.mapAttrs (_: mkPackage) checked.outputs;
   inherit tests;
+  projections = rootProjections;
   release = releaseBuild // {
     inherit publish;
   };

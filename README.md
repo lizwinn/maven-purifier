@@ -158,7 +158,10 @@ The builder's result has:
   Nix knows every output at evaluation time, without building first.
 - `tests`: the build with its tests, whose output holds the test reports.
 - `release`: every artifact the build installs, built with the tests
-  skipped; `maven-purifier publish` deploys it.
+  skipped.
+- `projections.maven`: an immutable Maven repository with Nix-derived
+  versions and matching dependency metadata; `maven-purifier publish`
+  deploys this repository, including supplied Nix dependencies.
 - `fetches`: the download entries the build fetches, for SBOM, license and
   vulnerability tools.
 
@@ -171,6 +174,23 @@ with), `mavenFlags`, `srcFilter` and `checkDefinition`;
 builder takes, such as `javaPackages` or `stdenvNoCC`, and
 `maven-purifier.overrideScope` replaces what the scope shares, such as
 `fetchurl`.
+
+To use another purified JVM package without downloading its artifacts:
+
+```zsh
+maven-purifier lock --input github:your-org/library#library
+maven-purifier prefetch
+mvn test
+```
+
+Native input activation currently requires Maven 3.1 or newer.
+Repeat `--input` for more packages. The lock records Nix's pinned source
+identity; `update` refreshes it. Maven discovers the supplied modules from
+their Maven or translated Ivy publications and selects them even when the
+POM requests a different version. Source POMs remain unchanged. Published
+POMs name the actual selections so ordinary Maven downstreams can consume
+the deployed repository. A Nix builder can instead pass package derivations
+as `projectDependencies = [ library ];`.
 
 To deploy what Nix built, with the target from the root POM's
 `distributionManagement` and the credentials from `~/.m2/settings.xml`:
@@ -337,7 +357,9 @@ the lockfile. The lock run copies the proxy from `https_proxy` and
 
 The sandboxed build runs the locked goals with
 `deploy` replaced by `install`, since Maven refuses to deploy offline, and
-`release.publish` deploys exactly the files the Nix build made. The local
+`release.publish` deploys the Maven projection. JAR bytes stay unchanged;
+publication versions include the Nix producer identity, and POM references
+use the selected versions. The local
 repository holds copies rather than links into the store, since Maven 3.10
 treats a file as absent when its real path differs from its path in the
 repository. Every run turns Maven Resolver 2's prefix filter off, since its

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 """maven-purifier: lock a Maven build's downloads, work offline from them, publish what Nix built.
 
-  maven-purifier lock [--lockfile FILE] [--force] [--settings FILE] [GOAL...]
+  maven-purifier lock [--lockfile FILE] [--force] [--input FLAKE#PACKAGE] [--settings FILE] [GOAL...]
       Runs the build once with an empty local repository and records every
       file Maven downloads in the lockfile, maven-purifier.lock.json at the
       build root unless --lockfile names another. The default goals are
@@ -14,7 +14,9 @@
       and proxies. The lock is renewed only when the build definition, the
       goals or the settings changed, unless --force is given. A relock
       keeps what version ranges and SNAPSHOTs resolved to in the previous
-      lock.
+      lock. `--input` supplies a Nix-built JVM package; repeat it for more
+      inputs. Its native coordinates are discovered from its repository
+      projection, and its Nix identity is pinned separately from downloads.
 
   maven-purifier update [--lockfile FILE] [--settings FILE] [GROUP:ARTIFACT...]
       Locks again with the goals of the lockfile, resolving the version
@@ -665,7 +667,7 @@ def tracked_repository(path):
 class Options:
     """The options of a command: --lockfile, the flags it names, and the rest in order."""
 
-    def __init__(self, args, flags=(), values=()):
+    def __init__(self, args, flags=(), values=(), repeatable=()):
         # MAVEN_PURIFIER_LOCKFILE names the lockfile of an external build,
         # such as the lockFile a dev shell passes to buildMavenProject;
         # --lockfile takes precedence over it.
@@ -680,6 +682,11 @@ class Options:
                 self.lockfile = Path(next(it, "")).resolve()
             elif arg in flags:
                 self.flags.add(arg)
+            elif arg in repeatable:
+                value = next(it, None)
+                if value is None:
+                    fail(f"{arg} needs a value")
+                self.values.setdefault(arg, []).append(value)
             elif arg in values:
                 value = next(it, None)
                 if value is None:
@@ -781,7 +788,7 @@ def seed_metadata(repo, previous, refresh):
 
 
 def lock(args):
-    options = Options(args, flags=("--force",), values=("--settings",))
+    options = Options(args, flags=("--force",), values=("--settings",), repeatable=("--input",))
     root = build_root()
     run_lock(
         root,
@@ -790,11 +797,12 @@ def lock(args):
         options.values.get("--settings"),
         force="--force" in options.flags,
         refresh=None,
+        input_refs=options.values.get("--input"),
     )
 
 
 def update(args):
-    options = Options(args, values=("--settings",))
+    options = Options(args, values=("--settings",), repeatable=("--input",))
     root = build_root()
     lock_path = options.lock_path(root)
     previous = read_lock(lock_path)
@@ -805,15 +813,23 @@ def update(args):
         options.values.get("--settings"),
         force=True,
         refresh=options.rest or "all",
+        input_refs=options.values.get("--input"),
     )
 
 
-def run_lock(root, lock_path, goals, settings_file, force, refresh):
+def run_lock(root, lock_path, goals, settings_file, force, refresh, input_refs=None):
     """The lock run. `refresh` says which metadata of the previous lock to resolve afresh (seed_metadata)."""
     def_hash = definition_hash(root, goals)
     settings_source = Path(settings_file).resolve() if settings_file else None
     settings, settings_record = read_settings(settings_source)
     previous = previous_lock(lock_path)
+    previous_inputs = (previous or {}).get("projectInputs", [])
+    if input_refs is None:
+        input_refs = [entry["reference"] for entry in previous_inputs]
+    inputs = []
+    if input_refs:
+        import project_inputs
+        inputs = project_inputs.pin(input_refs, previous_inputs, refresh=refresh == "all")
     if not force and lock_path.is_file():
         try:
             old = json.loads(lock_path.read_text())
@@ -825,6 +841,7 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             and old.get("lockHash") == lock_hash(old)
             and old.get("definitionHash") == def_hash
             and old.get("settings") == settings_record
+            and old.get("projectInputs", []) == inputs
         ):
             info(f"{lock_path} is up to date; pass --force to lock again")
             return
@@ -841,6 +858,9 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
         dist_path = download_path(url)
         mvn = unpack_maven(Path(dist_store), tmp / "maven")
         maven_version = mvn.parent.parent.name.removeprefix("apache-maven-")
+        if inputs and maven_version_tuple(mvn) < (3, 1, 0):
+            fail("native Nix project inputs currently need Maven 3.1 or newer; "
+                 "older Maven builds can use the Nix builder's projectDependencies argument")
         if not previous and not os.environ.get("JAVA_HOME") and maven_version_tuple(mvn) < (3, 1, 0):
             home = os.environ.get("MAVEN_PURIFIER_LEGACY_JAVA_HOME", home)
 
@@ -856,6 +876,26 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(declared_store, target)
             declared.append(file_entry(Path(d["path"]).as_posix(), d["url"], declared_hash))
+        provided_paths = set()
+        if inputs:
+            import project_inputs
+            import jvm_repository
+            state = project / STATE_DIR
+            state.mkdir(exist_ok=True)
+            selections = {}
+            for view in project_inputs.maven_views(inputs):
+                # Catalogs discover native coordinates; Nix identifies their
+                # provider. No caller-supplied version rewrites are involved.
+                jvm_repository.merge(view["repository"], repo)
+                provided_paths.update(path.relative_to(view["repository"]).as_posix()
+                                      for path in view["repository"].rglob("*") if path.is_file())
+                for module in json.loads(view["catalog"].read_text())["modules"]:
+                    key = module["group"] + ":" + module["name"]
+                    if key in selections and selections[key] != module["version"]:
+                        fail(f"conflicting Nix providers for {key}")
+                    selections[key] = module["version"]
+            lines = [key.replace(":", "\\:") + "=" + version + "\n" for key, version in sorted(selections.items())]
+            (state / "project-inputs.properties").write_text("".join(lines))
         declared_paths = {d["path"] for d in declared}
         seeded = seed_metadata(repo, previous, refresh)
         (tmp / "home").mkdir()
@@ -864,7 +904,7 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
 
         env = dict(os.environ)
         env.update({"JAVA_HOME": home, "HOME": str(tmp / "home"), "MAVEN_PURIFIER_RECORD": str(record),
-                    "MAVEN_PURIFIER_PRESERVED": json.dumps(sorted(declared_paths | seeded))})
+                    "MAVEN_PURIFIER_PRESERVED": json.dumps(sorted(declared_paths | seeded | provided_paths))})
         # Plugins that write temporary files write them into the lock run's
         # own directory.
         (tmp / "java-tmp").mkdir()
@@ -916,6 +956,8 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             if e["event"] != "download":
                 continue
             rel = Path(e["file"]).relative_to(repo).as_posix()
+            if rel in provided_paths:
+                continue
             found = [rel]
             # Maven Resolver stores a timestamped SNAPSHOT under its base
             # version, which the event names, and also under the name it has
@@ -953,7 +995,7 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             rel = path.relative_to(repo).as_posix()
             if path.name in BOOKKEEPING or path.name.endswith(".lastUpdated"):
                 continue
-            if rel.startswith(LEGACY_RECORDER_PATH) or rel in downloads or rel in installed or rel in declared_paths or rel in seeded:
+            if rel.startswith(LEGACY_RECORDER_PATH) or rel in downloads or rel in installed or rel in declared_paths or rel in seeded or rel in provided_paths:
                 continue
             if path.name.startswith("maven-metadata") and Path(rel).parent.as_posix() in module_dirs:
                 continue
@@ -1063,6 +1105,8 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             ],
             "downloads": entries,
         }
+        if inputs:
+            result["projectInputs"] = inputs
         result["lockHash"] = lock_hash(result)
         lock_path.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
         modules = ", ".join(sorted(a for _, a in projects))
@@ -1146,6 +1190,13 @@ def prefetch(args):
         stamp.write_text(source)
 
     offline_settings(lock_data, repo, state / "settings.xml")
+    # The core model adapters discover this file from each original POM,
+    # including IDE builds. The generated metadata remains rooted in Nix.
+    selection = state / "project-inputs.properties"
+    if selection.exists() or selection.is_symlink():
+        selection.unlink()
+    if (prefetched / "project-inputs.properties").is_file():
+        selection.symlink_to(prefetched / "project-inputs.properties")
     bin_dir = state / "bin"
     bin_dir.mkdir(exist_ok=True)
     jdk = state / "jdk"
@@ -1161,6 +1212,7 @@ def prefetch(args):
         "#!/bin/sh\n"
         f"export JAVA_HOME={shlex.quote(str(jdk))}\n"
         f"exec {shlex.quote(str(prefetched / 'maven' / 'bin' / 'mvn'))} "
+        f"-Dmaven.ext.class.path={shlex.quote(os.environ['MAVEN_PURIFIER_EXTENSION'])} "
         f"-o --settings {shlex.quote(str(state / 'settings.xml'))} \"$@\"\n"
     )
     launcher.chmod(0o755)
