@@ -40,6 +40,9 @@ public final class LegacyRecorderMojo extends AbstractMojo {
         for (ArtifactRepository repository : module.getPluginArtifactRepositories()) {
           repository(output, repository);
         }
+        if ("1".equals(System.getenv("MAVEN_PURIFIER_CAPTURE_RUNTIME"))) {
+          runtime(output, module);
+        }
         installed(output, module, "", "pom");
         if (!"pom".equals(module.getPackaging())) {
           Artifact main = module.getArtifact();
@@ -51,6 +54,23 @@ public final class LegacyRecorderMojo extends AbstractMojo {
       }
     } catch (IOException error) {
       throw new MojoExecutionException("Cannot record the legacy Maven reactor", error);
+    }
+  }
+
+  private void runtime(Writer output, MavenProject module) throws IOException {
+    if (module.getArtifacts() == null) return;
+    for (Artifact artifact : module.getArtifacts()) {
+      String scope = artifact.getScope();
+      if (!("compile".equals(scope) || "runtime".equals(scope))) continue;
+      // Resolve the managed repository path even if Maven canonicalized a
+      // cache symlink to its store object. Reactor classes are separate.
+      File file = new File(localRepository.getBasedir(), localRepository.pathOf(artifact));
+      if (!file.isFile()) continue;
+      // Tool/plugin classpaths are never part of MavenProject.getArtifacts().
+      output.write("{\"event\":\"runtime\",\"projectGroupId\":" + json(module.getGroupId())
+          + ",\"projectArtifactId\":" + json(module.getArtifactId())
+          + ",\"groupId\":" + json(artifact.getGroupId()) + ",\"artifactId\":" + json(artifact.getArtifactId())
+          + ",\"version\":" + json(artifact.getVersion()) + ",\"file\":" + json(file.getAbsolutePath()) + "}\n");
     }
   }
 

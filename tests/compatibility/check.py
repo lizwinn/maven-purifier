@@ -16,7 +16,10 @@ args = parser.parse_args()
 root = Path(__file__).resolve().parents[2]
 cli = str(args.cli.resolve())
 env = dict(os.environ, JAVA_HOME=str(args.jdk.resolve()))
+snapshot = json.loads(subprocess.check_output(['nix', 'flake', 'metadata', '--json',
+    '--no-write-lock-file', 'path:'+str(root)], text=True))['path']
 with tempfile.TemporaryDirectory(prefix="maven-compatibility-") as tmp:
+    subprocess.run(['nix-store', '--add-root', str(Path(tmp)/'source'), '--realise', snapshot], check=True)
     project = Path(tmp) / "project"
     shutil.copytree(Path(__file__).parent, project, ignore=shutil.ignore_patterns("check.py", "__pycache__"))
     wrapper = project / ".mvn/wrapper/maven-wrapper.properties"
@@ -54,7 +57,16 @@ with tempfile.TemporaryDirectory(prefix="maven-compatibility-") as tmp:
       }).tests
     """
     run("nix", "build", "--impure", "--no-link", "--print-build-logs", "--expr", expression,
-        extra_env={"COMPAT_FLAKE": str(root), "COMPAT_PROJECT": str(project)})
+        extra_env={"COMPAT_FLAKE": snapshot, "COMPAT_PROJECT": str(project)})
+
+    if args.version.startswith('2.'):
+        # Maven 2 has no native model adapter, but its sandbox builder still
+        # accepts Nix inputs. Exercise the Java 8 recorder in that mode too.
+        composed = expression.replace('src = /. + builtins.getEnv "COMPAT_PROJECT";',
+            'src = /. + builtins.getEnv "COMPAT_PROJECT"; '
+            'projectDependencies = [ f.checks.${builtins.currentSystem}.composition.producer ];')
+        run('nix', 'build', '--impure', '--no-link', '--print-build-logs', '--expr', composed,
+            extra_env={'COMPAT_FLAKE': snapshot, 'COMPAT_PROJECT': str(project)})
 
     if not args.version.startswith('2.'):
         # Maven 3.0 needs the Plexus registration; newer Maven 3 and Maven 4
@@ -69,13 +81,15 @@ with tempfile.TemporaryDirectory(prefix="maven-compatibility-") as tmp:
         pom = project / 'pom.xml'
         pom.write_text(pom.read_text().replace('<dependencies>', '<dependencies><dependency>'
             '<groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId>'
-            '<version>99.0</version></dependency>'))
+            '<version>99.0</version></dependency><dependency>'
+            '<groupId>org.apache.commons</groupId><artifactId>commons-text</artifactId>'
+            '<version>1.13.0</version></dependency>'))
         source_pom = pom.read_bytes()
         (project / 'src/main/java/example/Hello.java').write_text(
             'package example; public final class Hello { public static int answer() { '
             'return org.apache.commons.lang3.StringUtils.capitalize("nix").equals("Nix") ? 42 : 0; } }\n')
         system = subprocess.check_output(['nix', 'eval', '--impure', '--raw', '--expr', 'builtins.currentSystem'], text=True)
-        reference = 'path:' + str(root) + '#checks.' + system + '.composition.producer'
+        reference = 'path:' + snapshot + '#checks.' + system + '.composition.producer'
         run(cli, 'lock', '--input', reference)
         data = json.loads((project / 'maven-purifier.lock.json').read_text())
         assert len(data['projectInputs']) == 1
@@ -83,5 +97,11 @@ with tempfile.TemporaryDirectory(prefix="maven-compatibility-") as tmp:
         run(cli, 'prefetch')
         run(str(project / '.maven-purifier/bin/mvn'), '-B', 'clean', 'install')
         assert pom.read_bytes() == source_pom
-        run('nix', 'build', '--impure', '--no-link', '--print-build-logs', '--expr', expression,
-            extra_env={'COMPAT_FLAKE': str(root), 'COMPAT_PROJECT': str(project)})
+        runtime_expression = expression.replace('in (p.maven-purifier.buildMavenProject {',
+            'built = p.maven-purifier.buildMavenProject {').replace('}).tests', '''};
+          in p.runCommand "maven-compatibility-runtime" { tests = built.tests; } ''
+            find ${built.projections.maven}/org/apache/commons/commons-text -name '*-nix-*.pom' | grep -q .
+            touch $out
+          '' ''')
+        run('nix', 'build', '--impure', '--no-link', '--print-build-logs', '--expr', runtime_expression,
+            extra_env={'COMPAT_FLAKE': snapshot, 'COMPAT_PROJECT': str(project)})

@@ -17,8 +17,11 @@ args = parser.parse_args()
 cli = args.cli.resolve()
 root = Path(__file__).resolve().parents[1]
 system = subprocess.check_output(['nix', 'eval', '--impure', '--raw', '--expr', 'builtins.currentSystem'], text=True)
-reference = 'path:' + str(root) + '#checks.' + system + '.composition.producer'
+snapshot = json.loads(subprocess.check_output(['nix', 'flake', 'metadata', '--json',
+    '--no-write-lock-file', 'path:'+str(root)], text=True))['path']
 with tempfile.TemporaryDirectory(prefix='maven-project-input-') as temporary:
+    subprocess.run(['nix-store', '--add-root', str(Path(temporary)/'source'), '--realise', snapshot], check=True)
+    reference = 'path:' + snapshot + '#checks.' + system + '.composition.producer'
     project = Path(temporary) / 'project'
     shutil.copytree(root / 'tests/fixtures/multi', project)
     (project / 'maven-purifier.lock.json').unlink()
@@ -78,4 +81,47 @@ with tempfile.TemporaryDirectory(prefix='maven-project-input-') as temporary:
       }).tests
     """
     subprocess.run(['nix', 'build', '--impure', '--no-link', '--print-build-logs', '--expr', expression],
-        env=dict(os.environ, COMPOSITION_FLAKE=str(root), COMPOSITION_PROJECT=str(project)), check=True)
+        env=dict(os.environ, COMPOSITION_FLAKE=snapshot, COMPOSITION_PROJECT=str(project)), check=True)
+
+    # Consume the full exported graph with ordinary Maven, without an adapter.
+    environment = dict(os.environ, COMPOSITION_FLAKE=snapshot, COMPOSITION_PROJECT=str(project))
+    repository = Path(temporary) / 'exported-repository'
+    subprocess.run(['nix', 'build', '--impure', '--out-link', str(repository), '--expr',
+        expression.replace('}).tests', '}).projections.maven')], env=environment, check=True)
+    assert next((repository/'org/apache/commons/commons-text').glob('*/*-nix-*.jar')).is_file()
+    tools = Path(temporary) / 'downstream-tools'
+    tools_expression = r"""
+      let f = builtins.getFlake ("path:" + builtins.getEnv "COMPOSITION_FLAKE");
+          p = import f.inputs.nixpkgs { system = builtins.currentSystem; };
+      in p.runCommand "maven-composition-downstream-tools" {} ''
+        mkdir -p $out/bin
+        ln -s ${p.maven}/bin/mvn $out/bin/mvn
+        ln -s ${p.jdk} $out/jdk
+      ''
+    """
+    subprocess.run(['nix', 'build', '--impure', '--out-link', str(tools), '--expr', tools_expression],
+                   env=environment, check=True)
+    downstream = Path(temporary) / 'downstream'
+    source = downstream/'src/main/java/Downstream.java'
+    source.parent.mkdir(parents=True)
+    source.write_text("""public final class Downstream { public static void main(String[] args) throws Exception {
+      String greeting = (String)Class.forName("example.multi.core.Greeting").getMethod("greet", String.class).invoke(null, "nix");
+      if (!"Hello, Nix!".equals(greeting)) throw new AssertionError(greeting);
+      for (String name : new String[]{"org.apache.commons.lang3.StringUtils", "org.apache.commons.text.WordUtils"}) {
+        String location = Class.forName(name).getProtectionDomain().getCodeSource().getLocation().toString();
+        if (!location.contains("-nix-")) throw new AssertionError(location);
+      }
+      System.out.println("ORDINARY MAVEN TRANSITIVE COMPOSITION PASSED");
+    } }""")
+    publication = next((repository/'example/multi/core').glob('*/*.pom'))
+    (downstream/'pom.xml').write_text(f"""<project><modelVersion>4.0.0</modelVersion>
+      <groupId>example</groupId><artifactId>downstream</artifactId><version>1</version>
+      <properties><maven.compiler.release>21</maven.compiler.release></properties>
+      <repositories><repository><id>projected</id><url>{repository.as_uri()}</url></repository></repositories>
+      <dependencies><dependency><groupId>example.multi</groupId><artifactId>core</artifactId>
+      <version>{publication.parent.name}</version></dependency></dependencies></project>""")
+    plain = dict(os.environ, JAVA_HOME=str(tools/'jdk'))
+    subprocess.run([str(tools/'bin/mvn'), '-B', '-Dmaven.repo.local='+str(Path(temporary)/'ordinary-m2'),
+        'package', 'dependency:build-classpath', '-Dmdep.outputFile=classpath'], cwd=downstream, env=plain, check=True)
+    subprocess.run([str(tools/'jdk/bin/java'), '-cp', str(downstream/'target/classes')+os.pathsep
+        +(downstream/'classpath').read_text().strip(), 'Downstream'], cwd=downstream, env=plain, check=True)

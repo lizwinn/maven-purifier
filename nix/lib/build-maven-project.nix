@@ -33,8 +33,10 @@
 #   maven           the Maven distribution the lock run used
 #   jdk             the JDK that runs Maven
 #   lock            the lock in memory, as readLock (lock.nix) reads it
-{
+arguments@{
   lib,
+  maven,
+  jdk_headless,
   stdenvNoCC,
   runCommand,
   writeText,
@@ -189,6 +191,31 @@ let
   # the build made.
   buildGoals = map (goal: if goal == "deploy" then "install" else goal) lock.goals;
 
+  # A minimal Java 8 plugin, separate from the Maven 3/4 core adapters, can
+  # read the evaluated reactor on Maven 2 as well as current Maven releases.
+  runtimeRecorder =
+    runCommand "maven-runtime-recorder"
+      {
+        nativeBuildInputs = [ arguments.jdk_headless ];
+      }
+      ''
+        mkdir -p classes/META-INF/maven
+        cp ${../../extension/src/io/github/nixpurifiers/maven/LegacyRecorderMojo.java} LegacyRecorderMojo.java
+        javac --release 8 -Xlint:-options -d classes -cp "${arguments.maven}/maven/lib/*" LegacyRecorderMojo.java
+        cp ${../../extension/resources/META-INF/maven/plugin.xml} classes/META-INF/maven/plugin.xml
+        # Maven 4 populates the legacy project artifact view on demand.
+        sed -i '/<requiresProject>/a\      <requiresDependencyResolution>runtime</requiresDependencyResolution>' \
+          classes/META-INF/maven/plugin.xml
+        directory=$out/io/github/nix-purifiers/maven-purifier-legacy-recorder/1
+        mkdir -p "$directory"
+        jar --create --file "$directory/maven-purifier-legacy-recorder-1.jar" \
+          --date=1980-01-01T00:00:02Z -C classes .
+        cat > "$directory/maven-purifier-legacy-recorder-1.pom" <<'POM'
+        <project><modelVersion>4.0.0</modelVersion><groupId>io.github.nix-purifiers</groupId>
+        <artifactId>maven-purifier-legacy-recorder</artifactId><version>1</version><packaging>maven-plugin</packaging></project>
+        POM
+      '';
+
   marker = import ./maven-config-marker.nix;
 
   # Runs Maven offline in the build root, on a writable copy of the
@@ -207,6 +234,9 @@ let
     ${lib.optionalString (projectDependencies != [ ]) ''
       ${python3}/bin/python ${purifier.jvmRepositoryTool} \
         --rewrite-sources . --catalog ${provided.maven.catalog}
+      cp -r --no-preserve=mode ${runtimeRecorder}/. "$TMPDIR/repository"
+      export MAVEN_PURIFIER_RECORD="$TMPDIR/runtime-record.jsonl"
+      export MAVEN_PURIFIER_CAPTURE_RUNTIME=1
     ''}
     maven_failed() {
       echo "maven-purifier: Maven failed offline. If it reports an artifact that has not been downloaded, the lock does not hold everything this build needs: run \`maven-purifier lock --force\` at the build root, with the goals and -P options you build with. If it reports a compile or test failure, the build itself failed." >&2
@@ -218,7 +248,16 @@ let
       -Duser.home="$HOME" \
       -Daether.remoteRepositoryFilter.prefixes=false \
       -Dproject.build.outputTimestamp=1980-01-01T00:00:02Z \
-      ${lib.escapeShellArgs (flags ++ mavenFlags ++ buildGoals)} </dev/null || maven_failed
+      ${
+        lib.escapeShellArgs (
+          flags
+          ++ mavenFlags
+          ++ buildGoals
+          ++ lib.optional (
+            projectDependencies != [ ]
+          ) "io.github.nix-purifiers:maven-purifier-legacy-recorder:1:record"
+        )
+      } </dev/null || maven_failed
   '';
 
   releaseBuild = stdenvNoCC.mkDerivation {
@@ -247,6 +286,10 @@ let
         mkdir -p "$out/$(dirname "$path")"
         cp "$TMPDIR/repository/$path" "$out/$path"
       done
+      ${lib.optionalString (projectDependencies != [ ]) ''
+        ${python3}/bin/python ${./export-runtime.py} ${purifier.projectInputsTool} \
+          "$TMPDIR/runtime-record.jsonl" "$TMPDIR/repository" ${provided.maven.catalog} "$out/nix-support/runtime"
+      ''}
       runHook postInstall
     '';
   };
@@ -284,6 +327,8 @@ let
               projections = purifier.jvmProjections {
                 repository = releaseBuild;
                 producer = releaseBuild;
+                runtimeRepository =
+                  if projectDependencies == [ ] then null else "${releaseBuild}/nix-support/runtime";
                 dependencies = projectDependencies;
                 inherit runCommand python3;
                 name = "maven-publications";
@@ -331,6 +376,8 @@ let
 
   rootProjections = purifier.jvmProjections {
     repository = releaseBuild;
+    runtimeRepository =
+      if projectDependencies == [ ] then null else "${releaseBuild}/nix-support/runtime";
     dependencies = projectDependencies;
     inherit runCommand python3;
     name = "maven-publications";
