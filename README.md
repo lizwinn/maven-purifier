@@ -64,7 +64,8 @@ for every package or for the ones you name:
 
 ```zsh
 nix run github:nix-purifiers/maven-purifier -- update
-nix run github:nix-purifiers/maven-purifier -- update org.slf4j:slf4j-api
+nix run github:nix-purifiers/maven-purifier -- update \
+  org.slf4j:slf4j-api
 ```
 
 `maven-purifier update` locks with the goals that the lockfile recorded.
@@ -108,7 +109,8 @@ directly:
   inputs.maven-purifier.url = "github:nix-purifiers/maven-purifier";
   inputs.nixpkgs.follows = "maven-purifier/nixpkgs";
 
-  outputs = { nixpkgs, maven-purifier, ... }:
+  outputs =
+    { nixpkgs, maven-purifier, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -172,15 +174,15 @@ For an ad hoc build, the builder can also be evaluated directly from the
 project root. Replace the example package name with one from your project:
 
 ```zsh
-nix build --impure --expr '
-  let
-    purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
-    pkgs = import purifier.inputs.nixpkgs {
-      system = builtins.currentSystem;
-      overlays = [ purifier.overlays.default ];
-    };
-  in
-  (pkgs.maven-purifier.buildMavenProject { src = ./.; }).packages.app'
+nix build --impure --expr 'let
+  purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
+  pkgs = import purifier.inputs.nixpkgs {
+    system = builtins.currentSystem;
+    overlays = [ purifier.overlays.default ];
+  };
+in
+(pkgs.maven-purifier.buildMavenProject { src = ./.; })
+.packages.app'
 ```
 
 This uses the purifier's pinned nixpkgs, matching the lock command above.
@@ -347,21 +349,22 @@ Gson offline on the locked JDK, and an editor that reads
 `.maven-purifier/settings.xml` imports it offline:
 
 ```zsh
-JAVA_HOME=$PWD/.maven-purifier/jdk .maven-purifier/bin/mvn clean install
+JAVA_HOME=$PWD/.maven-purifier/jdk .maven-purifier/bin/mvn \
+  clean install
 ```
 
 From the same directory, Nix builds the `gson` module with this command:
 
 ```zsh
-nix build --impure --expr '
-  let
-    purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
-    pkgs = import purifier.inputs.nixpkgs {
-      system = builtins.currentSystem;
-      overlays = [ purifier.overlays.default ];
-    };
-  in
-  (pkgs.maven-purifier.buildMavenProject { src = ./.; }).packages.gson'
+nix build --impure --expr 'let
+  purifier = builtins.getFlake "github:nix-purifiers/maven-purifier";
+  pkgs = import purifier.inputs.nixpkgs {
+    system = builtins.currentSystem;
+    overlays = [ purifier.overlays.default ];
+  };
+in
+(pkgs.maven-purifier.buildMavenProject { src = ./.; })
+.packages.gson'
 ```
 
 `packages.gson-extras` and `packages.proto` select the other modules,
