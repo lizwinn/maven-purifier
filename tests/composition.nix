@@ -28,7 +28,7 @@ let
           }
         }
         JAVA
-        javac -d classes StringUtils.java
+        javac --release 8 -d classes StringUtils.java
         dir=$out/org/apache/commons/commons-lang3/0.0.1
         mkdir -p "$dir"
         jar --create --file "$dir/commons-lang3-0.0.1.jar" \
