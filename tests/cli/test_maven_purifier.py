@@ -493,4 +493,14 @@ class Compatibility(TemporaryTree):
         with mock.patch.dict(os.environ, {}, clear=True):
             path = self.root / "settings.xml"
             mp.write_run_settings(ET.Element("settings"), path, legacy=True)
-            self.assertEqual(ET.parse(path).findtext("mirrors/mirror/url"), CENTRAL)
+            self.assertEqual(ET.parse(path).findtext("mirrors/mirror/url"), CENTRAL.rstrip("/"))
+
+    def test_legacy_http_central_without_trailing_slash_is_verified_over_https(self):
+        self.write("repository/example/a/1/a-1.jar", "original")
+        record = self.write("events", json.dumps({"event":"repository","repository":"central","repositoryUrl":"http://repo1.maven.org/maven2"}) + "\n")
+        import io
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with mock.patch.object(mp.urllib.request,"urlopen",return_value=io.BytesIO(b"original")) as fetch:
+                mp.record_legacy_downloads(self.root/"repository",record)
+                self.assertEqual(fetch.call_args.args[0], CENTRAL+"example/a/1/a-1.jar")
+        self.assertEqual(mp.read_record(record)[-1]["event"],"download")

@@ -167,7 +167,7 @@ def record_legacy_downloads(repo, record, preserved=()):
     for event in events:
         if event["event"] in ("repository", "download"):
             base = event["repositoryUrl"]
-            repositories[event["repository"]] = CENTRAL if base in CENTRAL_HOSTS else base
+            repositories[event["repository"]] = CENTRAL if base.rstrip("/") + "/" in CENTRAL_HOSTS else base
     installed = {Path(e["file"]).parent for e in events if e["event"] == "install"}
     module_dirs = installed | {p.parent for p in installed}
     with record.open("a") as output:
@@ -575,7 +575,7 @@ def write_run_settings(settings, path, legacy=False):
             if mirrors is None:
                 mirrors = ET.SubElement(settings, qualify("mirrors"))
             element = ET.SubElement(mirrors, qualify("mirror"))
-            for name, text in (("id", "central"), ("mirrorOf", "central"), ("url", mirror)):
+            for name, text in (("id", "central"), ("mirrorOf", "central"), ("url", mirror.rstrip("/") if legacy else mirror)):
                 ET.SubElement(element, qualify(name)).text = text
     path.write_text(ET.tostring(settings, encoding="unicode") + "\n")
 
