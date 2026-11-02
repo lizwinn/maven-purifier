@@ -23,6 +23,7 @@
   unzip,
   python3,
   jdk_headless,
+  jdk8_headless,
   jdt-language-server,
   maven,
   version,
@@ -76,7 +77,8 @@ stdenvNoCC.mkDerivation {
       --set MAVEN_PURIFIER_FLAKE ${flake} \
       --set MAVEN_PURIFIER_DEFAULT_MAVEN ${maven.version} \
       --set MAVEN_PURIFIER_EDITOR_MAVEN "$editorMaven" \
-      --set MAVEN_PURIFIER_DEFAULT_JAVA_HOME ${jdk_headless.home}
+      --set MAVEN_PURIFIER_DEFAULT_JAVA_HOME ${jdk_headless.home} \
+      --set MAVEN_PURIFIER_LEGACY_JAVA_HOME ${jdk8_headless.home}
     runHook postInstall
   '';
   meta = {

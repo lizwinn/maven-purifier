@@ -119,4 +119,29 @@ jobs:
             echo "prefetch accepted a stale lock" >&2
             exit 1
           fi
+          # shellcheck disable=SC2016
           grep -F 'run `maven-purifier lock`' "$RUNNER_TEMP/stale.log"
+
+  compatibility:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { maven: '2.2.1', java: '8' }
+          - { maven: '3.0.5', java: '8' }
+          - { maven: '3.3.9', java: '17' }
+          - { maven: '3.8.8', java: '17' }
+          - { maven: '3.9.11', java: '17' }
+          - { maven: '4.0.0-rc-7', java: '17' }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
+      - name: Build the purifier and the matching JDK
+        run: |
+          nix build '.#cli' --out-link "$RUNNER_TEMP/cli"
+          nix build --inputs-from . 'nixpkgs#jdk${{ matrix.java }}_headless' --out-link "$RUNNER_TEMP/jdk"
+      - name: Lock, relock, work offline and build in the sandbox
+        run: >-
+          python3 tests/compatibility/check.py '${{ matrix.maven }}'
+          "$RUNNER_TEMP/cli/bin/maven-purifier" "$RUNNER_TEMP/jdk"

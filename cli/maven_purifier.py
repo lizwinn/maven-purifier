@@ -47,6 +47,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import shutil
 import stat
 import subprocess
@@ -55,6 +56,8 @@ import tarfile
 import tempfile
 import time
 import urllib.parse
+import urllib.request
+import urllib.error
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
@@ -77,7 +80,7 @@ DEPENDENCY_PLUGIN = "org.apache.maven.plugins:maven-dependency-plugin:3.8.1"
 # Files Maven Resolver writes into a local repository for its own
 # bookkeeping. They are not downloads, and an offline build does not need
 # them.
-BOOKKEEPING = {"_remote.repositories", "resolver-status.properties", "maven-metadata-local.xml"}
+BOOKKEEPING = {"_remote.repositories", "_maven.repositories", "resolver-status.properties", "maven-metadata-local.xml"}
 
 # Maven Resolver stores the checksum files it fetched to validate a download
 # beside the download. An offline build validates no checksums.
@@ -99,7 +102,107 @@ CENTRAL_HOSTS = (
     "https://repo1.maven.org/maven2/",
     "https://repo.maven.apache.org/maven2/",
     "https://maven-central.storage-download.googleapis.com/maven2/",
+    "http://repo1.maven.org/maven2/",
+    "http://repo.maven.apache.org/maven2/",
 )
+
+LEGACY_RECORDER = "io.github.nix-purifiers:maven-purifier-legacy-recorder:1:record"
+LEGACY_RECORDER_PATH = "io/github/nix-purifiers/maven-purifier-legacy-recorder/1/"
+
+
+def maven_version_tuple(mvn):
+    version = Path(mvn).parent.parent.name.removeprefix("apache-maven-")
+    found = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?", version)
+    if not found:
+        fail(f"cannot determine the Maven version from {mvn}")
+    return tuple(int(x or 0) for x in found.groups())
+
+
+def seed_legacy_recorder(repo):
+    target = repo / LEGACY_RECORDER_PATH
+    target.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(os.environ["MAVEN_PURIFIER_EXTENSION"], target / "maven-purifier-legacy-recorder-1.jar")
+    (target / "maven-purifier-legacy-recorder-1.pom").write_text(
+        '<project><modelVersion>4.0.0</modelVersion><groupId>io.github.nix-purifiers</groupId>'
+        '<artifactId>maven-purifier-legacy-recorder</artifactId><version>1</version>'
+        '<packaging>maven-plugin</packaging></project>\n')
+
+
+def legacy_remote_path(relative):
+    """Legacy Resolver appends the repository id to a remote metadata filename."""
+    path = Path(relative)
+    if path.name.startswith("maven-metadata-") and path.suffix == ".xml":
+        return str(path.with_name("maven-metadata.xml"))
+    return relative
+
+
+def legacy_remote_paths(relative, repo):
+    paths = [legacy_remote_path(relative)]
+    file = Path(relative)
+    if "-SNAPSHOT" in file.name:
+        for metadata in sorted((repo / file.parent).glob("maven-metadata*.xml")):
+            try:
+                snapshot = ET.parse(metadata).find("versioning/snapshot")
+                if snapshot is not None:
+                    timestamp = snapshot.findtext("timestamp")
+                    build = snapshot.findtext("buildNumber")
+                    if timestamp and build:
+                        paths.append(str(file.with_name(file.name.replace("-SNAPSHOT", f"-{timestamp}-{build}"))))
+            except (OSError, ET.ParseError):
+                continue
+    return list(dict.fromkeys(paths))
+
+
+def record_legacy_downloads(repo, record, preserved=()):
+    """Recover origins from the effective reactor, verifying the bytes remotely.
+
+    Maven 2 and Maven 3.0 have no repository events. The recorder goal supplies
+    their effective repositories and installed artifacts. Every remaining file
+    must match a file at one of those repositories before it can enter the lock.
+    Do this after each pass so build downloads remain distinct from IDE extras.
+    """
+    events = read_record(record)
+    seen = {e["file"] for e in events if e["event"] in ("download", "install", "resolved")}
+    repositories = {}
+    for event in events:
+        if event["event"] in ("repository", "download"):
+            base = event["repositoryUrl"]
+            repositories[event["repository"]] = CENTRAL if base in CENTRAL_HOSTS else base
+    installed = {Path(e["file"]).parent for e in events if e["event"] == "install"}
+    module_dirs = installed | {p.parent for p in installed}
+    with record.open("a") as output:
+        for file in sorted(repo.rglob("*")):
+            if not file.is_file() or str(file) in seen:
+                continue
+            relative = file.relative_to(repo).as_posix()
+            if relative in preserved:
+                output.write(json.dumps({"event": "resolved", "file": str(file)}) + "\n")
+                continue
+            if (relative.startswith(LEGACY_RECORDER_PATH) or file.name in BOOKKEEPING
+                or file.name.endswith((".lastUpdated", *CHECKSUM_SUFFIXES))
+                or (file.name.startswith("maven-metadata") and file.parent in module_dirs)):
+                continue
+            preferred = tracked_repository(file)
+            candidates = [(key, base, remote) for key, base in sorted(repositories.items(), key=lambda item: item[0] != preferred)
+                          for remote in legacy_remote_paths(relative, repo)]
+            expected = sri(file)
+            for repository, base, remote in candidates:
+                url = base.rstrip("/") + "/" + remote
+                try:
+                    with urllib.request.urlopen(fetch_url(url), timeout=60) as response:
+                        digest = hashlib.sha256()
+                        for chunk in iter(lambda: response.read(1 << 20), b""):
+                            digest.update(chunk)
+                    actual = "sha256-" + base64.b64encode(digest.digest()).decode()
+                except (OSError, urllib.error.HTTPError):
+                    continue
+                if actual != expected:
+                    continue
+                output.write(json.dumps({"event": "download", "repository": repository,
+                    "repositoryUrl": base, "url": url, "file": str(file)}) + "\n")
+                break
+            else:
+                fail(f"cannot establish the repository and matching bytes of legacy Maven file {relative}")
 
 
 def fail(message) -> NoReturn:
@@ -190,6 +293,8 @@ def definition_hash(root, goals):
         content = (root / rel).read_bytes()
         if rel == ".mvn/maven.config":
             content = "\n".join(build_config_lines(content.decode())).encode()
+            if not content:
+                continue
         lines.append(f"{rel} {hashlib.sha256(content).hexdigest()}")
     return "sha256:" + hashlib.sha256(("\n".join(lines) + "\n").encode()).hexdigest()
 
@@ -358,6 +463,13 @@ def java_version(home):
     fail(f"could not read the version of the JDK at {home}")
 
 
+def java_major(version):
+    found = re.match(r"(?:1\.)?(\d+)", version)
+    if not found:
+        fail(f"cannot determine the Java major version from {version!r}")
+    return found.group(1)
+
+
 def proxy_with_credentials():
     for name in ("https_proxy", "HTTPS_PROXY", "http_proxy", "HTTP_PROXY"):
         value = os.environ.get(name)
@@ -441,7 +553,7 @@ def read_settings(source):
     return settings, ET.tostring(recorded, encoding="unicode") + "\n"
 
 
-def write_run_settings(settings, path):
+def write_run_settings(settings, path, legacy=False):
     """Writes the lock run's settings, adding the environment's proxy when they name none."""
     settings = copy.deepcopy(settings)
     qualify = qualifier(settings)
@@ -455,7 +567,7 @@ def write_run_settings(settings, path):
     # A mirror of Maven Central under the id `central`, so that the names of
     # metadata files stay those of Central. Mirrors the settings declare
     # come first.
-    mirror = central_mirror()
+    mirror = central_mirror() or (CENTRAL if legacy else None)
     if mirror:
         mirrors = next((c for c in settings if local_name(c.tag) == "mirrors"), None)
         declared = [] if mirrors is None else [m.findtext(qualify("mirrorOf")) or "" for m in mirrors]
@@ -533,6 +645,8 @@ def declared_downloads(root):
 def tracked_repository(path):
     """The repository id that Maven Resolver's tracking file names for a file, or None."""
     tracking = path.parent / "_remote.repositories"
+    if not tracking.exists():
+        tracking = path.parent / "_maven.repositories"
     if not tracking.is_file():
         return None
     for line in tracking.read_text().splitlines():
@@ -605,18 +719,19 @@ def check_fresh(root, lock_path, lock_data):
 
 
 def run_maven(mvn, project, env, settings, repo, goals):
-    command = [
-        str(mvn),
-        "-B",
-        "-ntp",
-        "-s",
-        str(settings),
-        f"-Dmaven.repo.local={repo}",
-        f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}",
-        *MAVEN_FLAGS,
-        *goals,
-    ]
-    return subprocess.run(command, cwd=project, env=env, check=False).returncode
+    legacy = maven_version_tuple(mvn) < (3, 1, 0)
+    if legacy:
+        seed_legacy_recorder(repo)
+    command = [str(mvn), "-B", "-s", str(settings), f"-Dmaven.repo.local={repo}"]
+    if not legacy:
+        command.append(f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}")
+    command += [*MAVEN_FLAGS, *goals]
+    if legacy:
+        command.append(LEGACY_RECORDER)
+    result = subprocess.run(command, cwd=project, env=env, check=False).returncode
+    if result == 0 and legacy:
+        record_legacy_downloads(repo, Path(env["MAVEN_PURIFIER_RECORD"]), json.loads(env.get("MAVEN_PURIFIER_PRESERVED", "[]")))
+    return result
 
 
 def previous_lock(lock_path):
@@ -726,6 +841,8 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
         dist_path = download_path(url)
         mvn = unpack_maven(Path(dist_store), tmp / "maven")
         maven_version = mvn.parent.parent.name.removeprefix("apache-maven-")
+        if not previous and not os.environ.get("JAVA_HOME") and maven_version_tuple(mvn) < (3, 1, 0):
+            home = os.environ.get("MAVEN_PURIFIER_LEGACY_JAVA_HOME", home)
 
         project = tmp / "project"
         copy_build(root, project)
@@ -742,11 +859,12 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
         declared_paths = {d["path"] for d in declared}
         seeded = seed_metadata(repo, previous, refresh)
         (tmp / "home").mkdir()
-        write_run_settings(settings, tmp / "settings.xml")
+        write_run_settings(settings, tmp / "settings.xml", legacy=maven_version_tuple(mvn) < (3, 1, 0))
         record = tmp / "record.jsonl"
 
         env = dict(os.environ)
-        env.update({"JAVA_HOME": home, "HOME": str(tmp / "home"), "MAVEN_PURIFIER_RECORD": str(record)})
+        env.update({"JAVA_HOME": home, "HOME": str(tmp / "home"), "MAVEN_PURIFIER_RECORD": str(record),
+                    "MAVEN_PURIFIER_PRESERVED": json.dumps(sorted(declared_paths | seeded))})
         # Plugins that write temporary files write them into the lock run's
         # own directory.
         (tmp / "java-tmp").mkdir()
@@ -775,7 +893,8 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
         # marked as development: `prefetch` fetches it, and a sandboxed build
         # leaves it out. A failure here costs the lock nothing the build
         # needs, so it is reported and passed over.
-        development = [f"{DEPENDENCY_PLUGIN}:resolve-plugins", f"{DEPENDENCY_PLUGIN}:sources"]
+        dependency_plugin = "org.apache.maven.plugins:maven-dependency-plugin:2.8" if maven_version_tuple(mvn) < (3, 6, 3) else DEPENDENCY_PLUGIN
+        development = [f"{dependency_plugin}:resolve-plugins", f"{dependency_plugin}:sources"]
         info("adding the build's plugins and its dependencies' source jars for development")
         if run_maven(mvn, project, env, tmp / "settings.xml", repo, development) != 0:
             info("the development pass with the locked Maven failed; the lock leaves out what it would have added")
@@ -834,7 +953,7 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
             rel = path.relative_to(repo).as_posix()
             if path.name in BOOKKEEPING or path.name.endswith(".lastUpdated"):
                 continue
-            if rel in downloads or rel in installed or rel in declared_paths or rel in seeded:
+            if rel.startswith(LEGACY_RECORDER_PATH) or rel in downloads or rel in installed or rel in declared_paths or rel in seeded:
                 continue
             if path.name.startswith("maven-metadata") and Path(rel).parent.as_posix() in module_dirs:
                 continue
@@ -934,7 +1053,7 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh):
         result = {
             "version": FORMAT_VERSION,
             "maven": {"version": maven_version},
-            "javaMajor": java_version(home).split(".")[0],
+            "javaMajor": java_major(java_version(home)),
             "goals": goals,
             "settings": settings_record,
             "definitionHash": def_hash,
@@ -1029,11 +1148,22 @@ def prefetch(args):
     offline_settings(lock_data, repo, state / "settings.xml")
     bin_dir = state / "bin"
     bin_dir.mkdir(exist_ok=True)
-    for name, target in (("bin/mvn", prefetched / "maven" / "bin" / "mvn"), ("jdk", prefetched / "jdk")):
-        link = state / name
-        if link.is_symlink() or link.exists():
-            link.unlink()
-        link.symlink_to(target)
+    jdk = state / "jdk"
+    if jdk.is_symlink() or jdk.exists():
+        jdk.unlink()
+    jdk.symlink_to(prefetched / "jdk")
+    # Maven before 3.3.1 ignores .mvn/maven.config. Pass the locked settings
+    # explicitly, and select the locked JDK even when the caller has another.
+    launcher = bin_dir / "mvn"
+    if launcher.is_symlink():
+        launcher.unlink()
+    launcher.write_text(
+        "#!/bin/sh\n"
+        f"export JAVA_HOME={shlex.quote(str(jdk))}\n"
+        f"exec {shlex.quote(str(prefetched / 'maven' / 'bin' / 'mvn'))} "
+        f"-o --settings {shlex.quote(str(state / 'settings.xml'))} \"$@\"\n"
+    )
+    launcher.chmod(0o755)
 
     write_maven_config(
         root,

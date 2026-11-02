@@ -450,3 +450,47 @@ class Options(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Compatibility(TemporaryTree):
+    def test_java_versions(self):
+        for version, major in [("1.8.0_504", "8"), ("17.0.20", "17"), ("26-ea", "26")]:
+            self.assertEqual(mp.java_major(version), major)
+
+    def test_maven_versions(self):
+        for version, numbers in [("2.2.1", (2,2,1)), ("3.0.5", (3,0,5)), ("4.0.0-rc-7", (4,0,0))]:
+            self.assertEqual(mp.maven_version_tuple(Path("apache-maven-" + version) / "bin/mvn"), numbers)
+
+    def test_prefetch_does_not_change_absent_config_definition(self):
+        self.write("pom.xml", "<project/>")
+        before = mp.definition_hash(self.root, ["install"])
+        mp.write_maven_config(self.root, ["--settings=/locked/settings.xml"])
+        self.assertEqual(mp.definition_hash(self.root, ["install"]), before)
+
+    def test_legacy_snapshot_origins(self):
+        rel = "example/tool/1-SNAPSHOT/tool-1-SNAPSHOT.jar"
+        self.write("example/tool/1-SNAPSHOT/maven-metadata-central.xml", "<metadata><versioning><snapshot><timestamp>20261101.000001</timestamp><buildNumber>4</buildNumber></snapshot></versioning></metadata>")
+        self.assertEqual(mp.legacy_remote_paths(rel,self.root), [rel,"example/tool/1-SNAPSHOT/tool-1-20261101.000001-4.jar"])
+
+    def test_legacy_verification_rejects_different_remote_bytes(self):
+        file = self.write("repository/example/a/1/a-1.jar", "original")
+        record = self.write("events", json.dumps({"event":"repository","repository":"central","repositoryUrl":"https://example.org/"}) + "\n")
+        import io
+        with mock.patch.object(mp.urllib.request, "urlopen", return_value=io.BytesIO(b"different")):
+            with self.assertRaises(SystemExit):
+                mp.record_legacy_downloads(self.root / "repository",record)
+        self.assertEqual(len(mp.read_record(record)), 1)
+
+    def test_legacy_preserved_metadata_does_not_contact_remote(self):
+        rel = "example/a/maven-metadata-central.xml"
+        self.write("repository/"+rel, "<metadata/>")
+        record = self.write("events", "")
+        with mock.patch.object(mp.urllib.request,"urlopen",side_effect=AssertionError("network")):
+            mp.record_legacy_downloads(self.root/"repository",record,[rel])
+        self.assertEqual(mp.read_record(record)[0]["event"], "resolved")
+
+    def test_legacy_central_uses_https_without_a_mirror(self):
+        with mock.patch.dict(os.environ, {}, clear=True):
+            path = self.root / "settings.xml"
+            mp.write_run_settings(ET.Element("settings"), path, legacy=True)
+            self.assertEqual(ET.parse(path).findtext("mirrors/mirror/url"), CENTRAL)

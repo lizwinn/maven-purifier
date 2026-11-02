@@ -174,7 +174,7 @@ let
       echo "maven-purifier: Maven failed offline. If it reports an artifact that has not been downloaded, the lock does not hold everything this build needs: run \`maven-purifier lock --force\` at the build root, with the goals and -P options you build with. If it reports a compile or test failure, the build itself failed." >&2
       exit 1
     }
-    ${maven}/bin/mvn -o -B -ntp \
+    ${maven}/bin/mvn -o -B \
       -s ${settings} \
       -Dmaven.repo.local="$TMPDIR/repository" \
       -Duser.home="$HOME" \
@@ -275,9 +275,14 @@ let
           m = builtins.match "org/apache/maven/plugins/maven-deploy-plugin/([^/]+)/maven-deploy-plugin-[^/]+\\.jar" d.path;
         in
         lib.optional (m != null) (builtins.head m)
-      ) entries;
+      ) (builtins.filter (d: !(d.development or false)) entries);
     in
-    if versions != [ ] then lib.last (lib.naturalSort versions) else "3.1.4";
+    if versions != [ ] then
+      lib.last (lib.naturalSort versions)
+    else if lib.versionOlder lock.version "3.6.3" then
+      "2.8.2"
+    else
+      "3.1.4";
 
   # The arguments of deploy:deploy-file for a module: its main artifact (the
   # one without a classifier that is not the POM, or else the POM), its POM,
@@ -332,7 +337,7 @@ let
     cp -r --no-preserve=mode ${repository}/. "$work/repository"
     cd "$work"
     deploy_file() {
-      ${maven}/bin/mvn -B -ntp -Dmaven.repo.local="$work/repository" \
+      ${maven}/bin/mvn -B -Dmaven.repo.local="$work/repository" \
         -Daether.remoteRepositoryFilter.prefixes=false "''${args[@]}" \
         org.apache.maven.plugins:maven-deploy-plugin:${deployPluginVersion}:deploy-file \
         -DrepositoryId="$repository_id" -Durl="$url" -DgeneratePom=false "$@"

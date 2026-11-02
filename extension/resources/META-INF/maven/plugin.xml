@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: MIT -->
+<plugin>
+  <name>Legacy Maven purifier recorder</name>
+  <groupId>io.github.nix-purifiers</groupId>
+  <artifactId>maven-purifier-legacy-recorder</artifactId>
+  <version>1</version>
+  <goalPrefix>purifier-record</goalPrefix>
+  <mojos>
+    <mojo>
+      <goal>record</goal>
+      <requiresProject>true</requiresProject>
+      <aggregator>true</aggregator>
+      <implementation>io.github.nixpurifiers.maven.LegacyRecorderMojo</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter><name>project</name><type>org.apache.maven.project.MavenProject</type><required>true</required><editable>false</editable></parameter>
+        <parameter><name>projects</name><type>java.util.List</type><required>true</required><editable>false</editable></parameter>
+        <parameter><name>localRepository</name><type>org.apache.maven.artifact.repository.ArtifactRepository</type><required>true</required><editable>false</editable></parameter>
+      </parameters>
+      <configuration>
+        <project implementation="org.apache.maven.project.MavenProject" default-value="${project}"/>
+        <projects implementation="java.util.List" default-value="${reactorProjects}"/>
+        <localRepository implementation="org.apache.maven.artifact.repository.ArtifactRepository" default-value="${localRepository}"/>
+      </configuration>
+    </mojo>
+  </mojos>
+</plugin>

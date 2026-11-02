@@ -59,10 +59,8 @@ maven-purifier update \
 Maven keeps no lockfile of its own, so `maven-purifier.lock.json` is the one
 file that `update` changes.
 
-maven-purifier is a Maven core extension and a command, rather than a Maven
-plugin with a goal. Maven Resolver reports each download only to core
-extensions, which Maven loads before it reads the build. The command runs
-Maven with the extension loaded.
+maven-purifier runs Maven with a recording core extension. Maven 2 and 3.0
+use a recording goal instead, as described under [Maven versions](#maven-versions).
 
 `maven-purifier lock` copies the build to a temporary directory and runs
 Maven there with an empty local repository and an empty home directory. The
@@ -76,8 +74,33 @@ relock of an unchanged build writes the same lockfile, byte for byte. It
 keeps the recorded resolution of version ranges and SNAPSHOTs. It also
 keeps the recorded Java major version, and runs on the nixpkgs JDK of that
 version whatever `JAVA_HOME` names. A first lock runs on `JAVA_HOME`, or on
-the JDK that maven-purifier's nixpkgs provides. To move to another Java
+the JDK that maven-purifier's nixpkgs provides (Java 8 for Maven 2 and 3.0). To move to another Java
 version, delete the lockfile and lock again.
+
+## Maven versions
+
+Maven 3 and Maven 4 are supported, along with Maven 2.2.1. CI builds and
+runs tests with 2.2.1, 3.0.5, 3.3.9, 3.8.8, 3.9.11 and 4.0.0-rc-7,
+including relocking, offline development and Nix sandbox builds.
+The Maven wrapper's distribution URL selects the version to lock.
+
+For Maven older than 3.3.1, use the prefetched launcher, since those
+versions do not read `.mvn/maven.config`:
+
+```zsh
+export PATH="$PWD/.maven-purifier/bin:$PATH"
+mvn clean install
+```
+
+That launcher selects the locked JDK too. A first lock defaults to Java 8
+for Maven 2 and 3.0; `JAVA_HOME` can select another JDK. The plugins in your
+POM must also support the Maven and Java versions you select.
+
+Maven 2 and 3.0 lack repository download events. Their lock runs use a
+recorder goal and verify each downloaded file against its remote origin.
+Repositories must permit that verification; authenticated repositories
+requiring Maven-specific transports are not yet supported by this legacy
+recording path. Maven 3.1 and newer use the core extension's events.
 
 ## Published recording extension
 

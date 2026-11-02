@@ -81,7 +81,11 @@ let
     else
       builtins.hashFile "sha256" path;
 
-  files = builtins.sort builtins.lessThan (walk src "" false);
+  # An absent config and one containing only generated prefetch lines
+  # describe the same build.
+  files = builtins.filter (
+    rel: rel != ".mvn/maven.config" || fileHash rel != builtins.hashString "sha256" ""
+  ) (builtins.sort builtins.lessThan (walk src "" false));
   lines = [
     "goals ${builtins.concatStringsSep " " goals}"
   ]
