@@ -249,10 +249,10 @@ let
     ${lib.optionalString (projectDependencies != [ ]) ''
       ${python3}/bin/python ${purifier.jvmRepositoryTool} \
         --rewrite-sources . --catalog ${provided.maven.catalog}
-      cp -r --no-preserve=mode ${runtimeRecorder}/. "$TMPDIR/repository"
-      export MAVEN_PURIFIER_RECORD="$TMPDIR/runtime-record.jsonl"
-      export MAVEN_PURIFIER_CAPTURE_RUNTIME=1
     ''}
+    cp -r --no-preserve=mode ${runtimeRecorder}/. "$TMPDIR/repository"
+    export MAVEN_PURIFIER_RECORD="$TMPDIR/runtime-record.jsonl"
+    export MAVEN_PURIFIER_CAPTURE_RUNTIME=1
     maven_failed() {
       echo "maven-purifier: Maven failed offline. If it reports an artifact that has not been downloaded, the lock does not hold everything this build needs: run \`maven-purifier lock --force\` at the build root, with the goals and -P options you build with. If it reports a compile or test failure, the build itself failed." >&2
       exit 1
@@ -268,9 +268,7 @@ let
           flags
           ++ mavenFlags
           ++ buildGoals
-          ++ lib.optional (
-            projectDependencies != [ ]
-          ) "io.github.nix-purifiers:maven-purifier-legacy-recorder:1:record"
+          ++ [ "io.github.nix-purifiers:maven-purifier-legacy-recorder:1:record" ]
         )
       } </dev/null || maven_failed
   '';
@@ -301,10 +299,9 @@ let
         mkdir -p "$out/$(dirname "$path")"
         cp "$TMPDIR/repository/$path" "$out/$path"
       done
-      ${lib.optionalString (projectDependencies != [ ]) ''
-        ${python3}/bin/python ${./export-runtime.py} ${purifier.projectInputsTool} \
-          "$TMPDIR/runtime-record.jsonl" "$TMPDIR/repository" ${provided.maven.catalog} "$out/nix-support/runtime"
-      ''}
+      ${python3}/bin/python ${./export-runtime.py} ${purifier.projectInputsTool} \
+        "$TMPDIR/runtime-record.jsonl" "$TMPDIR/repository" ${provided.maven.catalog} "$out/nix-support/runtime" \
+        ${writeText "maven-published-projects.json" (builtins.toJSON lock.projects)}
       runHook postInstall
     '';
   };
@@ -342,8 +339,7 @@ let
               projections = purifier.jvmProjections {
                 repository = releaseBuild;
                 producer = releaseBuild;
-                runtimeRepository =
-                  if projectDependencies == [ ] then null else "${releaseBuild}/nix-support/runtime";
+                runtimeRepository = "${releaseBuild}/nix-support/runtime";
                 dependencies = projectDependencies;
                 inherit runCommand python3;
                 name = "maven-publications";
@@ -391,8 +387,7 @@ let
 
   rootProjections = purifier.jvmProjections {
     repository = releaseBuild;
-    runtimeRepository =
-      if projectDependencies == [ ] then null else "${releaseBuild}/nix-support/runtime";
+    runtimeRepository = "${releaseBuild}/nix-support/runtime";
     dependencies = projectDependencies;
     inherit runCommand python3;
     name = "maven-publications";

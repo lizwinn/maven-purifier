@@ -381,6 +381,11 @@ let
     pkgs.runCommand "maven-purifier-test-nix-library" { } "touch $out";
 in
 {
+  # A producer needs a complete runtime view even with no Nix project inputs.
+  standalone-projection = pkgs.runCommand "maven-standalone-projection" { } ''
+    test -n "$(find ${multi.projections.maven}/org/apache/commons/commons-lang3 -name '*.jar')"
+    touch $out
+  '';
   jvm-projection = multi.projections.maven;
 
   composition = import ./composition.nix {
