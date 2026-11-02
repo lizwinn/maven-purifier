@@ -38,8 +38,9 @@ verify`. Maven resolves from the locked files, offline.
 To add or upgrade a dependency or a plugin, edit the POM and lock again:
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- lock
-nix run github:nix-purifiers/maven-purifier -- prefetch
+nix shell 'github:nix-purifiers/maven-purifier'
+maven-purifier lock
+maven-purifier prefetch
 ```
 
 A relock keeps what version ranges and SNAPSHOTs resolved to in the
@@ -48,8 +49,9 @@ recorded. To move them to what the repositories hold now, update instead,
 for every package or for the ones you name:
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- update
-nix run github:nix-purifiers/maven-purifier -- update \
+nix shell 'github:nix-purifiers/maven-purifier'
+maven-purifier update
+maven-purifier update \
   org.slf4j:slf4j-api
 ```
 
@@ -141,7 +143,8 @@ To deploy what Nix built, with the target from the root POM's
 `distributionManagement` and the credentials from `~/.m2/settings.xml`:
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- publish
+nix shell 'github:nix-purifiers/maven-purifier'
+maven-purifier publish
 ```
 
 `--repository-id ID --url URL` names another target.
@@ -180,7 +183,8 @@ purifier from that package set or pass a compatible toolchain to the builder.
 ## Working offline
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- prefetch
+nix shell 'github:nix-purifiers/maven-purifier'
+maven-purifier prefetch
 ```
 
 `maven-purifier prefetch` fetches everything the lockfile lists into the
@@ -325,8 +329,9 @@ both Linux systems.
 From a clone of Gson, lock the build and prefetch it:
 
 ```zsh
-nix run github:nix-purifiers/maven-purifier -- lock
-nix run github:nix-purifiers/maven-purifier -- prefetch
+nix shell 'github:nix-purifiers/maven-purifier'
+maven-purifier lock
+maven-purifier prefetch
 ```
 
 Commit `maven-purifier.lock.json`. The locked Maven now builds and tests
