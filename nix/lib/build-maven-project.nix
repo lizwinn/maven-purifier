@@ -210,9 +210,24 @@ let
         mkdir -p "$directory"
         jar --create --file "$directory/maven-purifier-legacy-recorder-1.jar" \
           --date=1980-01-01T00:00:02Z -C classes .
-        cat > "$directory/maven-purifier-legacy-recorder-1.pom" <<'POM'
+        # Legacy plugin containers otherwise inject an undeclared
+        # plexus-utils:1.1 download. Use the library from our pinned SDK.
+        utils=( ${arguments.maven}/maven/lib/plexus-utils-*.jar )
+        test "''${#utils[@]}" -eq 1
+        utilsVersion=$(basename "''${utils[0]}" .jar)
+        utilsVersion=''${utilsVersion#plexus-utils-}
+        utilsDirectory=$out/org/codehaus/plexus/plexus-utils/$utilsVersion
+        mkdir -p "$utilsDirectory"
+        cp "''${utils[0]}" "$utilsDirectory/plexus-utils-$utilsVersion.jar"
+        cat > "$utilsDirectory/plexus-utils-$utilsVersion.pom" <<POM
+        <project><modelVersion>4.0.0</modelVersion><groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId><version>$utilsVersion</version></project>
+        POM
+        cat > "$directory/maven-purifier-legacy-recorder-1.pom" <<POM
         <project><modelVersion>4.0.0</modelVersion><groupId>io.github.nix-purifiers</groupId>
-        <artifactId>maven-purifier-legacy-recorder</artifactId><version>1</version><packaging>maven-plugin</packaging></project>
+        <artifactId>maven-purifier-legacy-recorder</artifactId><version>1</version><packaging>maven-plugin</packaging>
+        <dependencies><dependency><groupId>org.codehaus.plexus</groupId><artifactId>plexus-utils</artifactId>
+        <version>$utilsVersion</version></dependency></dependencies></project>
         POM
       '';
 
