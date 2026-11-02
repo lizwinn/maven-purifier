@@ -79,6 +79,13 @@ version whatever `JAVA_HOME` names. A first lock runs on `JAVA_HOME`, or on
 the JDK that maven-purifier's nixpkgs provides. To move to another Java
 version, delete the lockfile and lock again.
 
+## Published recording extension
+
+The [Maven repository](https://nix-purifiers.github.io/maven-purifier/maven/) publishes
+`io.github.nix-purifiers:maven-purifier-extension` at each release version.
+This is the download recorder used during locking. The `maven-purifier`
+wrapper in the Quickstart supplies the complete locked development workflow.
+
 ## Building the project with Nix
 
 Once the native development workflow is working, you can also build and
