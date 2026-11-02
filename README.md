@@ -93,7 +93,8 @@ directly:
 
 ```nix
 {
-  inputs.maven-purifier.url = "github:nix-purifiers/maven-purifier";
+  inputs.maven-purifier.url =
+    "github:nix-purifiers/maven-purifier";
   inputs.nixpkgs.follows = "maven-purifier/nixpkgs";
 
   outputs =
@@ -104,7 +105,9 @@ directly:
         inherit system;
         overlays = [ maven-purifier.overlays.default ];
       };
-      project = pkgs.maven-purifier.buildMavenProject { src = ./.; };
+      project = pkgs.maven-purifier.buildMavenProject {
+        src = ./.;
+      };
     in
     {
       packages.${system}.app = project.packages.app;
