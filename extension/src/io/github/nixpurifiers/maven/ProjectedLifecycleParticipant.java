@@ -27,7 +27,15 @@ public final class ProjectedLifecycleParticipant extends AbstractMavenLifecycleP
         if (versions.isEmpty()) continue;
         Model original = ProjectedVersions.select(project.getOriginalModel(), versions, project.getProperties());
         project.setOriginalModel(original);
-        project.setModel(ProjectedVersions.select(project.getModel(), versions, project.getProperties()));
+        try {
+          // Maven 3.0 exposes this setter as protected; later releases made
+          // it public. The model API itself is otherwise compatible.
+          java.lang.reflect.Method setModel = MavenProject.class.getDeclaredMethod("setModel", Model.class);
+          setModel.setAccessible(true);
+          setModel.invoke(project, ProjectedVersions.select(project.getModel(), versions, project.getProperties()));
+        } catch (ReflectiveOperationException error) {
+          throw new IOException("cannot apply selected dependency model", error);
+        }
         File directory = new File(project.getBasedir(), ".maven-purifier");
         if (!directory.isDirectory() && !directory.mkdirs()) {
           throw new IOException("cannot create " + directory);

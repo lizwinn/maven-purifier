@@ -123,7 +123,17 @@ def maven_version_tuple(mvn):
 def seed_legacy_recorder(repo):
     target = repo / LEGACY_RECORDER_PATH
     target.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(os.environ["MAVEN_PURIFIER_EXTENSION"], target / "maven-purifier-legacy-recorder-1.jar")
+    # Older plugin containers must not discover the core model adapters or
+    # Maven 4 classes while loading this small recording Mojo.
+    with zipfile.ZipFile(os.environ["MAVEN_PURIFIER_EXTENSION"]) as source, zipfile.ZipFile(
+        target / "maven-purifier-legacy-recorder-1.jar", "w"
+    ) as output:
+        for entry in source.infolist():
+            if entry.filename == "META-INF/maven/plugin.xml" or (
+                entry.filename.startswith("io/github/nixpurifiers/maven/LegacyRecorderMojo")
+                and entry.filename.endswith(".class")
+            ):
+                output.writestr(entry, source.read(entry.filename))
     (target / "maven-purifier-legacy-recorder-1.pom").write_text(
         '<project><modelVersion>4.0.0</modelVersion><groupId>io.github.nix-purifiers</groupId>'
         '<artifactId>maven-purifier-legacy-recorder</artifactId><version>1</version>'
@@ -730,7 +740,7 @@ def run_maven(mvn, project, env, settings, repo, goals):
     if legacy:
         seed_legacy_recorder(repo)
     command = [str(mvn), "-B", "-s", str(settings), f"-Dmaven.repo.local={repo}"]
-    if not legacy:
+    if maven_version_tuple(mvn) >= (3, 0, 0):
         command.append(f"-Dmaven.ext.class.path={os.environ['MAVEN_PURIFIER_EXTENSION']}")
     command += [*MAVEN_FLAGS, *goals]
     if legacy:
@@ -858,8 +868,8 @@ def run_lock(root, lock_path, goals, settings_file, force, refresh, input_refs=N
         dist_path = download_path(url)
         mvn = unpack_maven(Path(dist_store), tmp / "maven")
         maven_version = mvn.parent.parent.name.removeprefix("apache-maven-")
-        if inputs and maven_version_tuple(mvn) < (3, 1, 0):
-            fail("native Nix project inputs currently need Maven 3.1 or newer; "
+        if inputs and maven_version_tuple(mvn) < (3, 0, 0):
+            fail("native Nix project inputs currently need Maven 3 or newer; "
                  "older Maven builds can use the Nix builder's projectDependencies argument")
         if not previous and not os.environ.get("JAVA_HOME") and maven_version_tuple(mvn) < (3, 1, 0):
             home = os.environ.get("MAVEN_PURIFIER_LEGACY_JAVA_HOME", home)

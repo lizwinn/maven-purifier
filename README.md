@@ -183,7 +183,8 @@ maven-purifier prefetch
 mvn test
 ```
 
-Native input activation currently requires Maven 3.1 or newer.
+Native input activation requires Maven 3 or newer. Maven before 3.3.1
+uses the prefetched `mvn` wrapper because it does not read `.mvn/maven.config`.
 Repeat `--input` for more packages. The lock records Nix's pinned source
 identity; `update` refreshes it. Maven discovers the supplied modules from
 their Maven or translated Ivy publications and selects them even when the
