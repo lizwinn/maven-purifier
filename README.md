@@ -375,9 +375,5 @@ tests in the Nix sandbox. After a change to a POM, lock and prefetch again.
 
 ## Credits
 
-maven-purifier follows the design of
-[sbt-purifier](https://github.com/nix-purifiers/sbt-purifier): a lock run
-that records every download of the build tool, a Nix library that builds
-from the lockfile, offline work on the locked downloads, and a publish step
-for what Nix built. The purifier idea was inspired by nixcloud's
+The purifier idea was inspired by nixcloud's
 [cargo (libnix)](https://github.com/nixcloud/cargo).
