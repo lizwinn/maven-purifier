@@ -22,6 +22,9 @@ let
         cat > StringUtils.java <<'JAVA'
         package org.apache.commons.lang3;
         public final class StringUtils {
+          public static boolean isEmpty(CharSequence value) {
+            return value == null || value.length() == 0;
+          }
           public static String capitalize(String value) {
             if (value == null || value.isEmpty()) return value;
             return Character.toUpperCase(value.charAt(0)) + value.substring(1);
